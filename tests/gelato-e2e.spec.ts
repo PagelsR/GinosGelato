@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const baseUrl = 'http://localhost:5173';
+const baseUrl = 'https://zealous-sky-008ca630f.1.azurestaticapps.net/';
 
 // Disney-themed test data
 const disneyCustomers = [

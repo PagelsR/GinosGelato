@@ -9,7 +9,7 @@
     "tailwindcss": "^4.1.16"
   },
   "devDependencies": {
-    "@playwright/test": "^1.56.1",
+    "@playwright/test": "^1.58.1",
     "@types/node": "^24.9.1"
   },
   "scripts": {}

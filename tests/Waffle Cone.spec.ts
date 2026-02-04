@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('Waffle Cone', async ({ page }) => {
-  await page.goto('http://localhost:5173/');
+  await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
   await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
   await page.getByRole('heading', { name: 'Waffle Cone' }).click();
   await page.getByText('🍪Cookies & CreamCrushed Oreo').click();
