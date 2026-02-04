@@ -1,4 +1,4 @@
-// App Service Plan module for FIFOWorldCup
+// App Service Plan module for Gino's Gelato
 // Based on eShop proven patterns
 
 @description('Location for the App Service Plan')

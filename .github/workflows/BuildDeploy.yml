@@ -1,4 +1,4 @@
-name: FIFOWorldCup - Build and Deploy to Azure
+name: GinosGelato - Build and Deploy to Azure
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  RESOURCE_GROUP: 'rg-FIFOWorldCup'
-  LOCATION: 'eastus2'
+  RESOURCE_GROUP: 'rg-GinosGelato'
+  LOCATION: 'eastus'
   DOTNET_VERSION: '8.0.x'
   NODE_VERSION: '20.x'
 
@@ -19,20 +19,11 @@ jobs:
   # ============================================================================
   # TODO: Add AZURE_CREDENTIALS secret here for service principal authentication
   #       Format: JSON object with clientId, clientSecret, subscriptionId, tenantId
-  #       Create via: az ad sp create-for-rbac --name "FIFOWorldCup-GitHub-Actions" 
+  #       Create via: az ad sp create-for-rbac --name "GinosGelato-GitHub-Actions" 
   #                   --role contributor --scopes /subscriptions/{subscription-id} --sdk-auth
   #
   # TODO: Add AZURE_SUBSCRIPTION_ID secret here
   #       Your Azure subscription ID (GUID format)
-  #
-  # TODO: Add SQL_ADMIN_LOGIN secret here
-  #       SQL Server administrator username (e.g., "sqladmin")
-  #
-  # TODO: Add SQL_ADMIN_PASSWORD secret here
-  #       SQL Server administrator password (must meet Azure SQL complexity requirements)
-  #
-  # TODO: Add FIFO_API_KEY secret here
-  #       FIFO API Key for match data (automatically stored in Key Vault during deployment)
   # ============================================================================
 
   provision-infrastructure:
@@ -43,7 +34,6 @@ jobs:
       appServiceName: ${{ steps.deploy.outputs.appServiceName }}
       appServiceUrl: ${{ steps.deploy.outputs.appServiceUrl }}
       staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
-      keyVaultName: ${{ steps.deploy.outputs.keyVaultName }}
     
     steps:
       - name: Checkout code
@@ -69,75 +59,8 @@ jobs:
           template: ./iac/main.bicep
           parameters: >
             location=${{ env.LOCATION }}
-            sqlAdminLogin=${{ secrets.SQL_ADMIN_LOGIN }}
-            sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
-          deploymentName: 'fifoworldcup-infra-${{ github.run_number }}'
+          deploymentName: 'ginosgelato-infra-${{ github.run_number }}'
           failOnStdErr: false
-      
-      - name: Get Deployment Outputs
-        id: get-outputs
-        run: |
-          echo "appServiceName=${{ steps.deploy.outputs.appServiceName }}" >> $GITHUB_OUTPUT
-          echo "appServiceUrl=${{ steps.deploy.outputs.appServiceUrl }}" >> $GITHUB_OUTPUT
-          echo "staticWebAppName=${{ steps.deploy.outputs.staticWebAppName }}" >> $GITHUB_OUTPUT
-          echo "keyVaultName=${{ steps.deploy.outputs.keyVaultName }}" >> $GITHUB_OUTPUT
-          
-          # Get Key Vault name from deployment outputs or resource group
-          KV_NAME="${{ steps.deploy.outputs.keyVaultName }}"
-          if [ -z "$KV_NAME" ]; then
-            KV_NAME=$(az keyvault list --resource-group ${{ env.RESOURCE_GROUP }} --query "[0].name" -o tsv)
-          fi
-          echo "keyVaultName=$KV_NAME" >> $GITHUB_OUTPUT
-          echo "Key Vault Name: $KV_NAME"
-      
-      - name: Set FIFO API Key in Key Vault
-        run: |
-          echo "Setting FIFO API Key in Key Vault..."
-          KV_NAME="${{ steps.get-outputs.outputs.keyVaultName }}"
-          
-          # Get service principal App ID (clientId)
-          SP_APP_ID=$(az account show --query user.name -o tsv)
-          echo "Service Principal App ID: $SP_APP_ID"
-          
-          # Get service principal Object ID from App ID
-          SP_OBJECT_ID=$(az ad sp show --id $SP_APP_ID --query id -o tsv)
-          echo "Service Principal Object ID: $SP_OBJECT_ID"
-          
-          # Grant GitHub Actions service principal temporary access to Key Vault
-          echo "Granting Key Vault access..."
-          az keyvault set-policy \
-            --name $KV_NAME \
-            --object-id $SP_OBJECT_ID \
-            --secret-permissions get list set \
-            --output none || echo "Access policy may already exist"
-          
-          # Wait for Key Vault to be fully available (Azure eventual consistency)
-          echo "Waiting for Key Vault to be ready..."
-          sleep 30
-          
-          # Retry logic for setting secret
-          MAX_RETRIES=5
-          RETRY_COUNT=0
-          
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if az keyvault secret set \
-              --vault-name $KV_NAME \
-              --name FifoApiKey \
-              --value "${{ secrets.FIFO_API_KEY }}" \
-              --output none 2>/dev/null; then
-              echo "✅ FIFO API Key stored in Key Vault"
-              break
-            else
-              RETRY_COUNT=$((RETRY_COUNT + 1))
-              if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
-                echo "⏳ Attempt $RETRY_COUNT failed. Retrying in 15 seconds..."
-                sleep 15
-              else
-                echo "❌ Failed to set FIFO API Key after $MAX_RETRIES attempts"
-                exit 1
-              fi
-            fi
-          done
       
       - name: Lock Resource Group (Production Safety)
         run: |
@@ -160,71 +83,13 @@ jobs:
           echo "| App Service | ${{ steps.deploy.outputs.appServiceName }} |" >> $GITHUB_STEP_SUMMARY
           echo "| App Service URL | ${{ steps.deploy.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Static Web App | ${{ steps.deploy.outputs.staticWebAppName }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Key Vault | ${{ steps.get-outputs.outputs.keyVaultName }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Location | ${{ env.LOCATION }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Lock Status | Protected (CanNotDelete) |" >> $GITHUB_STEP_SUMMARY
-
-  deploy-database:
-    name: 2️⃣ Deploy Database Schema
-    runs-on: ubuntu-latest
-    needs: provision-infrastructure
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      - name: Get SQL Connection String from Key Vault
-        id: get-connection-string
-        run: |
-          echo "Retrieving SQL connection string from Key Vault: ${{ needs.provision-infrastructure.outputs.keyVaultName }}"
-          
-          # Wait for Key Vault to be ready
-          for i in {1..5}; do
-            CONNECTION_STRING=$(az keyvault secret show \
-              --vault-name ${{ needs.provision-infrastructure.outputs.keyVaultName }} \
-              --name SqlConnectionString \
-              --query value -o tsv 2>/dev/null || echo "")
-            
-            if [ -n "$CONNECTION_STRING" ]; then
-              echo "Successfully retrieved connection string"
-              echo "::add-mask::$CONNECTION_STRING"
-              echo "CONNECTION_STRING=$CONNECTION_STRING" >> $GITHUB_OUTPUT
-              break
-            fi
-            
-            echo "Waiting for Key Vault secret (attempt $i/5)..."
-            sleep 10
-          done
-          
-          if [ -z "$CONNECTION_STRING" ]; then
-            echo "❌ Failed to retrieve connection string from Key Vault"
-            exit 1
-          fi
-      
-      - name: Deploy SQL Schema
-        uses: azure/sql-action@v2.3
-        with:
-          connection-string: ${{ steps.get-connection-string.outputs.CONNECTION_STRING }}
-          path: './iac/database-schema.sql'
-      
-      - name: Database Deployment Summary
-        run: |
-          echo "### Database Schema Deployed Successfully" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Users table created" >> $GITHUB_STEP_SUMMARY
-          echo "- Matches table created" >> $GITHUB_STEP_SUMMARY
-          echo "- Predictions table created" >> $GITHUB_STEP_SUMMARY
-          echo "- Initial seed data loaded" >> $GITHUB_STEP_SUMMARY
 
   build-and-deploy-backend:
     name: 3️⃣ Build, Test & Deploy Backend API
     runs-on: ubuntu-latest
-    needs: [provision-infrastructure, deploy-database]
+    needs: [provision-infrastructure]
     
     steps:
       - name: Checkout code
@@ -239,76 +104,50 @@ jobs:
         run: |
           echo "Restoring NuGet packages..."
           dotnet restore
-        working-directory: ./PredictionHub.API
+        working-directory: ./ginos-gelato/server
       
       - name: Build
         run: |
           echo "Building solution in Release mode..."
           dotnet build --configuration Release --no-restore
-        working-directory: ./PredictionHub.API
+        working-directory: ./ginos-gelato/server
       
       - name: Run Tests
         run: |
           echo "Running unit tests..."
           dotnet test --configuration Release --no-build --verbosity normal
-        working-directory: ./PredictionHub.API
+        working-directory: ./ginos-gelato/server
         continue-on-error: true
       
       - name: Publish
         run: |
           echo "Publishing application..."
           dotnet publish --configuration Release --no-build --output ./publish
-        working-directory: ./PredictionHub.API
+        working-directory: ./ginos-gelato/server
       
       - name: Azure Login
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-      - name: Configure App Service Settings (Key Vault References)
-        run: |
-          echo "Configuring App Service with Key Vault references..."
-          
-          KV_NAME="${{ needs.provision-infrastructure.outputs.keyVaultName }}"
-          APP_NAME="${{ needs.provision-infrastructure.outputs.appServiceName }}"
-          RG_NAME="${{ needs.provision-infrastructure.outputs.resourceGroupName }}"
-          
-          # Configure connection string from Key Vault
-          az webapp config connection-string set \
-            --name $APP_NAME \
-            --resource-group $RG_NAME \
-            --connection-string-type SQLAzure \
-            --settings DefaultConnection="@Microsoft.KeyVault(SecretUri=https://${KV_NAME}.vault.azure.net/secrets/SqlConnectionString/)"
-          
-          # Configure app settings from Key Vault
-          az webapp config appsettings set \
-            --name $APP_NAME \
-            --resource-group $RG_NAME \
-            --settings \
-              FifoApiKey="@Microsoft.KeyVault(SecretUri=https://${KV_NAME}.vault.azure.net/secrets/FifoApiKey/)" \
-              ASPNETCORE_ENVIRONMENT="Production" \
-              KeyVaultName="${KV_NAME}"
-          
-          echo "App Service configured to use Key Vault references"
-      
       - name: Deploy to Azure App Service
         uses: azure/webapps-deploy@v3
         with:
           app-name: ${{ needs.provision-infrastructure.outputs.appServiceName }}
-          package: ./PredictionHub.API/publish
+          package: ./ginos-gelato/server/publish
       
       - name: Verify Deployment
         run: |
           echo "Verifying API deployment..."
           API_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
-          echo "Testing endpoint: ${API_URL}/health"
+          echo "Testing endpoint: ${API_URL}/api/flavors"
           
           # Wait for app to be ready
           for i in {1..12}; do
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${API_URL}/health" || echo "000")
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${API_URL}/api/flavors" || echo "000")
             if [ "$HTTP_CODE" = "200" ]; then
               echo "✅ API is responding (HTTP $HTTP_CODE)"
-              curl -s "${API_URL}/health"
+              curl -s "${API_URL}/api/flavors"
               break
             fi
             echo "⏳ Waiting for API to be ready (attempt $i/12, HTTP $HTTP_CODE)..."
@@ -328,7 +167,7 @@ jobs:
           echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| API URL | ${{ needs.provision-infrastructure.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Swagger UI | ${{ needs.provision-infrastructure.outputs.appServiceUrl }}/swagger |" >> $GITHUB_STEP_SUMMARY
+          echo "| Flavors API | ${{ needs.provision-infrastructure.outputs.appServiceUrl }}/api/flavors |" >> $GITHUB_STEP_SUMMARY
           echo "| .NET Version | ${{ env.DOTNET_VERSION }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Configuration | Release |" >> $GITHUB_STEP_SUMMARY
 
@@ -346,13 +185,13 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: './predictionhub-client/package-lock.json'
+          cache-dependency-path: './ginos-gelato/client/package-lock.json'
       
       - name: Install dependencies
         run: |
           echo "Installing npm packages..."
           npm ci
-        working-directory: ./predictionhub-client
+        working-directory: ./ginos-gelato/client
       
       - name: Configure API URL for production
         run: |
@@ -360,13 +199,13 @@ jobs:
           echo "Configuring API URL: $API_URL"
           echo "VITE_API_URL=$API_URL" > .env.production
           cat .env.production
-        working-directory: ./predictionhub-client
+        working-directory: ./ginos-gelato/client
       
       - name: Build Frontend
         run: |
           echo "Building frontend application..."
           npm run build
-        working-directory: ./predictionhub-client
+        working-directory: ./ginos-gelato/client
       
       - name: Azure Login
         uses: azure/login@v2
@@ -392,7 +231,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ steps.get-swa-token.outputs.SWA_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: 'upload'
-          app_location: './predictionhub-client/dist'
+          app_location: './ginos-gelato/client/dist'
           skip_app_build: true
       
       - name: Frontend Deployment Summary
@@ -416,32 +255,12 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-      - name: Verify Key Vault Secrets
-        run: |
-          echo "Verifying Key Vault configuration..."
-          KV_NAME="${{ needs.provision-infrastructure.outputs.keyVaultName }}"
-          
-          echo "Key Vault: $KV_NAME"
-          
-          # List secrets (not values)
-          echo "Secrets in Key Vault:"
-          az keyvault secret list --vault-name $KV_NAME --query "[].name" -o table
-          
-          # Check if FIFO API Key is set to placeholder
-          FIFO_API_KEY=$(az keyvault secret show --vault-name $KV_NAME --name FifoApiKey --query value -o tsv)
-          if [ "$FIFO_API_KEY" = "YOUR-FIFO-API-KEY-HERE" ]; then
-            echo "⚠️ WARNING: FIFO API Key is still set to placeholder value"
-            echo "Please update with: az keyvault secret set --vault-name $KV_NAME --name FifoApiKey --value {your-api-key}"
-          else
-            echo "FIFO API Key is configured"
-          fi
-      
       - name: Verify Backend Health
         run: |
           echo "Checking Backend API health..."
           API_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
           
-          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${API_URL}/swagger/index.html")
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${API_URL}/api/flavors")
           
           if [ "$HTTP_CODE" = "200" ]; then
             echo "Backend API is healthy (HTTP $HTTP_CODE)"
@@ -451,33 +270,25 @@ jobs:
       
       - name: Final Deployment Report
         run: |
-          echo "## FIFOWorldCup Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "## Gino's Gelato Deployment Complete!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Deployment Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**1. Infrastructure Provisioned** - All Azure resources created in \`${{ env.LOCATION }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**2. Database Deployed** - Schema and seed data applied to Azure SQL" >> $GITHUB_STEP_SUMMARY
-          echo "**3. Backend API Deployed** - .NET 8 API running on App Service" >> $GITHUB_STEP_SUMMARY
-          echo "**4. Frontend Deployed** - React app hosted on Static Web App" >> $GITHUB_STEP_SUMMARY
+          echo "**1. Infrastructure Provisioned** - All Azure resources created in `${{ env.LOCATION }}`" >> $GITHUB_STEP_SUMMARY
+          echo "**2. Backend API Deployed** - .NET 8 API running on App Service" >> $GITHUB_STEP_SUMMARY
+          echo "**3. Frontend Deployed** - React app hosted on Static Web App" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Access Points" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Backend API**: ${{ needs.provision-infrastructure.outputs.appServiceUrl }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Swagger UI**: ${{ needs.provision-infrastructure.outputs.appServiceUrl }}/swagger" >> $GITHUB_STEP_SUMMARY
+          echo "- **Flavors API**: ${{ needs.provision-infrastructure.outputs.appServiceUrl }}/api/flavors" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Security" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- SQL connection string stored in Key Vault" >> $GITHUB_STEP_SUMMARY
-          echo "- FIFO API Key stored in Key Vault" >> $GITHUB_STEP_SUMMARY
-          echo "- App Service uses Managed Identity for Key Vault access" >> $GITHUB_STEP_SUMMARY
-          echo "- ⚠️ **Action Required**: Update FIFO API Key in Key Vault with actual value" >> $GITHUB_STEP_SUMMARY
+          echo "- HTTPS enforced for App Service" >> $GITHUB_STEP_SUMMARY
+          echo "- Static Web App secured with deployment token" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "1. Update FIFO API Key in Key Vault:" >> $GITHUB_STEP_SUMMARY
-          echo "   \`\`\`bash" >> $GITHUB_STEP_SUMMARY
-          echo "   az keyvault secret set --vault-name ${{ needs.provision-infrastructure.outputs.keyVaultName }} --name FifoApiKey --value {your-api-key}" >> $GITHUB_STEP_SUMMARY
-          echo "   \`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "2. Restart App Service to pick up the new API key" >> $GITHUB_STEP_SUMMARY
-          echo "3. Test the application end-to-end" >> $GITHUB_STEP_SUMMARY
-          echo "4. Monitor Application Insights for any issues" >> $GITHUB_STEP_SUMMARY
+          echo "1. Test the application end-to-end" >> $GITHUB_STEP_SUMMARY
+          echo "2. Monitor App Service logs for any issues" >> $GITHUB_STEP_SUMMARY

@@ -1,4 +1,4 @@
-// Static Web App module for FIFOWorldCup
+// Static Web App module for Gino's Gelato
 // Based on eShop proven patterns
 
 @description('Location for the Static Web App')
@@ -25,7 +25,7 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
     repositoryUrl: ''
     branch: ''
     buildProperties: {
-      appLocation: 'predictionhub-client'
+      appLocation: 'ginos-gelato/client'
       apiLocation: ''
       outputLocation: 'dist'
     }

@@ -4,7 +4,7 @@ targetScope = 'subscription'
 param location string = 'eastus'
 
 @description('Resource group name')
-param resourceGroupName string = 'rg-FIFOWorldCup'
+param resourceGroupName string = 'rg-GinosGelato'
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
