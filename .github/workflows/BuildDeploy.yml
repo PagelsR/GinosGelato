@@ -44,12 +44,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-      - name: Unlock Resource Group (if locked)
-        run: |
-          echo "Removing resource group lock (if exists)..."
-          az group lock delete --name ProductionLock --resource-group ${{ env.RESOURCE_GROUP }} || echo "No lock found, continuing..."
-        continue-on-error: true
-      
       - name: Deploy Bicep Infrastructure
         id: deploy
         uses: azure/arm-deploy@v2
@@ -62,17 +56,6 @@ jobs:
           deploymentName: 'ginosgelato-infra-${{ github.run_number }}'
           failOnStdErr: false
       
-      - name: Lock Resource Group (Production Safety)
-        run: |
-          echo "Locking resource group to prevent accidental deletion..."
-          az group lock create \
-            --lock-type CanNotDelete \
-            --name ProductionLock \
-            --resource-group ${{ env.RESOURCE_GROUP }} \
-            --notes "Prevents accidental deletion of production resources"
-          echo "Resource group locked successfully"
-        continue-on-error: true
-      
       - name: Infrastructure Deployment Summary
         run: |
           echo "### Infrastructure Deployed Successfully" >> $GITHUB_STEP_SUMMARY
@@ -84,7 +67,6 @@ jobs:
           echo "| App Service URL | ${{ steps.deploy.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Static Web App | ${{ steps.deploy.outputs.staticWebAppName }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Location | ${{ env.LOCATION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lock Status | Protected (CanNotDelete) |" >> $GITHUB_STEP_SUMMARY
 
   build-and-deploy-backend:
     name: 3️⃣ Build, Test & Deploy Backend API

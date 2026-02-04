@@ -26,7 +26,7 @@ const Footer: React.FC = () => {
                         <h4 className="font-semibold text-lg mb-3 text-yellow-300">Quick Links</h4>
                         <ul className="space-y-2 text-gray-300">
                             <li><a href="/about" className="hover:text-pink-300 transition-colors">About Us</a></li>
-                            <li><a href="/menu" className="hover:text-pink-300 transition-colors">Our Flavors</a></li>
+                            <li><a href="/flavors" className="hover:text-pink-300 transition-colors">Our Flavors</a></li>
                             <li><a href="/locations" className="hover:text-pink-300 transition-colors">Locations</a></li>
                             <li><a href="/catering" className="hover:text-pink-300 transition-colors">Catering</a></li>
                         </ul>
@@ -36,6 +36,8 @@ const Footer: React.FC = () => {
                     <div>
                         <h4 className="font-semibold text-lg mb-3 text-yellow-300">Contact</h4>
                         <div className="space-y-2 text-gray-300 text-sm">
+                            <p>👤 Randy Pagels</p>
+                            <p>✉️ randy.pagels@xebia.com</p>
                             <p>📍 123 Gelato Street</p>
                             <p>🌟 Sweet City, SC 12345</p>
                             <p>📞 (555) 123-GELATO</p>
