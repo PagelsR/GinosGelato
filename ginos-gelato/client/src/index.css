@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Fredoka+One:wght@400&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS Variables for Ice Cream Theme */
+:root {
+  --primary-pink: #ff6b9d;
+  --primary-blue: #4ecdc4;
+  --accent-yellow: #ffe066;
+  --accent-orange: #ff8a50;
+  --cream: #fff8f3;
+  --chocolate: #8b4513;
+  --berry: #8e44ad;
+}
+
+body {
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+    background: linear-gradient(to bottom right, #fdf2f8, #eff6ff, #fefce8);
+    color: #1f2937;
+    min-height: 100vh;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* Ice Cream Theme Components */
+.gelato-card {
+    @apply bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 hover:scale-105;
+}
+
+.gelato-button-primary {
+    @apply bg-gradient-to-r from-pink-500 to-orange-400 text-white font-semibold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 border-none;
+}
+
+.gelato-button-secondary {
+    @apply bg-gradient-to-r from-blue-400 to-teal-400 text-white font-semibold py-2 px-6 rounded-full shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 border-none;
+}
+
+.gelato-container {
+    @apply max-w-6xl mx-auto p-6;
+}
+
+/* Animated Background Elements */
+.floating-ice-cream {
+    @apply absolute opacity-10 animate-bounce;
+}
+
+/* Selection Cards */
+.selection-card {
+    @apply bg-white/70 backdrop-blur-sm rounded-xl p-4 border-2 border-transparent hover:border-pink-300 cursor-pointer transition-all duration-300 hover:shadow-lg;
+}
+
+.selection-card.selected {
+    @apply border-pink-500 bg-pink-50/80 shadow-lg scale-105;
+}
+
+/* Flavor Grid */
+.flavor-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+}
+
+.flavor-card {
+    @apply relative overflow-hidden rounded-xl cursor-pointer transition-all duration-300 hover:scale-105;
+    background: linear-gradient(135deg, var(--cream) 0%, #f8f9fa 100%);
+}
+
+.flavor-card.selected {
+    @apply ring-4 ring-pink-400 scale-105;
+}
+
+/* Topping Pills */
+.topping-pill {
+    @apply inline-block bg-gradient-to-r from-yellow-200 to-orange-200 text-gray-800 px-4 py-2 rounded-full mr-2 mb-2 cursor-pointer border-2 border-transparent hover:border-yellow-400 transition-all duration-300;
+}
+
+.topping-pill.selected {
+    @apply bg-gradient-to-r from-yellow-400 to-orange-400 text-white border-orange-500 shadow-lg;
+}
