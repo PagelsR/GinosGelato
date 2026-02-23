@@ -1,4 +1,4 @@
-name: GinosGelato - Build and Deploy to Azure
+name: Build and Deploy to Azure
 
 on:
   push:

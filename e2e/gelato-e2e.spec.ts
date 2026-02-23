@@ -1,7 +1,5 @@
 import { test, expect } from '@playwright/test';
 
-const baseUrl = 'https://zealous-sky-008ca630f.1.azurestaticapps.net/';
-
 // Disney-themed test data
 const disneyCustomers = [
   {
@@ -29,7 +27,7 @@ const disneyCustomers = [
 ];
 
 test('Waffle Cone order with checkout', async ({ page }) => {
-  await page.goto(baseUrl);
+  await page.goto('/');
   await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
   await page.getByRole('heading', { name: 'Waffle Cone' }).click();
   await page.getByText('🍪Cookies & CreamCrushed Oreo').click();
@@ -71,7 +69,7 @@ test('Waffle Cone order with checkout', async ({ page }) => {
 });
 
 test('Bowl Cup order with checkout', async ({ page }) => {
-  await page.goto(baseUrl);
+  await page.goto('/');
   await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
   
   // Select Bowl Cup container
