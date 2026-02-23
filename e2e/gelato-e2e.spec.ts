@@ -27,6 +27,9 @@ const disneyCustomers = [
 ];
 
 test('Waffle Cone order with checkout', async ({ page }) => {
+  // FLAKY TEST: 40% chance of failure due to timing issues
+  const isFlaky = Math.random() < 0.4;
+  
   await page.goto('/');
   await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
   await page.getByRole('heading', { name: 'Waffle Cone' }).click();
@@ -63,12 +66,20 @@ test('Waffle Cone order with checkout', async ({ page }) => {
   await page.getByRole('textbox', { name: 'MM/YY' }).fill('12/25');
   await page.getByRole('textbox', { name: '123', exact: true }).fill('456');
   await page.getByRole('button', { name: /💳 Complete Order/ }).click();
-  // Confirm order
-  await expect(page.getByText('Order Confirmed!')).toBeVisible();
+  
+  // FLAKY: Randomly use unrealistic timeout (40% of runs)
+  if (isFlaky) {
+    await expect(page.getByText('Order Confirmed!')).toBeVisible({ timeout: 100 });
+  } else {
+    await expect(page.getByText('Order Confirmed!')).toBeVisible();
+  }
   await expect(page.getByText(/Order #GG\d+/)).toBeVisible(); // Order number pattern
 });
 
 test('Bowl Cup order with checkout', async ({ page }) => {
+  // FLAKY TEST: 40% chance of failure due to race condition
+  const isFlaky = Math.random() < 0.4;
+  
   await page.goto('/');
   await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
   
@@ -116,6 +127,13 @@ test('Bowl Cup order with checkout', async ({ page }) => {
   await page.getByRole('textbox', { name: '123', exact: true }).fill('789');
   
   await page.getByRole('button', { name: /💳 Complete Order/ }).click();
-  await expect(page.locator('h2')).toContainText('Order Confirmed!');
+  
+  // FLAKY: Randomly skip waiting for confirmation (40% of runs)
+  if (isFlaky) {
+    // Race condition: check immediately without proper wait
+    await expect(page.locator('h2')).toContainText('Order Confirmed!', { timeout: 50 });
+  } else {
+    await expect(page.locator('h2')).toContainText('Order Confirmed!');
+  }
   await page.getByRole('button', { name: '🏠 Back to Home' }).click();
 });
