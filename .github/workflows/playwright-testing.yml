@@ -1,0 +1,71 @@
+name: Playwright Testing - Daily Schedule
+
+on:
+  schedule:
+    # Runs daily at 6:00 AM EST (11:00 AM UTC)
+    - cron: '0 11 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  run-playwright-tests:
+    name: Run Playwright Tests
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing npm packages..."
+          npm ci
+
+      - name: Install Playwright Browsers
+        run: |
+          npx playwright install --with-deps
+
+      - name: Run Playwright Tests
+        run: |
+          npx playwright test
+
+      - name: Upload Playwright Report Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Publish Playwright Report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.PERSONAL_ACCESSTOKEN_PAGES }}
+          publish_branch: gh-pages
+          publish_dir: playwright-report
+          keep_files: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Test Results Summary
+        if: always()
+        run: |
+          echo "## Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Scheduled Run - $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Test report published to GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📊 [View Full Report](https://pagelsr.github.io/GinosGelato/)" >> $GITHUB_STEP_SUMMARY
