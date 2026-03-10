@@ -320,7 +320,7 @@ jobs:
 
       - name: Install Playwright Browsers
         run: |
-          npx playwright install --with-deps
+          npx playwright install --with-deps chromium
 
       - name: Run Playwright Tests
         run: |
