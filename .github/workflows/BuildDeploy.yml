@@ -48,6 +48,7 @@ jobs:
         id: deploy
         uses: azure/arm-deploy@v2
         with:
+          scope: resourcegroup
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resourceGroupName: ${{ env.RESOURCE_GROUP }}
           template: ./iac/main.bicep
@@ -256,6 +257,60 @@ jobs:
       - name: Run Playwright Tests
         run: |
           npx playwright test
+        continue-on-error: true
+
+      - name: Checkout gh-pages branch for history
+        if: always()
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages-content
+          
+      - name: Extract Test Metrics and Update History
+        if: always()
+        run: |
+          # Create reports directory for this run
+          RUN_ID="${{ github.run_number }}"
+          DATE=$(date +%Y-%m-%d)
+          REPORT_DIR="reports/${DATE}-run-${RUN_ID}"
+          
+          echo "Creating report directory: $REPORT_DIR"
+          mkdir -p deployment-content/$REPORT_DIR
+          
+          # Copy HTML report to dated folder
+          if [ -d "playwright-report" ]; then
+            cp -r playwright-report/* deployment-content/$REPORT_DIR/
+          fi
+          
+          # Extract metrics from JSON
+          if [ -f "test-results.json" ]; then
+            # Copy existing history if it exists
+            if [ -f "gh-pages-content/test-history.json" ]; then
+              cp gh-pages-content/test-history.json ./test-history.json
+            else
+              echo "[]" > test-history.json
+            fi
+            
+            # Extract and append metrics
+            REPORT_URL="https://pagelsr.github.io/GinosGelato/reports/${DATE}-run-${RUN_ID}"
+            node .github/scripts/extract-test-metrics.js test-results.json test-history.json $RUN_ID "$REPORT_URL"
+            
+            # Copy updated history to deployment
+            cp test-history.json deployment-content/
+            cp current-run-summary.json deployment-content/
+          fi
+          
+          # Copy dashboard as index.html
+          cp .github/pages/dashboard.html deployment-content/index.html
+          
+          # Copy existing reports if any
+          if [ -d "gh-pages-content/reports" ]; then
+            mkdir -p deployment-content/reports
+            cp -r gh-pages-content/reports/* deployment-content/reports/ || true
+          fi
+          
+          echo "Deployment structure ready"
+          ls -la deployment-content/
 
       - name: Upload Playwright Report Artifact
         if: always()
@@ -265,16 +320,17 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-      - name: Publish Playwright Report to GitHub Pages
+      - name: Publish Test Dashboard to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v3
         with:
           personal_token: ${{ secrets.PERSONAL_ACCESSTOKEN_PAGES }}
           publish_branch: gh-pages
-          publish_dir: playwright-report
-          keep_files: true
+          publish_dir: deployment-content
+          keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Deploy test report for run #${{ github.run_number }}'
 
   post-deployment-verification:
     name: 5️⃣ Post-Deployment Verification

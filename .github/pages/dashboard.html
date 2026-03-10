@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gino's Gelato - Test Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      text-align: center;
+    }
+    
+    header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    
+    header p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      padding: 30px;
+      background: #f8f9fa;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 8px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid #667eea;
+    }
+    
+    .stat-card.success {
+      border-left-color: #10b981;
+    }
+    
+    .stat-card.danger {
+      border-left-color: #ef4444;
+    }
+    
+    .stat-card.warning {
+      border-left-color: #f59e0b;
+    }
+    
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.9em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    .chart-container {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+    
+    .chart-wrapper {
+      position: relative;
+      height: 400px;
+    }
+    
+    h2 {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #1f2937;
+    }
+    
+    .test-runs-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .test-runs-table thead {
+      background: #667eea;
+      color: white;
+    }
+    
+    .test-runs-table th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .test-runs-table td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .test-runs-table tbody tr:hover {
+      background: #f3f4f6;
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 0.85em;
+      font-weight: 600;
+    }
+    
+    .badge.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .badge.warning {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .badge.danger {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .link-button {
+      display: inline-block;
+      padding: 6px 14px;
+      background: #667eea;
+      color: white;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.9em;
+      transition: background 0.2s;
+    }
+    
+    .link-button:hover {
+      background: #5568d3;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 60px;
+      color: #6b7280;
+      font-size: 1.2em;
+    }
+    
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🍦 Gino's Gelato</h1>
+      <p>Test Results Dashboard & Trends</p>
+    </header>
+    
+    <div id="stats-container" class="stats-grid">
+      <div class="loading">Loading test data...</div>
+    </div>
+    
+    <div class="content">
+      <div class="chart-container">
+        <h2>📈 Test Trend - Pass/Fail Over Time</h2>
+        <div class="chart-wrapper">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <h2>⏱️ Test Duration Trend</h2>
+        <div class="chart-wrapper">
+          <canvas id="durationChart"></canvas>
+        </div>
+      </div>
+      
+      <h2>📋 Recent Test Runs</h2>
+      <div id="test-runs-container">
+        <div class="loading">Loading test runs...</div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    async function loadTestHistory() {
+      try {
+        const response = await fetch('./test-history.json');
+        if (!response.ok) {
+          throw new Error('No test history found');
+        }
+        const history = await response.json();
+        
+        if (!history || history.length === 0) {
+          throw new Error('No test runs recorded yet');
+        }
+        
+        renderStats(history);
+        renderTrendChart(history);
+        renderDurationChart(history);
+        renderTestRunsTable(history);
+      } catch (error) {
+        console.error('Error loading test history:', error);
+        document.getElementById('stats-container').innerHTML = `
+          <div class="error">
+            <strong>⚠️ Error Loading Test Data</strong><br>
+            ${error.message}<br>
+            <small>Run your tests to generate history data.</small>
+          </div>
+        `;
+        document.getElementById('test-runs-container').innerHTML = '';
+      }
+    }
+    
+    function renderStats(history) {
+      const latest = history[history.length - 1];
+      const totalRuns = history.length;
+      const avgPassRate = Math.round(
+        history.reduce((sum, run) => sum + run.passRate, 0) / history.length
+      );
+      
+      const statsHtml = `
+        <div class="stat-card">
+          <div class="stat-value">${totalRuns}</div>
+          <div class="stat-label">Total Runs</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-value">${latest.passed}</div>
+          <div class="stat-label">Last Run Passed</div>
+        </div>
+        <div class="stat-card danger">
+          <div class="stat-value">${latest.failed}</div>
+          <div class="stat-label">Last Run Failed</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-value">${avgPassRate}%</div>
+          <div class="stat-label">Avg Pass Rate</div>
+        </div>
+      `;
+      
+      document.getElementById('stats-container').innerHTML = statsHtml;
+    }
+    
+    function renderTrendChart(history) {
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      
+      // Take last 20 runs for readability
+      const recentHistory = history.slice(-20);
+      
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: recentHistory.map(r => r.date),
+          datasets: [
+            {
+              label: 'Passed',
+              data: recentHistory.map(r => r.passed),
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Failed',
+              data: recentHistory.map(r => r.failed),
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              tension: 0.4,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'top'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    function renderDurationChart(history) {
+      const ctx = document.getElementById('durationChart').getContext('2d');
+      
+      const recentHistory = history.slice(-20);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: recentHistory.map(r => r.date),
+          datasets: [{
+            label: 'Duration (seconds)',
+            data: recentHistory.map(r => r.duration),
+            backgroundColor: 'rgba(102, 126, 234, 0.7)',
+            borderColor: '#667eea',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+    
+    function renderTestRunsTable(history) {
+      // Show most recent runs first
+      const sortedHistory = [...history].reverse().slice(0, 10);
+      
+      const tableHtml = `
+        <table class="test-runs-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Run</th>
+              <th>Total</th>
+              <th>Passed</th>
+              <th>Failed</th>
+              <th>Pass Rate</th>
+              <th>Duration</th>
+              <th>Report</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sortedHistory.map(run => `
+              <tr>
+                <td>${new Date(run.timestamp).toLocaleDateString()}</td>
+                <td>#${run.runNumber}</td>
+                <td><strong>${run.total}</strong></td>
+                <td><span class="badge success">${run.passed}</span></td>
+                <td>${run.failed > 0 ? `<span class="badge danger">${run.failed}</span>` : '-'}</td>
+                <td>
+                  <span class="badge ${run.passRate === 100 ? 'success' : run.passRate >= 80 ? 'warning' : 'danger'}">
+                    ${run.passRate}%
+                  </span>
+                </td>
+                <td>${run.duration}s</td>
+                <td>
+                  <a href="./reports/${run.runId}/index.html" class="link-button" target="_blank">
+                    View Report
+                  </a>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+      
+      document.getElementById('test-runs-container').innerHTML = tableHtml;
+    }
+    
+    // Load data on page load
+    loadTestHistory();
+  </script>
+</body>
+</html>
