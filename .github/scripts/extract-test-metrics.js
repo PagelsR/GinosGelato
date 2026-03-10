@@ -32,10 +32,18 @@ const allTests = [];
 function extractTests(suite) {
   if (suite.specs) {
     suite.specs.forEach(spec => {
+      // Check if test is flaky (passed after retry)
+      const isFlaky = spec.tests && spec.tests.some(test => {
+        const results = test.results || [];
+        // Flaky = has multiple results and eventually passed
+        return results.length > 1 && spec.ok;
+      });
+      
       allTests.push({
         title: spec.title,
         ok: spec.ok,
-        tests: spec.tests || []
+        tests: spec.tests || [],
+        isFlaky: isFlaky
       });
     });
   }
@@ -47,9 +55,14 @@ function extractTests(suite) {
 suites.forEach(extractTests);
 
 const total = allTests.length;
-const passed = allTests.filter(t => t.ok).length;
-const failed = total - passed;
+const flaky = allTests.filter(t => t.isFlaky).length;
+const passed = allTests.filter(t => t.ok && !t.isFlaky).length;
+const failed = allTests.filter(t => !t.ok).length;
 const duration = results.stats?.duration || 0;
+
+// Treat flaky tests as failed for pass rate calculation
+const effectiveFailed = failed + flaky;
+const effectivePassed = passed;
 
 // Create summary object
 const summary = {
@@ -58,11 +71,12 @@ const summary = {
   date: new Date().toISOString().split('T')[0],
   runNumber: runNumber,
   total: total,
-  passed: passed,
-  failed: failed,
+  passed: effectivePassed,
+  failed: effectiveFailed,
+  flaky: flaky,
   skipped: 0,
   duration: Math.round(duration / 1000), // convert to seconds
-  passRate: total > 0 ? Math.round((passed / total) * 100) : 0,
+  passRate: total > 0 ? Math.round((effectivePassed / total) * 100) : 0,
   reportUrl: runUrl
 };
 
