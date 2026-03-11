@@ -478,7 +478,7 @@
                 <td>#${run.runNumber}</td>
                 <td><strong>${run.total}</strong></td>
                 <td><span class="badge success">${run.passed}</span></td>
-                <td>${run.failed > 0 ? `<span class="badge danger">${run.failed - (run.flaky || 0)}</span>` : '-'}</td>
+                <td>${run.failed - (run.flaky || 0) > 0 ? `<span class="badge danger">${run.failed - (run.flaky || 0)}</span>` : '-'}</td>
                 <td>${(run.flaky || 0) > 0 ? `<span class="badge warning">${run.flaky}</span>` : '-'}</td>
                 <td>
                   <span class="badge ${run.passRate === 100 ? 'success' : run.passRate >= 80 ? 'warning' : 'danger'}">
