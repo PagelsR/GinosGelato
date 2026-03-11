@@ -274,6 +274,9 @@
       );
       const totalFlaky = history.reduce((sum, run) => sum + (run.flaky || 0), 0);
       
+      // Calculate actual failures (excluding flaky) for consistency with table display
+      const actualFailed = latest.failed - (latest.flaky || 0);
+      
       const statsHtml = `
         <div class="stat-card">
           <div class="stat-value">${totalRuns}</div>
@@ -284,7 +287,7 @@
           <div class="stat-label">Last Run Passed</div>
         </div>
         <div class="stat-card danger">
-          <div class="stat-value">${latest.failed}</div>
+          <div class="stat-value">${actualFailed}</div>
           <div class="stat-label">Last Run Failed</div>
         </div>
         <div class="stat-card warning">
