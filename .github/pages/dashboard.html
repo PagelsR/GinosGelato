@@ -208,9 +208,16 @@
     
     <div class="content">
       <div class="chart-container">
-        <h2>📈 Test Trend - Pass/Fail Over Time</h2>
+        <h2>📈 Test Trend - Pass/Fail/Flaky Over Time</h2>
         <div class="chart-wrapper">
           <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <h2>🔄 Flaky Test Trend</h2>
+        <div class="chart-wrapper">
+          <canvas id="flakyChart"></canvas>
         </div>
       </div>
       
@@ -243,6 +250,7 @@
         
         renderStats(history);
         renderTrendChart(history);
+        renderFlakyChart(history);
         renderDurationChart(history);
         renderTestRunsTable(history);
       } catch (error) {
@@ -264,6 +272,7 @@
       const avgPassRate = Math.round(
         history.reduce((sum, run) => sum + run.passRate, 0) / history.length
       );
+      const totalFlaky = history.reduce((sum, run) => sum + (run.flaky || 0), 0);
       
       const statsHtml = `
         <div class="stat-card">
@@ -277,6 +286,10 @@
         <div class="stat-card danger">
           <div class="stat-value">${latest.failed}</div>
           <div class="stat-label">Last Run Failed</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-value">${latest.flaky || 0}</div>
+          <div class="stat-label">Last Run Flaky</div>
         </div>
         <div class="stat-card warning">
           <div class="stat-value">${avgPassRate}%</div>
@@ -308,9 +321,17 @@
             },
             {
               label: 'Failed',
-              data: recentHistory.map(r => r.failed),
+              data: recentHistory.map(r => r.failed - (r.flaky || 0)),
               borderColor: '#ef4444',
               backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              tension: 0.4,
+              fill: true
+            },
+            {
+              label: 'Flaky (Counted as Failed)',
+              data: recentHistory.map(r => r.flaky || 0),
+              borderColor: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.1)',
               tension: 0.4,
               fill: true
             }
@@ -323,6 +344,66 @@
             legend: {
               display: true,
               position: 'top'
+            },
+            tooltip: {
+              callbacks: {
+                footer: function(tooltipItems) {
+                  const index = tooltipItems[0].dataIndex;
+                  const run = recentHistory[index];
+                  return `Total Failed (including flaky): ${run.failed}`;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              stacked: true,
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
+            },
+            x: {
+              stacked: true
+            }
+          }
+        }
+      });
+    }
+    
+    function renderFlakyChart(history) {
+      const ctx = document.getElementById('flakyChart').getContext('2d');
+      
+      const recentHistory = history.slice(-20);
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: recentHistory.map(r => r.date),
+          datasets: [{
+            label: 'Flaky Tests (Unstable)',
+            data: recentHistory.map(r => r.flaky || 0),
+            backgroundColor: 'rgba(245, 158, 11, 0.7)',
+            borderColor: '#f59e0b',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `Flaky Tests: ${context.parsed.y}`;
+                },
+                afterLabel: function(context) {
+                  return 'These tests passed after retry';
+                }
+              }
             }
           },
           scales: {
@@ -384,6 +465,7 @@
               <th>Total</th>
               <th>Passed</th>
               <th>Failed</th>
+              <th>Flaky</th>
               <th>Pass Rate</th>
               <th>Duration</th>
               <th>Report</th>
@@ -396,7 +478,8 @@
                 <td>#${run.runNumber}</td>
                 <td><strong>${run.total}</strong></td>
                 <td><span class="badge success">${run.passed}</span></td>
-                <td>${run.failed > 0 ? `<span class="badge danger">${run.failed}</span>` : '-'}</td>
+                <td>${run.failed > 0 ? `<span class="badge danger">${run.failed - (run.flaky || 0)}</span>` : '-'}</td>
+                <td>${(run.flaky || 0) > 0 ? `<span class="badge warning">${run.flaky}</span>` : '-'}</td>
                 <td>
                   <span class="badge ${run.passRate === 100 ? 'success' : run.passRate >= 80 ? 'warning' : 'danger'}">
                     ${run.passRate}%
