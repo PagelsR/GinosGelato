@@ -1,14 +1,14 @@
 {
-  "runId": "2026-03-12-run-38",
-  "timestamp": "2026-03-12T19:06:38.147Z",
+  "runId": "2026-03-12-run-39",
+  "timestamp": "2026-03-12T20:47:11.333Z",
   "date": "2026-03-12",
-  "runNumber": "38",
+  "runNumber": "39",
   "total": 25,
   "passed": 16,
   "failed": 9,
-  "flaky": 3,
+  "flaky": 1,
   "skipped": 0,
-  "duration": 356,
+  "duration": 359,
   "passRate": 64,
-  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-03-12-run-38"
+  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-03-12-run-39"
 }
