@@ -30,8 +30,8 @@ test.describe('Edge Cases and Boundary Testing', () => {
   });
 
   test('FLAKY: should handle rapid flavor selection changes', async ({ page }) => {
-    // FLAKY TEST: 35% chance of failure due to race conditions
-    const isFlaky = Math.random() < 0.35;
+    // FLAKY TEST: 25% chance of failure due to race conditions
+    const isFlaky = Math.random() < 0.25;
     
     await page.goto('/');
     await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
@@ -76,8 +76,8 @@ test.describe('Edge Cases and Boundary Testing', () => {
   });
 
   test('FLAKY: should validate form fields before proceeding', async ({ page }) => {
-    // FLAKY TEST: 25% chance of timing issue
-    const isFlaky = Math.random() < 0.25;
+    // FLAKY TEST: 20% chance of timing issue
+    const isFlaky = Math.random() < 0.20;
     
     await page.goto('/');
     await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
@@ -123,8 +123,8 @@ test.describe('Edge Cases and Boundary Testing', () => {
   });
 
   test('FLAKY: network delay simulation during checkout', async ({ page }) => {
-    // FLAKY TEST: 30% chance of failure simulating network issues
-    const isFlaky = Math.random() < 0.3;
+    // FLAKY TEST: 25% chance of failure simulating network issues
+    const isFlaky = Math.random() < 0.25;
     
     await page.goto('/');
     await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();

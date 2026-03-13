@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test.describe('Flaky Test Examples', () => {
   
   test('Random 50/50 Test - Simulates Network Instability', async ({ page }) => {
-    // This test randomly fails 50% of the time
-    const shouldPass = Math.random() > 0.5;
+    // This test randomly fails 30% of the time
+    const shouldPass = Math.random() > 0.3;
     
     console.log(`Test will ${shouldPass ? 'PASS' : 'FAIL'} this time`);
     
@@ -21,9 +21,9 @@ test.describe('Flaky Test Examples', () => {
   });
 
   test('Time-based Flaky Test - Fails on Odd Seconds', async ({ page }) => {
-    // Fails when the current second is odd
+    // Fails 15% of the time based on timing
     const currentSecond = new Date().getSeconds();
-    const shouldPass = currentSecond % 2 === 0;
+    const shouldPass = Math.random() > 0.15;
     
     console.log(`Current second: ${currentSecond}, Test will ${shouldPass ? 'PASS' : 'FAIL'}`);
     
@@ -39,7 +39,7 @@ test.describe('Flaky Test Examples', () => {
   test('Race Condition Simulation', async ({ page }) => {
     // Simulates a race condition with random timing
     const delay = Math.floor(Math.random() * 100);
-    const shouldFail = delay > 50;
+    const shouldFail = delay > 75;
     
     console.log(`Delay: ${delay}ms, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
@@ -74,10 +74,10 @@ test.describe('Flaky Test Examples', () => {
     await expect(page.locator('h1')).toContainText('Build Your');
   });
 
-  test('Memory Leak Simulation - 30% Failure Rate', async ({ page }) => {
-    // Simulates memory pressure causing test failures (fails 30% of the time)
+  test('Memory Leak Simulation - 25% Failure Rate', async ({ page }) => {
+    // Simulates memory pressure causing test failures (fails 25% of the time)
     const memoryPressure = Math.random();
-    const shouldFail = memoryPressure > 0.7;
+    const shouldFail = memoryPressure > 0.75;
     
     console.log(`Memory pressure: ${(memoryPressure * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
@@ -94,10 +94,10 @@ test.describe('Flaky Test Examples', () => {
     await expect(page.locator('h1')).toBeVisible();
   });
 
-  test('Browser Cache Inconsistency - 25% Failure Rate', async ({ page }) => {
-    // Simulates stale cache causing inconsistent behavior (fails 25% of the time)
-    const cacheState = Math.floor(Math.random() * 4); // 0, 1, 2, or 3
-    const shouldFail = cacheState === 0; // 25% chance
+  test('Browser Cache Inconsistency - 20% Failure Rate', async ({ page }) => {
+    // Simulates stale cache causing inconsistent behavior (fails 20% of the time)
+    const cacheState = Math.floor(Math.random() * 5); // 0, 1, 2, 3, or 4
+    const shouldFail = cacheState === 0; // 20% chance
     
     console.log(`Cache state: ${cacheState}, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
@@ -113,10 +113,10 @@ test.describe('Flaky Test Examples', () => {
     await expect(page.locator('body')).toContainText('About');
   });
 
-  test('Database Connection Pool Exhaustion - 20% Failure Rate', async ({ page }) => {
-    // Simulates database connection issues (fails 20% of the time)
+  test('Database Connection Pool Exhaustion - 15% Failure Rate', async ({ page }) => {
+    // Simulates database connection issues (fails 15% of the time)
     const connectionPoolLoad = Math.random() * 100;
-    const shouldFail = connectionPoolLoad > 80;
+    const shouldFail = connectionPoolLoad > 85;
     
     console.log(`Connection pool load: ${connectionPoolLoad.toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
@@ -133,9 +133,9 @@ test.describe('Flaky Test Examples', () => {
     await expect(page).toHaveURL(/.*build/);
   });
 
-  test('Payment Gateway Timeout - 70% Failure Rate', async ({ page }) => {
-    // Consistently fails most of the time (70% failure)
-    const shouldFail = Math.random() > 0.3;
+  test('Payment Gateway Timeout - 20% Failure Rate', async ({ page }) => {
+    // Occasionally fails (20% failure)
+    const shouldFail = Math.random() > 0.8;
     
     console.log(`Payment gateway test will ${shouldFail ? 'FAIL' : 'PASS'} this time`);
     
@@ -149,10 +149,10 @@ test.describe('Flaky Test Examples', () => {
     await expect(page).toHaveURL(/.*build/);
   });
 
-  test('Image CDN Loading Failure - 75% Failure Rate', async ({ page }) => {
-    // Fails 75% of the time - simulates CDN issues
+  test('Image CDN Loading Failure - 15% Failure Rate', async ({ page }) => {
+    // Fails 15% of the time - simulates CDN issues
     const cdnHealth = Math.random() * 100;
-    const shouldFail = cdnHealth > 25;
+    const shouldFail = cdnHealth > 85;
     
     console.log(`CDN health: ${cdnHealth.toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
@@ -165,10 +165,10 @@ test.describe('Flaky Test Examples', () => {
     await expect(page).toHaveTitle(/Gino's Gelato/);
   });
 
-  test('Session Storage Corruption - 80% Failure Rate', async ({ page }) => {
-    // Fails 80% of the time - simulates persistent storage issues
+  test('Session Storage Corruption - 15% Failure Rate', async ({ page }) => {
+    // Fails 15% of the time - simulates persistent storage issues
     const storageIntegrity = Math.random();
-    const shouldFail = storageIntegrity > 0.2;
+    const shouldFail = storageIntegrity > 0.85;
     
     console.log(`Storage integrity: ${(storageIntegrity * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
@@ -182,10 +182,10 @@ test.describe('Flaky Test Examples', () => {
     await expect(page.locator('h1')).toBeVisible();
   });
 
-  test('Third-Party Script Blocker - 85% Failure Rate', async ({ page }) => {
-    // Fails 85% of the time - simulates ad blockers or script failures
+  test('Third-Party Script Blocker - 15% Failure Rate', async ({ page }) => {
+    // Fails 15% of the time - simulates ad blockers or script failures
     const scriptLoaded = Math.random();
-    const shouldFail = scriptLoaded > 0.15;
+    const shouldFail = scriptLoaded > 0.85;
     
     console.log(`Script load probability: ${(scriptLoaded * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
