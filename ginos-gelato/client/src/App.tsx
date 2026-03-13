@@ -8,6 +8,7 @@ import AboutUs from './pages/AboutUs';
 import OurFlavors from './pages/OurFlavors';
 import Locations from './pages/Locations';
 import Catering from './pages/Catering';
+import ManagementDashboard from './pages/ManagementDashboard';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import { CartProvider } from './contexts/CartContext';
@@ -28,6 +29,7 @@ const App: React.FC = () => {
               <Route path="/flavors" element={<OurFlavors />} />
               <Route path="/locations" element={<Locations />} />
               <Route path="/catering" element={<Catering />} />
+              <Route path="/management" element={<ManagementDashboard />} />
             </Routes>
           </main>
           <Footer />

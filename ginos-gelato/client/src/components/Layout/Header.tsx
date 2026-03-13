@@ -53,6 +53,15 @@ const Header: React.FC = () => {
                                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-200 group-hover:w-full transition-all duration-300"></span>
                                 </Link>
                             </li>
+                            <li>
+                                <Link
+                                    to="/management"
+                                    className="text-white font-medium hover:text-yellow-100 transition-all duration-300 hover:scale-110 relative group"
+                                >
+                                    📊 Management
+                                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-200 group-hover:w-full transition-all duration-300"></span>
+                                </Link>
+                            </li>
                         </ul>
                     </nav>
                 </div>
