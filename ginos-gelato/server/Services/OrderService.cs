@@ -10,10 +10,12 @@ namespace GinosGelato.Services
     public class OrderService
     {
         private readonly ApplicationDbContext _context;
+        private readonly OrderQueueService _queueService;
 
-        public OrderService(ApplicationDbContext context)
+        public OrderService(ApplicationDbContext context, OrderQueueService queueService)
         {
             _context = context;
+            _queueService = queueService;
         }
 
         public async Task<Order> CreateOrderAsync(List<IceCream> iceCreams)
@@ -27,6 +29,8 @@ namespace GinosGelato.Services
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
+
+            _queueService.EnqueueOrder(order.Id);
 
             return order;
         }
