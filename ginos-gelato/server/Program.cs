@@ -16,6 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseInMemoryDatabase("GinosGelatoDb")); // Using in-memory database for simplicity
 
 // Add custom services
+builder.Services.AddSingleton<OrderQueueService>();
 builder.Services.AddScoped<OrderService>();
 
 // Add Swagger/OpenAPI
