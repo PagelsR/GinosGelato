@@ -20,8 +20,15 @@ namespace GinosGelato.Controllers
         [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder(Order order)
         {
-            var createdOrder = await _orderService.CreateOrderAsync(order.IceCreams);
-            return CreatedAtAction(nameof(GetOrder), new { id = createdOrder.Id }, createdOrder);
+            try
+            {
+                var createdOrder = await _orderService.CreateOrderAsync(order.IceCreams);
+                return CreatedAtAction(nameof(GetOrder), new { id = createdOrder.Id }, createdOrder);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An error occurred while processing your order.");
+            }
         }
 
         [HttpGet("{id}")]

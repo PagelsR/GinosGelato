@@ -20,3 +20,8 @@ export const validateOrder = (order: IceCream): string | null => {
     }
     return null;
 };
+
+// Create a function that applies a 10% discount to a given price and returns the discounted price.
+export const applyDiscount = (price: number): number => {
+    return price * 0.9;
+};
