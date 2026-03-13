@@ -20,7 +20,7 @@ namespace GinosGelato.Controllers
         [HttpPost]
         public async Task<ActionResult<Order>> CreateOrder(Order order)
         {
-            var createdOrder = await _orderService.CreateOrderAsync(order.IceCreams);
+            var createdOrder = await _orderService.CreateOrderAsync(order.IceCreams, order.CustomerName, order.OrderType);
             return CreatedAtAction(nameof(GetOrder), new { id = createdOrder.Id }, createdOrder);
         }
 
@@ -41,5 +41,18 @@ namespace GinosGelato.Controllers
             var orders = await _orderService.GetOrdersAsync();
             return Ok(orders);
         }
+
+        [HttpPatch("{id}/status")]
+        public async Task<ActionResult<Order>> UpdateOrderStatus(int id, [FromBody] UpdateOrderStatusRequest request)
+        {
+            var order = await _orderService.UpdateOrderStatusAsync(id, request.Status);
+            if (order == null)
+            {
+                return NotFound();
+            }
+            return Ok(order);
+        }
     }
+
+    public record UpdateOrderStatusRequest(OrderStatus Status);
 }
