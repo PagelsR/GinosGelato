@@ -44,6 +44,33 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
     await page.waitForTimeout(1500); // Increased wait for page transitions
   }
 
+  // Helper function to find available matches in March or April
+  async function findMatchesInMarchApril(page: any): Promise<string[]> {
+    const matchIds: string[] = [];
+    
+    // Look for all enable checkboxes on the page
+    const enableCheckboxes = page.locator('input[type="checkbox"][id^="enable-"]');
+    const count = await enableCheckboxes.count();
+    
+    for (let i = 0; i < count; i++) {
+      const checkbox = enableCheckboxes.nth(i);
+      const id = await checkbox.getAttribute('id');
+      if (id) {
+        const matchId = id.replace('enable-', '');
+        matchIds.push(matchId);
+      }
+    }
+    
+    console.log(`Found ${matchIds.length} total matches`);
+    return matchIds;
+  }
+
+  // Helper function to randomly select 4 unique match IDs
+  function selectRandomMatches(matchIds: string[], count: number = 4): string[] {
+    const shuffled = [...matchIds].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, Math.min(count, matchIds.length));
+  }
+
   // Helper function to make a prediction
   async function makePrediction(
     page: any, 
@@ -55,34 +82,59 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
   ) {
     console.log(`Making prediction for match ${matchId}: Team1: ${team1Score}, Team2: ${team2Score}, Winner: ${selectFirstTeam ? 'Team1' : 'Team2'}`);
     
-    // Unlock match
-    await page.locator(`#enable-${matchId}`).click();
-    await page.waitForTimeout(500); // Wait for unlock animation
-    await expect(page.locator(`#enable-${matchId}`)).toBeChecked();
+    // Check if match is locked and unlock if needed
+    const enableCheckbox = page.locator(`#enable-${matchId}`);
+    const isChecked = await enableCheckbox.isChecked();
     
-    // Wait for inputs to be enabled
+    if (!isChecked) {
+      console.log(`🔓 Unlocking match ${matchId}...`);
+      await enableCheckbox.click();
+      await page.waitForTimeout(500);
+    }
+    
+    await expect(enableCheckbox).toBeChecked();
     await page.waitForTimeout(500);
     
-    // Select winner
-    const checkboxIndex = matchIndex * 3 + 1 + (selectFirstTeam ? 0 : 1);
-    await page.getByRole('checkbox').nth(checkboxIndex).click();
+    // Find the winner checkboxes for this specific match
+    // They should be in the same container as the enable checkbox
+    const matchContainer = page.locator(`#enable-${matchId}`).locator('xpath=ancestor::div[contains(@class, "rounded-lg")]');
+    const winnerCheckboxes = matchContainer.locator('input[type="checkbox"]:not([id^="enable-"])');
+    
+    // Clear any existing winner selection
+    const checkbox1 = winnerCheckboxes.nth(0);
+    const checkbox2 = winnerCheckboxes.nth(1);
+    
+    const isChecked1 = await checkbox1.isChecked();
+    const isChecked2 = await checkbox2.isChecked();
+    
+    if (isChecked1) await checkbox1.click();
+    if (isChecked2) await checkbox2.click();
     await page.waitForTimeout(300);
     
-    // Enter scores
-    const scoreIndex = matchIndex * 2;
-    await page.getByRole('textbox', { name: '-' }).nth(scoreIndex).fill(team1Score);
+    // Select the winner
+    if (selectFirstTeam) {
+      await checkbox1.click();
+    } else {
+      await checkbox2.click();
+    }
+    await page.waitForTimeout(300);
+    
+    // Find and fill score inputs for this match
+    const scoreInputs = matchContainer.getByRole('textbox', { name: '-' });
+    await scoreInputs.nth(0).fill(team1Score);
     await page.waitForTimeout(200);
-    await page.getByRole('textbox', { name: '-' }).nth(scoreIndex + 1).fill(team2Score);
+    await scoreInputs.nth(1).fill(team2Score);
     await page.waitForTimeout(300);
     
-    // Save
-    await page.getByRole('button', { name: 'Save' }).nth(matchIndex).click();
+    // Find and click the Save button for this match
+    const saveButton = matchContainer.getByRole('button', { name: 'Save' });
+    await saveButton.click();
     
     // Wait for save - success message appears and disappears quickly
     await page.waitForTimeout(2000);
     
     // Verify match is locked again (indicates successful save)
-    await expect(page.locator(`#enable-${matchId}`)).not.toBeChecked({ timeout: 3000 });
+    await expect(enableCheckbox).not.toBeChecked({ timeout: 3000 });
     
     console.log(`✅ Prediction saved for match ${matchId}`);
   }
@@ -97,54 +149,40 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
   ) {
     console.log(`Setting actual result for match ${matchId}: Team1: ${team1Score}, Team2: ${team2Score}`);
     
-    // Wait for page to fully load with longer timeout for Admin
+    // Wait for page to fully load
     await page.waitForTimeout(2000);
     
-    // Debug: Take screenshot to see what's on the admin page
-    await page.screenshot({ path: `e2e/screenshots/admin-before-unlock-${matchId}.png` });
-    
-    // Try to find the match enable checkbox - be more flexible
+    // Find the enable checkbox for this match
     const enableCheckbox = page.locator(`#enable-${matchId}`).first();
     
-    // Check if the checkbox exists
+    // Check if exists
     const exists = await enableCheckbox.count();
     if (exists === 0) {
-      console.log(`⚠️  Match ${matchId} not found on Admin page, trying alternative selectors...`);
-      
-      // Alternative: Try finding by match index in the list
-      const allCheckboxes = page.locator('input[type="checkbox"][id^="enable-"]');
-      const checkboxCount = await allCheckboxes.count();
-      console.log(`Found ${checkboxCount} enable checkboxes on Admin page`);
-      
-      if (matchIndex < checkboxCount) {
-        console.log(`Using checkbox at index ${matchIndex}`);
-        await allCheckboxes.nth(matchIndex).click();
-        await page.waitForTimeout(500);
-      } else {
-        throw new Error(`Could not find match ${matchId} on Admin page (index ${matchIndex} out of ${checkboxCount})`);
-      }
-    } else {
-      await enableCheckbox.waitFor({ state: 'visible', timeout: 10000 });
+      throw new Error(`Could not find match ${matchId} on Admin page`);
+    }
+    
+    // Unlock if locked
+    const isChecked = await enableCheckbox.isChecked();
+    if (!isChecked) {
+      console.log(`🔓 Unlocking match ${matchId} in Admin...`);
       await enableCheckbox.click();
       await page.waitForTimeout(500);
     }
     
-    // Wait for inputs to be enabled
     await page.waitForTimeout(500);
     
-    // Enter actual scores using a more flexible selector
-    const allScoreInputs = page.getByRole('textbox', { name: '-' });
-    const inputCount = await allScoreInputs.count();
-    console.log(`Found ${inputCount} score inputs on Admin page`);
+    // Find score inputs within this match's container
+    const matchContainer = enableCheckbox.locator('xpath=ancestor::div[contains(@class, "rounded-lg")]');
+    const scoreInputs = matchContainer.getByRole('textbox', { name: '-' });
     
-    const scoreIndex = matchIndex * 2;
-    await allScoreInputs.nth(scoreIndex).fill(team1Score);
+    await scoreInputs.nth(0).fill(team1Score);
     await page.waitForTimeout(200);
-    await allScoreInputs.nth(scoreIndex + 1).fill(team2Score);
+    await scoreInputs.nth(1).fill(team2Score);
     await page.waitForTimeout(300);
     
     // Save
-    await page.getByRole('button', { name: 'Save' }).nth(matchIndex).click();
+    const saveButton = matchContainer.getByRole('button', { name: 'Save' });
+    await saveButton.click();
     
     // Wait for save to complete
     await page.waitForTimeout(2000);
@@ -181,7 +219,7 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
     
     try {
       // =====================================================
-      // SETUP: Login and Record Initial Points
+      // SETUP: Login and Find Random Matches
       // =====================================================
       console.log('🔐 Step 1: Login as Randy Pagels...');
       await login(page);
@@ -192,57 +230,77 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
       console.log(`📊 Initial points: ${initialPoints}`);
 
       // =====================================================
+      // Find 4 random matches from March/April
+      // =====================================================
+      console.log('\n🔍 Step 2: Finding random matches from March/April...');
+      await navigateTo(page, 'Predictions');
+      
+      const availableMatches = await findMatchesInMarchApril(page);
+      console.log(`Found ${availableMatches.length} matches in March/April`);
+      
+      if (availableMatches.length < 4) {
+        throw new Error(`Not enough matches available. Found ${availableMatches.length}, need at least 4`);
+      }
+      
+      const selectedMatches = selectRandomMatches(availableMatches, 4);
+      console.log(`🎲 Randomly selected matches: ${selectedMatches.join(', ')}`);
+      
+      const match1 = selectedMatches[0]; // Correct Winner Only
+      const match2 = selectedMatches[1]; // Exact Score Only
+      const match3 = selectedMatches[2]; // Both Correct
+      const match4 = selectedMatches[3]; // Wrong Prediction
+
+      // =====================================================
       // STEP 1: Make Predictions for 4 Matches
       // =====================================================
-      console.log('\n⚽ Step 2: Making predictions for 4 matches...');
-      await navigateTo(page, 'Predictions');
+      console.log('\n⚽ Step 3: Making predictions for 4 random matches...');
 
       // Scenario 1: Correct Winner Only (3 pts expected)
-      console.log('\n📝 Scenario 1: Correct Winner Only');
-      await makePrediction(page, '108', true, '3', '1', 0);
+      console.log(`\n📝 Scenario 1: Match ${match1} - Correct Winner Only`);
+      await makePrediction(page, match1, true, '3', '1', 0);
 
       // Scenario 2: Exact Score Only (5 pts expected)
-      console.log('\n📝 Scenario 2: Exact Score Only');
-      await makePrediction(page, '109', true, '2', '1', 1);
+      console.log(`\n📝 Scenario 2: Match ${match2} - Exact Score Only`);
+      await makePrediction(page, match2, true, '2', '1', 1);
 
       // Scenario 3: Both Correct (8 pts expected)
-      console.log('\n📝 Scenario 3: Both Correct');
-      await makePrediction(page, '110', true, '4', '2', 2);
+      console.log(`\n📝 Scenario 3: Match ${match3} - Both Correct`);
+      await makePrediction(page, match3, true, '4', '2', 2);
 
       // Scenario 4: Wrong Prediction (0 pts expected)
-      console.log('\n📝 Scenario 4: Wrong Prediction');
-      await makePrediction(page, '111', true, '3', '0', 3);
+      console.log(`\n📝 Scenario 4: Match ${match4} - Wrong Prediction`);
+      await makePrediction(page, match4, true, '3', '0', 3);
 
       console.log('\n✅ All 4 predictions made successfully');
 
       // =====================================================
       // STEP 2: Set Actual Results in Admin Dashboard
       // =====================================================
-      console.log('\n🔧 Step 3: Navigating to Admin Dashboard...');
+      console.log('\n🔧 Step 4: Navigating to Admin Dashboard...');
       await navigateTo(page, 'Admin');
 
       // Scenario 1: Team1 wins with different score (3 pts)
-      console.log('\n📝 Setting actual for Scenario 1');
-      await setActualResult(page, '108', '2', '0', 0);
+      console.log(`\n📝 Setting actual for Scenario 1 (Match ${match1})`);
+      await setActualResult(page, match1, '2', '0', 0);
 
       // Scenario 2: Score is correct but winner is opposite (5 pts)
-      console.log('\n📝 Setting actual for Scenario 2');
-      await setActualResult(page, '109', '1', '2', 1);
+      console.log(`\n📝 Setting actual for Scenario 2 (Match ${match2})`);
+      await setActualResult(page, match2, '1', '2', 1);
 
       // Scenario 3: Perfect match (8 pts)
-      console.log('\n📝 Setting actual for Scenario 3');
-      await setActualResult(page, '110', '4', '2', 2);
+      console.log(`\n📝 Setting actual for Scenario 3 (Match ${match3})`);
+      await setActualResult(page, match3, '4', '2', 2);
 
       // Scenario 4: Completely wrong (0 pts)
-      console.log('\n📝 Setting actual for Scenario 4');
-      await setActualResult(page, '111', '1', '2', 3);
+      console.log(`\n📝 Setting actual for Scenario 4 (Match ${match4})`);
+      await setActualResult(page, match4, '1', '2', 3);
 
       console.log('\n✅ All 4 actual results set in Admin');
 
     // =====================================================
     // STEP 3: Recalculate All Points
     // =====================================================
-    console.log('\n🔄 Step 4: Recalculating all points...');
+    console.log('\n🔄 Step 5: Recalculating all points...');
     const recalcButton = page.getByRole('button', { name: 'Recalculate All Points' });
     await recalcButton.waitFor({ state: 'visible', timeout: 10000 });
     await recalcButton.click();
@@ -252,7 +310,7 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
     // =====================================================
     // STEP 4: Verify Points on Leaderboard
     // =====================================================
-    console.log('\n📊 Step 5: Verifying points on Leaderboard...');
+    console.log('\n📊 Step 6: Verifying points on Leaderboard...');
     await navigateTo(page, 'Leaderboard');
     await page.waitForTimeout(2000); // Extra wait for leaderboard to refresh
 
@@ -266,7 +324,7 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
     // =====================================================
     // STEP 5: Validate Results
     // =====================================================
-    console.log('\n✅ Step 6: Validating scoring results...');
+    console.log('\n✅ Step 7: Validating scoring results...');
     
     const expectedPoints = 3 + 5 + 8 + 0; // = 16 points
     
@@ -279,6 +337,7 @@ test.describe('FIFA World Cup 2026 - Scoring Calculation Validation', () => {
 ║ Scenario 3 (Both Correct):      Expected: 8 pts          ║
 ║ Scenario 4 (Wrong Prediction):  Expected: 0 pts          ║
 ╠═══════════════════════════════════════════════════════════╣
+║ Matches Tested: ${selectedMatches.join(', ').padEnd(36)} ║
 ║ TOTAL EXPECTED:                  ${expectedPoints} pts                   ║
 ║ TOTAL EARNED:                    ${earnedPoints} pts                   ║
 ║ STATUS:                          ${earnedPoints === expectedPoints ? '✅ PASS' : '❌ FAIL'}                 ║

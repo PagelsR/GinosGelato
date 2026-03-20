@@ -11,7 +11,7 @@
     "grepInvert": null,
     "maxFailures": 0,
     "metadata": {
-      "actualWorkers": 1
+      "actualWorkers": 6
     },
     "preserveOutput": "always",
     "projects": [
@@ -20,7 +20,7 @@
         "repeatEach": 1,
         "retries": 0,
         "metadata": {
-          "actualWorkers": 1
+          "actualWorkers": 6
         },
         "id": "chromium",
         "name": "chromium",
@@ -59,7 +59,7 @@
     "updateSnapshots": "missing",
     "updateSourceMethod": "patch",
     "version": "1.58.2",
-    "workers": 1,
+    "workers": 6,
     "webServer": null
   },
   "suites": [
@@ -82,7 +82,7 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
@@ -92,53 +92,48 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "failed",
-                      "duration": 14359,
+                      "duration": 20828,
                       "error": {
-                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('text=✓ Saved!').nth(1)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=✓ Saved!').nth(1)\u001b[22m\n",
-                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('text=✓ Saved!').nth(1)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=✓ Saved!').nth(1)\u001b[22m\n\n    at makePrediction (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:67:65)\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:138:5",
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:225:7",
                         "location": {
                           "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
-                          "column": 65,
-                          "line": 67
+                          "column": 70,
+                          "line": 36
                         },
-                        "snippet": "\u001b[0m \u001b[90m 65 |\u001b[39m     \u001b[90m// Save\u001b[39m\n \u001b[90m 66 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Save'\u001b[39m })\u001b[33m.\u001b[39mnth(matchIndex)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 67 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=✓ Saved!'\u001b[39m)\u001b[33m.\u001b[39mnth(matchIndex))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 68 |\u001b[39m     \n \u001b[90m 69 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m`✅ Prediction saved for match ${matchId}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 70 |\u001b[39m   }\u001b[0m"
+                        "snippet": "\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m"
                       },
                       "errors": [
                         {
                           "location": {
                             "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
-                            "column": 65,
-                            "line": 67
+                            "column": 70,
+                            "line": 36
                           },
-                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: locator('text=✓ Saved!').nth(1)\nExpected: visible\nTimeout: 5000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('text=✓ Saved!').nth(1)\u001b[22m\n\n\n\u001b[0m \u001b[90m 65 |\u001b[39m     \u001b[90m// Save\u001b[39m\n \u001b[90m 66 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Save'\u001b[39m })\u001b[33m.\u001b[39mnth(matchIndex)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 67 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m'text=✓ Saved!'\u001b[39m)\u001b[33m.\u001b[39mnth(matchIndex))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m5000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                 \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 68 |\u001b[39m     \n \u001b[90m 69 |\u001b[39m     console\u001b[33m.\u001b[39mlog(\u001b[32m`✅ Prediction saved for match ${matchId}`\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 70 |\u001b[39m   }\u001b[0m\n\u001b[2m    at makePrediction (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:67:65)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:138:5\u001b[22m"
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m\n\u001b[2m    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:225:7\u001b[22m"
                         }
                       ],
                       "stdout": [
                         {
+                          "text": "\n======================================================================\n"
+                        },
+                        {
+                          "text": "🚀 STARTING COMPREHENSIVE SCORING VALIDATION TEST\n"
+                        },
+                        {
+                          "text": "======================================================================\n\n"
+                        },
+                        {
                           "text": "🔐 Step 1: Login as Randy Pagels...\n"
-                        },
-                        {
-                          "text": "📊 Randy Pagels has 0 points\n"
-                        },
-                        {
-                          "text": "📊 Initial points: 0\n"
-                        },
-                        {
-                          "text": "\n⚽ Step 2: Making predictions for 4 matches...\n"
-                        },
-                        {
-                          "text": "Making prediction for match 108: Team1: 3, Team2: 1, Winner: Team1\n"
-                        },
-                        {
-                          "text": "✅ Prediction saved for match 108\n"
-                        },
-                        {
-                          "text": "Making prediction for match 109: Team1: 2, Team2: 1, Winner: Team1\n"
                         }
                       ],
-                      "stderr": [],
+                      "stderr": [
+                        {
+                          "text": "\n❌ COMPREHENSIVE TEST FAILED: ExpectError: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login \u001b[90m(C:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:36:70\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:225:7 {\n  matcherResult: {\n    message: \u001b[32m'\\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n      \u001b[32m'Expected: visible\\n'\u001b[39m +\n      \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n      \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m'Call log:\\n'\u001b[39m +\n      \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n      \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n    pass: \u001b[33mfalse\u001b[39m,\n    actual: \u001b[90mundefined\u001b[39m,\n    name: \u001b[32m'toBeVisible'\u001b[39m,\n    expected: \u001b[32m'visible'\u001b[39m,\n    log: [\n      \u001b[32m'  - Expect \"toBeVisible\" with timeout 10000ms'\u001b[39m,\n      \u001b[32m\"  - waiting for getByRole('button', { name: 'Randy Pagels' })\"\u001b[39m\n    ],\n    timeout: \u001b[33m10000\u001b[39m\n  },\n  [\u001b[32mSymbol(step)\u001b[39m]: {\n    category: \u001b[32m'expect'\u001b[39m,\n    apiName: \u001b[32m'expect.toBeVisible'\u001b[39m,\n    title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n    shortTitle: \u001b[32m'Expect \"toBeVisible\"'\u001b[39m,\n    params: { expected: \u001b[36m[Object]\u001b[39m },\n    infectParentStepsWithError: \u001b[90mundefined\u001b[39m,\n    stepId: \u001b[32m'expect@40'\u001b[39m,\n    group: \u001b[90mundefined\u001b[39m,\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts'\u001b[39m,\n      line: \u001b[33m36\u001b[39m,\n      column: \u001b[33m70\u001b[39m,\n      function: \u001b[32m'login'\u001b[39m\n    },\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'expect@40'\u001b[39m,\n      _title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n      _parentStep: \u001b[90mundefined\u001b[39m,\n      skip: \u001b[36m[Function (anonymous)]\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1774016681644\u001b[39m,\n    error: {\n      message: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n      stack: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at login (C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:36:70)\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:225:7'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
                       "retry": 0,
-                      "startTime": "2026-03-19T19:14:23.769Z",
+                      "startTime": "2026-03-20T14:24:19.152Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -149,8 +144,8 @@
                       ],
                       "errorLocation": {
                         "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
-                        "column": 65,
-                        "line": 67
+                        "column": 70,
+                        "line": 36
                       }
                     }
                   ],
@@ -159,7 +154,7 @@
               ],
               "id": "490c3afca397865f336b-db3ef3891d633a1a82e5",
               "file": "scoring-validation.spec.ts",
-              "line": 112,
+              "line": 215,
               "column": 7
             },
             {
@@ -168,7 +163,7 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
@@ -176,46 +171,41 @@
                   "results": [
                     {
                       "workerIndex": 1,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30330,
+                      "parallelIndex": 1,
+                      "status": "failed",
+                      "duration": 20886,
                       "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:361:7",
+                        "location": {
+                          "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                          "column": 70,
+                          "line": 36
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m"
                       },
                       "errors": [
                         {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
                           "location": {
                             "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
-                            "column": 46,
-                            "line": 83
+                            "column": 70,
+                            "line": 36
                           },
-                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('#enable-108')\u001b[22m\n\n\n\u001b[0m \u001b[90m 81 |\u001b[39m     \n \u001b[90m 82 |\u001b[39m     \u001b[90m// Find and unlock the match in admin\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 83 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mlocator(\u001b[32m`#enable-${matchId}`\u001b[39m)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                              \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 84 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mlocator(\u001b[32m`#enable-${matchId}`\u001b[39m))\u001b[33m.\u001b[39mtoBeChecked()\u001b[33m;\u001b[39m\n \u001b[90m 85 |\u001b[39m     \n \u001b[90m 86 |\u001b[39m     \u001b[90m// Enter actual scores\u001b[39m\u001b[0m\n\u001b[2m    at setActualResult (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:83:46)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:234:11\u001b[22m"
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m\n\u001b[2m    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:361:7\u001b[22m"
                         }
                       ],
                       "stdout": [
                         {
                           "text": "🎯 Testing: Correct Winner Only (3 points expected)\n"
-                        },
-                        {
-                          "text": "📊 Randy Pagels has 0 points\n"
-                        },
-                        {
-                          "text": "Making prediction for match 108: Team1: 3, Team2: 1, Winner: Team1\n"
-                        },
-                        {
-                          "text": "✅ Prediction saved for match 108\n"
-                        },
-                        {
-                          "text": "Setting actual result for match 108: Team1: 2, Team2: 0\n"
                         }
                       ],
-                      "stderr": [],
+                      "stderr": [
+                        {
+                          "text": "❌ Scenario 1 failed: ExpectError: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login \u001b[90m(C:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:36:70\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:361:7 {\n  matcherResult: {\n    message: \u001b[32m'\\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n      \u001b[32m'Expected: visible\\n'\u001b[39m +\n      \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n      \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m'Call log:\\n'\u001b[39m +\n      \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n      \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n    pass: \u001b[33mfalse\u001b[39m,\n    actual: \u001b[90mundefined\u001b[39m,\n    name: \u001b[32m'toBeVisible'\u001b[39m,\n    expected: \u001b[32m'visible'\u001b[39m,\n    log: [\n      \u001b[32m'  - Expect \"toBeVisible\" with timeout 10000ms'\u001b[39m,\n      \u001b[32m\"  - waiting for getByRole('button', { name: 'Randy Pagels' })\"\u001b[39m\n    ],\n    timeout: \u001b[33m10000\u001b[39m\n  },\n  [\u001b[32mSymbol(step)\u001b[39m]: {\n    category: \u001b[32m'expect'\u001b[39m,\n    apiName: \u001b[32m'expect.toBeVisible'\u001b[39m,\n    title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n    shortTitle: \u001b[32m'Expect \"toBeVisible\"'\u001b[39m,\n    params: { expected: \u001b[36m[Object]\u001b[39m },\n    infectParentStepsWithError: \u001b[90mundefined\u001b[39m,\n    stepId: \u001b[32m'expect@40'\u001b[39m,\n    group: \u001b[90mundefined\u001b[39m,\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts'\u001b[39m,\n      line: \u001b[33m36\u001b[39m,\n      column: \u001b[33m70\u001b[39m,\n      function: \u001b[32m'login'\u001b[39m\n    },\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'expect@40'\u001b[39m,\n      _title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n      _parentStep: \u001b[90mundefined\u001b[39m,\n      skip: \u001b[36m[Function (anonymous)]\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1774016681771\u001b[39m,\n    error: {\n      message: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n      stack: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at login (C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:36:70)\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:361:7'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
                       "retry": 0,
-                      "startTime": "2026-03-19T19:14:42.462Z",
+                      "startTime": "2026-03-20T14:24:19.113Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -223,7 +213,12 @@
                           "contentType": "text/markdown",
                           "path": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\test-results\\scoring-validation-FIFA-Wo-afe10-rect-winner-only---3-points-chromium\\error-context.md"
                         }
-                      ]
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                        "column": 70,
+                        "line": 36
+                      }
                     }
                   ],
                   "status": "unexpected"
@@ -231,7 +226,7 @@
               ],
               "id": "490c3afca397865f336b-994193d76d0cf12438e8",
               "file": "scoring-validation.spec.ts",
-              "line": 221,
+              "line": 357,
               "column": 7
             },
             {
@@ -240,7 +235,7 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
@@ -248,40 +243,41 @@
                   "results": [
                     {
                       "workerIndex": 2,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30507,
+                      "parallelIndex": 2,
+                      "status": "failed",
+                      "duration": 20746,
                       "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:397:7",
+                        "location": {
+                          "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                          "column": 70,
+                          "line": 36
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m"
                       },
                       "errors": [
                         {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
                           "location": {
                             "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
-                            "column": 57,
-                            "line": 58
+                            "column": 70,
+                            "line": 36
                           },
-                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('checkbox').nth(1)\u001b[22m\n\u001b[2m    - locator resolved to <input disabled type=\"checkbox\" class=\"w-4 h-4 accent-lime-500 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    43 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\n\n\u001b[0m \u001b[90m 56 |\u001b[39m     \u001b[90m// Select winner\u001b[39m\n \u001b[90m 57 |\u001b[39m     \u001b[36mconst\u001b[39m checkboxIndex \u001b[33m=\u001b[39m matchIndex \u001b[33m*\u001b[39m \u001b[35m3\u001b[39m \u001b[33m+\u001b[39m \u001b[35m1\u001b[39m \u001b[33m+\u001b[39m (selectFirstTeam \u001b[33m?\u001b[39m \u001b[35m0\u001b[39m \u001b[33m:\u001b[39m \u001b[35m1\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 58 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'checkbox'\u001b[39m)\u001b[33m.\u001b[39mnth(checkboxIndex)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 59 |\u001b[39m     \n \u001b[90m 60 |\u001b[39m     \u001b[90m// Enter scores\u001b[39m\n \u001b[90m 61 |\u001b[39m     \u001b[36mconst\u001b[39m scoreIndex \u001b[33m=\u001b[39m matchIndex \u001b[33m*\u001b[39m \u001b[35m2\u001b[39m\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at makePrediction (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:58:57)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:257:5\u001b[22m"
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m\n\u001b[2m    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:397:7\u001b[22m"
                         }
                       ],
                       "stdout": [
                         {
                           "text": "🎯 Testing: Exact Score Only (5 points expected)\n"
-                        },
-                        {
-                          "text": "📊 Randy Pagels has 0 points\n"
-                        },
-                        {
-                          "text": "Making prediction for match 109: Team1: 2, Team2: 1, Winner: Team1\n"
                         }
                       ],
-                      "stderr": [],
+                      "stderr": [
+                        {
+                          "text": "❌ Scenario 2 failed: ExpectError: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login \u001b[90m(C:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:36:70\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:397:7 {\n  matcherResult: {\n    message: \u001b[32m'\\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n      \u001b[32m'Expected: visible\\n'\u001b[39m +\n      \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n      \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m'Call log:\\n'\u001b[39m +\n      \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n      \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n    pass: \u001b[33mfalse\u001b[39m,\n    actual: \u001b[90mundefined\u001b[39m,\n    name: \u001b[32m'toBeVisible'\u001b[39m,\n    expected: \u001b[32m'visible'\u001b[39m,\n    log: [\n      \u001b[32m'  - Expect \"toBeVisible\" with timeout 10000ms'\u001b[39m,\n      \u001b[32m\"  - waiting for getByRole('button', { name: 'Randy Pagels' })\"\u001b[39m\n    ],\n    timeout: \u001b[33m10000\u001b[39m\n  },\n  [\u001b[32mSymbol(step)\u001b[39m]: {\n    category: \u001b[32m'expect'\u001b[39m,\n    apiName: \u001b[32m'expect.toBeVisible'\u001b[39m,\n    title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n    shortTitle: \u001b[32m'Expect \"toBeVisible\"'\u001b[39m,\n    params: { expected: \u001b[36m[Object]\u001b[39m },\n    infectParentStepsWithError: \u001b[90mundefined\u001b[39m,\n    stepId: \u001b[32m'expect@40'\u001b[39m,\n    group: \u001b[90mundefined\u001b[39m,\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts'\u001b[39m,\n      line: \u001b[33m36\u001b[39m,\n      column: \u001b[33m70\u001b[39m,\n      function: \u001b[32m'login'\u001b[39m\n    },\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'expect@40'\u001b[39m,\n      _title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n      _parentStep: \u001b[90mundefined\u001b[39m,\n      skip: \u001b[36m[Function (anonymous)]\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1774016681596\u001b[39m,\n    error: {\n      message: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n      stack: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at login (C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:36:70)\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:397:7'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
                       "retry": 0,
-                      "startTime": "2026-03-19T19:15:16.959Z",
+                      "startTime": "2026-03-20T14:24:19.183Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -289,7 +285,12 @@
                           "contentType": "text/markdown",
                           "path": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\test-results\\scoring-validation-FIFA-Wo-5fd85-exact-score-only---5-points-chromium\\error-context.md"
                         }
-                      ]
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                        "column": 70,
+                        "line": 36
+                      }
                     }
                   ],
                   "status": "unexpected"
@@ -297,7 +298,7 @@
               ],
               "id": "490c3afca397865f336b-8bc5ac1a9aed179b8fce",
               "file": "scoring-validation.spec.ts",
-              "line": 248,
+              "line": 393,
               "column": 7
             },
             {
@@ -306,7 +307,7 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
@@ -314,40 +315,41 @@
                   "results": [
                     {
                       "workerIndex": 3,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30989,
+                      "parallelIndex": 3,
+                      "status": "failed",
+                      "duration": 20450,
                       "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:433:7",
+                        "location": {
+                          "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                          "column": 70,
+                          "line": 36
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m"
                       },
                       "errors": [
                         {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
                           "location": {
                             "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
-                            "column": 57,
-                            "line": 58
+                            "column": 70,
+                            "line": 36
                           },
-                          "message": "Error: locator.click: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('checkbox').nth(1)\u001b[22m\n\u001b[2m    - locator resolved to <input disabled type=\"checkbox\" class=\"w-4 h-4 accent-lime-500 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed flex-shrink-0\"/>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    44 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not enabled\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n\n\n\u001b[0m \u001b[90m 56 |\u001b[39m     \u001b[90m// Select winner\u001b[39m\n \u001b[90m 57 |\u001b[39m     \u001b[36mconst\u001b[39m checkboxIndex \u001b[33m=\u001b[39m matchIndex \u001b[33m*\u001b[39m \u001b[35m3\u001b[39m \u001b[33m+\u001b[39m \u001b[35m1\u001b[39m \u001b[33m+\u001b[39m (selectFirstTeam \u001b[33m?\u001b[39m \u001b[35m0\u001b[39m \u001b[33m:\u001b[39m \u001b[35m1\u001b[39m)\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 58 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'checkbox'\u001b[39m)\u001b[33m.\u001b[39mnth(checkboxIndex)\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                         \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 59 |\u001b[39m     \n \u001b[90m 60 |\u001b[39m     \u001b[90m// Enter scores\u001b[39m\n \u001b[90m 61 |\u001b[39m     \u001b[36mconst\u001b[39m scoreIndex \u001b[33m=\u001b[39m matchIndex \u001b[33m*\u001b[39m \u001b[35m2\u001b[39m\u001b[33m;\u001b[39m\u001b[0m\n\u001b[2m    at makePrediction (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:58:57)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:284:5\u001b[22m"
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m\n\u001b[2m    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:433:7\u001b[22m"
                         }
                       ],
                       "stdout": [
                         {
                           "text": "🎯 Testing: Both Correct (8 points expected)\n"
-                        },
-                        {
-                          "text": "📊 Randy Pagels has 0 points\n"
-                        },
-                        {
-                          "text": "Making prediction for match 110: Team1: 4, Team2: 2, Winner: Team1\n"
                         }
                       ],
-                      "stderr": [],
+                      "stderr": [
+                        {
+                          "text": "❌ Scenario 3 failed: ExpectError: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login \u001b[90m(C:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:36:70\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:433:7 {\n  matcherResult: {\n    message: \u001b[32m'\\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n      \u001b[32m'Expected: visible\\n'\u001b[39m +\n      \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n      \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m'Call log:\\n'\u001b[39m +\n      \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n      \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n    pass: \u001b[33mfalse\u001b[39m,\n    actual: \u001b[90mundefined\u001b[39m,\n    name: \u001b[32m'toBeVisible'\u001b[39m,\n    expected: \u001b[32m'visible'\u001b[39m,\n    log: [\n      \u001b[32m'  - Expect \"toBeVisible\" with timeout 10000ms'\u001b[39m,\n      \u001b[32m\"  - waiting for getByRole('button', { name: 'Randy Pagels' })\"\u001b[39m\n    ],\n    timeout: \u001b[33m10000\u001b[39m\n  },\n  [\u001b[32mSymbol(step)\u001b[39m]: {\n    category: \u001b[32m'expect'\u001b[39m,\n    apiName: \u001b[32m'expect.toBeVisible'\u001b[39m,\n    title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n    shortTitle: \u001b[32m'Expect \"toBeVisible\"'\u001b[39m,\n    params: { expected: \u001b[36m[Object]\u001b[39m },\n    infectParentStepsWithError: \u001b[90mundefined\u001b[39m,\n    stepId: \u001b[32m'expect@40'\u001b[39m,\n    group: \u001b[90mundefined\u001b[39m,\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts'\u001b[39m,\n      line: \u001b[33m36\u001b[39m,\n      column: \u001b[33m70\u001b[39m,\n      function: \u001b[32m'login'\u001b[39m\n    },\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'expect@40'\u001b[39m,\n      _title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n      _parentStep: \u001b[90mundefined\u001b[39m,\n      skip: \u001b[36m[Function (anonymous)]\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1774016681611\u001b[39m,\n    error: {\n      message: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n      stack: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at login (C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:36:70)\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:433:7'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
                       "retry": 0,
-                      "startTime": "2026-03-19T19:15:51.730Z",
+                      "startTime": "2026-03-20T14:24:19.124Z",
                       "annotations": [],
                       "attachments": [
                         {
@@ -355,7 +357,12 @@
                           "contentType": "text/markdown",
                           "path": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\test-results\\scoring-validation-FIFA-Wo-ed4fe-o-3-both-correct---8-points-chromium\\error-context.md"
                         }
-                      ]
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                        "column": 70,
+                        "line": 36
+                      }
                     }
                   ],
                   "status": "unexpected"
@@ -363,47 +370,151 @@
               ],
               "id": "490c3afca397865f336b-ef335e66a07e160387cf",
               "file": "scoring-validation.spec.ts",
-              "line": 275,
+              "line": 429,
               "column": 7
             },
             {
               "title": "scenario 4: wrong prediction - 0 points",
-              "ok": true,
+              "ok": false,
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
-                  "results": [],
-                  "status": "skipped"
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "parallelIndex": 4,
+                      "status": "failed",
+                      "duration": 21072,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:469:7",
+                        "location": {
+                          "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                          "column": 70,
+                          "line": 36
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                            "column": 70,
+                            "line": 36
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m\n\u001b[2m    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:469:7\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🎯 Testing: Wrong Prediction (0 points expected)\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "❌ Scenario 4 failed: ExpectError: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login \u001b[90m(C:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:36:70\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:469:7 {\n  matcherResult: {\n    message: \u001b[32m'\\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n      \u001b[32m'Expected: visible\\n'\u001b[39m +\n      \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n      \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m'Call log:\\n'\u001b[39m +\n      \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n      \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n    pass: \u001b[33mfalse\u001b[39m,\n    actual: \u001b[90mundefined\u001b[39m,\n    name: \u001b[32m'toBeVisible'\u001b[39m,\n    expected: \u001b[32m'visible'\u001b[39m,\n    log: [\n      \u001b[32m'  - Expect \"toBeVisible\" with timeout 10000ms'\u001b[39m,\n      \u001b[32m\"  - waiting for getByRole('button', { name: 'Randy Pagels' })\"\u001b[39m\n    ],\n    timeout: \u001b[33m10000\u001b[39m\n  },\n  [\u001b[32mSymbol(step)\u001b[39m]: {\n    category: \u001b[32m'expect'\u001b[39m,\n    apiName: \u001b[32m'expect.toBeVisible'\u001b[39m,\n    title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n    shortTitle: \u001b[32m'Expect \"toBeVisible\"'\u001b[39m,\n    params: { expected: \u001b[36m[Object]\u001b[39m },\n    infectParentStepsWithError: \u001b[90mundefined\u001b[39m,\n    stepId: \u001b[32m'expect@40'\u001b[39m,\n    group: \u001b[90mundefined\u001b[39m,\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts'\u001b[39m,\n      line: \u001b[33m36\u001b[39m,\n      column: \u001b[33m70\u001b[39m,\n      function: \u001b[32m'login'\u001b[39m\n    },\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'expect@40'\u001b[39m,\n      _title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n      _parentStep: \u001b[90mundefined\u001b[39m,\n      skip: \u001b[36m[Function (anonymous)]\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1774016681771\u001b[39m,\n    error: {\n      message: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n      stack: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at login (C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:36:70)\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:469:7'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2026-03-20T14:24:19.202Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\test-results\\scoring-validation-FIFA-Wo-38fd2-wrong-prediction---0-points-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                        "column": 70,
+                        "line": 36
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
                 }
               ],
               "id": "490c3afca397865f336b-fe0617b9c784e09530ad",
               "file": "scoring-validation.spec.ts",
-              "line": 302,
+              "line": 465,
               "column": 7
             },
             {
               "title": "edge case: draw predictions",
-              "ok": true,
+              "ok": false,
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
-                  "results": [],
-                  "status": "skipped"
+                  "results": [
+                    {
+                      "workerIndex": 5,
+                      "parallelIndex": 5,
+                      "status": "failed",
+                      "duration": 20802,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:505:7",
+                        "location": {
+                          "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                          "column": 70,
+                          "line": 36
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                            "column": 70,
+                            "line": 36
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n\n\u001b[0m \u001b[90m 34 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'textbox'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Password'\u001b[39m })\u001b[33m.\u001b[39mfill(\u001b[33mLOGIN_PASSWORD\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 35 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Login'\u001b[39m\u001b[33m,\u001b[39m exact\u001b[33m:\u001b[39m \u001b[36mtrue\u001b[39m })\u001b[33m.\u001b[39mclick()\u001b[33m;\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 36 |\u001b[39m     \u001b[36mawait\u001b[39m expect(page\u001b[33m.\u001b[39mgetByRole(\u001b[32m'button'\u001b[39m\u001b[33m,\u001b[39m { name\u001b[33m:\u001b[39m \u001b[32m'Randy Pagels'\u001b[39m }))\u001b[33m.\u001b[39mtoBeVisible({ timeout\u001b[33m:\u001b[39m \u001b[35m10000\u001b[39m })\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                                                      \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 37 |\u001b[39m     \u001b[36mawait\u001b[39m page\u001b[33m.\u001b[39mwaitForTimeout(\u001b[35m1000\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m 38 |\u001b[39m   }\n \u001b[90m 39 |\u001b[39m\u001b[0m\n\u001b[2m    at login (C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:36:70)\u001b[22m\n\u001b[2m    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts:505:7\u001b[22m"
+                        }
+                      ],
+                      "stdout": [
+                        {
+                          "text": "🎯 Testing: Draw Predictions\n"
+                        }
+                      ],
+                      "stderr": [
+                        {
+                          "text": "❌ Draw test failed: ExpectError: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m(\u001b[22m\u001b[2m)\u001b[22m failed\n\nLocator: getByRole('button', { name: 'Randy Pagels' })\nExpected: visible\nTimeout: 10000ms\nError: element(s) not found\n\nCall log:\n\u001b[2m  - Expect \"toBeVisible\" with timeout 10000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\u001b[22m\n\n    at login \u001b[90m(C:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:36:70\u001b[90m)\u001b[39m\n    at \u001b[90mC:\\Users\\RandyPagels\\Repos\\GinosGelato\\\u001b[39me2e\\scoring-validation.spec.ts:505:7 {\n  matcherResult: {\n    message: \u001b[32m'\\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n      \u001b[32m'Expected: visible\\n'\u001b[39m +\n      \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n      \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n      \u001b[32m'\\n'\u001b[39m +\n      \u001b[32m'Call log:\\n'\u001b[39m +\n      \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n      \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n    pass: \u001b[33mfalse\u001b[39m,\n    actual: \u001b[90mundefined\u001b[39m,\n    name: \u001b[32m'toBeVisible'\u001b[39m,\n    expected: \u001b[32m'visible'\u001b[39m,\n    log: [\n      \u001b[32m'  - Expect \"toBeVisible\" with timeout 10000ms'\u001b[39m,\n      \u001b[32m\"  - waiting for getByRole('button', { name: 'Randy Pagels' })\"\u001b[39m\n    ],\n    timeout: \u001b[33m10000\u001b[39m\n  },\n  [\u001b[32mSymbol(step)\u001b[39m]: {\n    category: \u001b[32m'expect'\u001b[39m,\n    apiName: \u001b[32m'expect.toBeVisible'\u001b[39m,\n    title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n    shortTitle: \u001b[32m'Expect \"toBeVisible\"'\u001b[39m,\n    params: { expected: \u001b[36m[Object]\u001b[39m },\n    infectParentStepsWithError: \u001b[90mundefined\u001b[39m,\n    stepId: \u001b[32m'expect@40'\u001b[39m,\n    group: \u001b[90mundefined\u001b[39m,\n    boxedStack: \u001b[90mundefined\u001b[39m,\n    location: {\n      file: \u001b[32m'C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts'\u001b[39m,\n      line: \u001b[33m36\u001b[39m,\n      column: \u001b[33m70\u001b[39m,\n      function: \u001b[32m'login'\u001b[39m\n    },\n    steps: [],\n    attachmentIndices: [],\n    info: TestStepInfoImpl {\n      annotations: [],\n      _testInfo: \u001b[36m[TestInfoImpl]\u001b[39m,\n      _stepId: \u001b[32m'expect@40'\u001b[39m,\n      _title: \u001b[32m`Expect \"toBeVisible\" getByRole('button', { name: 'Randy Pagels' })`\u001b[39m,\n      _parentStep: \u001b[90mundefined\u001b[39m,\n      skip: \u001b[36m[Function (anonymous)]\u001b[39m\n    },\n    complete: \u001b[36m[Function: complete]\u001b[39m,\n    endWallTime: \u001b[33m1774016681673\u001b[39m,\n    error: {\n      message: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m,\n      stack: \u001b[32m'Error: \\x1B[2mexpect(\\x1B[22m\\x1B[31mlocator\\x1B[39m\\x1B[2m).\\x1B[22mtoBeVisible\\x1B[2m(\\x1B[22m\\x1B[2m)\\x1B[22m failed\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m\"Locator: getByRole('button', { name: 'Randy Pagels' })\\n\"\u001b[39m +\n        \u001b[32m'Expected: visible\\n'\u001b[39m +\n        \u001b[32m'Timeout: 10000ms\\n'\u001b[39m +\n        \u001b[32m'Error: element(s) not found\\n'\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'Call log:\\n'\u001b[39m +\n        \u001b[32m'\\x1B[2m  - Expect \"toBeVisible\" with timeout 10000ms\\x1B[22m\\n'\u001b[39m +\n        \u001b[32m\"\\x1B[2m  - waiting for getByRole('button', { name: 'Randy Pagels' })\\x1B[22m\\n\"\u001b[39m +\n        \u001b[32m'\\n'\u001b[39m +\n        \u001b[32m'    at login (C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:36:70)\\n'\u001b[39m +\n        \u001b[32m'    at C:\\\\Users\\\\RandyPagels\\\\Repos\\\\GinosGelato\\\\e2e\\\\scoring-validation.spec.ts:505:7'\u001b[39m,\n      cause: \u001b[90mundefined\u001b[39m\n    }\n  }\n}\n"
+                        }
+                      ],
+                      "retry": 0,
+                      "startTime": "2026-03-20T14:24:19.264Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\test-results\\scoring-validation-FIFA-Wo-c7c28--edge-case-draw-predictions-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\scoring-validation.spec.ts",
+                        "column": 70,
+                        "line": 36
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
                 }
               ],
               "id": "490c3afca397865f336b-2de474c3dc8e47667264",
               "file": "scoring-validation.spec.ts",
-              "line": 329,
+              "line": 501,
               "column": 7
             }
           ]
@@ -413,11 +524,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-03-19T19:14:20.928Z",
-    "duration": 124714.579,
+    "startTime": "2026-03-20T14:24:17.399Z",
+    "duration": 25209.434,
     "expected": 0,
-    "skipped": 2,
-    "unexpected": 4,
+    "skipped": 0,
+    "unexpected": 6,
     "flaky": 0
   }
 }

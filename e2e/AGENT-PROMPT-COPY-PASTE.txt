@@ -1,0 +1,236 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  🎯 FIFA WORLD CUP 2026 - SCORING VALIDATION AGENT PROMPT       ┃
+┃  Copy everything below this box into a new VS Code instance     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+═══════════════════════════════════════════════════════════════════
+📋 COPY FROM HERE ⬇️
+═══════════════════════════════════════════════════════════════════
+
+/playwright explore https://yellow-ocean-020b8190f.1.azurestaticapps.net/
+
+You are testing the FIFA World Cup 2026 predictions scoring system. 
+
+**🔐 LOGIN CREDENTIALS:**
+- Email: Randy.Pagels@Xebia.com
+- Password: f3Jps:t-43ddJcF
+
+**🎯 OBJECTIVE:**
+Validate that the scoring calculation system awards points correctly according to these rules:
+- **3 points** → Correct winner only (right winner, wrong exact score)
+- **5 points** → Exact score only (exact score, wrong winner)
+- **8 points** → Both correct (correct winner AND exact score)
+- **0 points** → Wrong prediction (neither winner nor exact score match)
+
+**📝 TEST METHODOLOGY:**
+You will run 4 complete test scenarios. For each scenario:
+1. Make a prediction on the Predictions page
+2. Set the actual result on the Admin dashboard
+3. Click "Recalculate All Points"
+4. Verify the points awarded on the Leaderboard
+5. Take a screenshot showing the result
+
+**Important:** Use UNUSED matches (not matches 108-111 if they already have predictions). Find fresh matches that don't have predictions yet.
+
+---
+
+## 🧪 SCENARIO 1: Correct Winner Only (3 points expected)
+
+**Test Case:** Prediction has correct winner but wrong exact score
+
+**Steps:**
+1. Login as Randy Pagels with the credentials above
+2. Navigate to "Predictions" page
+3. Find an available match without existing predictions
+4. Unlock the match (click the lock icon)
+5. Select **Team A** as the winner (check the Team A checkbox)
+6. Enter prediction scores:
+   - Team A: **3**
+   - Team B: **1**
+7. Click "Save" - wait for confirmation
+8. Navigate to "Admin" dashboard
+9. Find the SAME match you just predicted on
+10. Unlock it
+11. Enter actual result scores:
+    - Team A: **2**
+    - Team B: **0**
+    (Note: Team A still wins, but different score than predicted)
+12. Click "Save"
+13. Click "Recalculate All Points" button
+14. Navigate to "Leaderboard"
+15. **VERIFY:** Randy Pagels gained exactly **+3 points**
+16. Take screenshot labeled "Scenario-1-Correct-Winner-3pts.png"
+
+**Expected Result:** ✅ +3 points (correct winner, wrong score)
+
+---
+
+## 🧪 SCENARIO 2: Exact Score Only (5 points expected)
+
+**Test Case:** Prediction has exact score but wrong winner
+
+**Steps:**
+1. Still logged in as Randy Pagels
+2. Navigate to "Predictions" page
+3. Find a DIFFERENT available match (not the one from Scenario 1)
+4. Unlock the match
+5. Select **Team A** as the winner
+6. Enter prediction scores:
+   - Team A: **2**
+   - Team B: **1**
+7. Click "Save"
+8. Navigate to "Admin" dashboard
+9. Find the SAME match
+10. Unlock it
+11. Enter actual result scores:
+    - Team A: **1**
+    - Team B: **2**
+    (Note: Score is 2-1 but REVERSED - Team B wins instead!)
+12. Click "Save"
+13. Click "Recalculate All Points"
+14. Navigate to "Leaderboard"
+15. **VERIFY:** Randy Pagels gained exactly **+5 points**
+16. Take screenshot labeled "Scenario-2-Exact-Score-5pts.png"
+
+**Expected Result:** ✅ +5 points (wrong winner, exact score match)
+
+---
+
+## 🧪 SCENARIO 3: Both Correct (8 points expected)
+
+**Test Case:** Perfect prediction - both winner and score correct
+
+**Steps:**
+1. Still logged in as Randy Pagels
+2. Navigate to "Predictions" page
+3. Find a THIRD available match
+4. Unlock the match
+5. Select **Team A** as the winner
+6. Enter prediction scores:
+   - Team A: **4**
+   - Team B: **2**
+7. Click "Save"
+8. Navigate to "Admin" dashboard
+9. Find the SAME match
+10. Unlock it
+11. Enter actual result scores:
+    - Team A: **4**
+    - Team B: **2**
+    (Note: EXACT MATCH - same winner, same score!)
+12. Click "Save"
+13. Click "Recalculate All Points"
+14. Navigate to "Leaderboard"
+15. **VERIFY:** Randy Pagels gained exactly **+8 points**
+16. Take screenshot labeled "Scenario-3-Both-Correct-8pts.png"
+
+**Expected Result:** ✅ +8 points (perfect prediction)
+
+---
+
+## 🧪 SCENARIO 4: Wrong Prediction (0 points expected)
+
+**Test Case:** Completely wrong prediction
+
+**Steps:**
+1. Still logged in as Randy Pagels
+2. Navigate to "Predictions" page
+3. Find a FOURTH available match
+4. Unlock the match
+5. Select **Team A** as the winner
+6. Enter prediction scores:
+   - Team A: **3**
+   - Team B: **0**
+7. Click "Save"
+8. Navigate to "Admin" dashboard
+9. Find the SAME match
+10. Unlock it
+11. Enter actual result scores:
+    - Team A: **1**
+    - Team B: **2**
+    (Note: Complete opposite - Team B wins with different score!)
+12. Click "Save"
+13. Click "Recalculate All Points"
+14. Navigate to "Leaderboard"
+15. **VERIFY:** Randy Pagels gained **+0 points** (no change)
+16. Take screenshot labeled "Scenario-4-Wrong-Prediction-0pts.png"
+
+**Expected Result:** ✅ 0 points (completely wrong)
+
+---
+
+## 📊 FINAL VERIFICATION & SUMMARY
+
+**After completing all 4 scenarios:**
+
+1. Navigate to Leaderboard one final time
+2. Calculate Randy Pagels' total earned points from these 4 scenarios:
+   - Scenario 1: 3 pts
+   - Scenario 2: 5 pts
+   - Scenario 3: 8 pts
+   - Scenario 4: 0 pts
+   - **TOTAL EXPECTED: 16 points**
+
+3. Take final screenshot labeled "Final-Leaderboard-16pts.png"
+
+4. **Generate a detailed summary table:**
+
+```
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    SCORING VALIDATION TEST RESULTS                        ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║ Scenario | Prediction      | Actual Result   | Expected | Actual | Status ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║ 1        | A:3-1:B (A win) | A:2-0:B (A win) | 3 pts    | __ pts | ___   ║
+║ 2        | A:2-1:B (A win) | A:1-2:B (B win) | 5 pts    | __ pts | ___   ║
+║ 3        | A:4-2:B (A win) | A:4-2:B (A win) | 8 pts    | __ pts | ___   ║
+║ 4        | A:3-0:B (A win) | A:1-2:B (B win) | 0 pts    | __ pts | ___   ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║ TOTAL                                          | 16 pts   | __ pts | ___   ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+```
+
+5. **Report any discrepancies:**
+   - If any scenario awarded wrong points, explain what happened
+   - Include browser console errors if any
+   - Note any UI issues observed
+
+6. **Provide pass/fail verdict:**
+   - ✅ PASS: All scenarios awarded correct points (16 total)
+   - ❌ FAIL: One or more scenarios awarded incorrect points
+
+---
+
+## 🚨 IMPORTANT NOTES
+
+- **Use fresh matches:** Don't reuse matches that already have predictions
+- **Wait for save confirmations:** Allow 2-3 seconds after each save
+- **Verify in Leaderboard:** Always check points were actually awarded
+- **Take screenshots:** Evidence is critical for validation
+- **Note match IDs:** Record which matches you used for each scenario
+
+---
+
+## 🐛 IF YOU ENCOUNTER ISSUES
+
+**Problem: Can't unlock a match**
+- Solution: Match already has a prediction. Try a different match.
+
+**Problem: Save button doesn't work**
+- Solution: Ensure both scores are filled in and a winner is selected.
+
+**Problem: Points don't appear on Leaderboard**
+- Solution: Click "Recalculate All Points" again, then refresh Leaderboard.
+
+**Problem: Can't find "Admin" button**
+- Solution: May need admin permissions. Verify Randy.Pagels@Xebia.com has admin role.
+
+---
+
+**TEST COMPLETED BY:** [Your Name]  
+**TEST DATE:** [YYYY-MM-DD]  
+**BROWSER:** [Chrome/Firefox/Edge]  
+**FINAL RESULT:** [PASS/FAIL]
+
+═══════════════════════════════════════════════════════════════════
+📋 COPY TO HERE ⬆️
+═══════════════════════════════════════════════════════════════════
