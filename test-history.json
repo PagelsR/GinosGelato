@@ -637,5 +637,19 @@
     "duration": 346,
     "passRate": 72,
     "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-03-24-run-58"
+  },
+  {
+    "runId": "2026-03-25-run-59",
+    "timestamp": "2026-03-25T11:40:10.705Z",
+    "date": "2026-03-25",
+    "runNumber": "59",
+    "total": 25,
+    "passed": 19,
+    "failed": 6,
+    "flaky": 1,
+    "skipped": 0,
+    "duration": 345,
+    "passRate": 76,
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-03-25-run-59"
   }
 ]
