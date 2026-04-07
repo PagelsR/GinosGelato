@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ContainerSelector from '../components/IceCreamBuilder/ContainerSelector';
 import FlavorSelector from '../components/IceCreamBuilder/FlavorSelector';
 import ToppingsSelector from '../components/IceCreamBuilder/ToppingsSelector';
@@ -6,6 +6,7 @@ import { useCart } from '../contexts/CartContext';
 import { IceCream, Flavor, Topping } from '../types';
 import Button from '../components/UI/Button';
 import { useNavigate } from 'react-router-dom';
+import { appInsights } from '../services/appInsights';
 
 const Builder: React.FC = () => {
     const { addToCart, cartItems } = useCart();
@@ -14,6 +15,23 @@ const Builder: React.FC = () => {
     const [selectedFlavors, setSelectedFlavors] = useState<Flavor[]>([]);
     const [selectedToppings, setSelectedToppings] = useState<Topping[]>([]);
     const [showSuccess, setShowSuccess] = useState(false);
+
+    // Track when user lands on builder page
+    useEffect(() => {
+        appInsights.trackEvent(
+            { name: 'BuilderPageVisit' },
+            { timestamp: new Date().toISOString() }
+        );
+    }, []);
+
+    // Track container selection changes
+    const handleContainerChange = (container: 'cone' | 'cup') => {
+        setSelectedContainer(container);
+        appInsights.trackEvent(
+            { name: 'ContainerSelected' },
+            { containerType: container }
+        );
+    };
 
     const calculatePrice = () => {
         const containerPrice = selectedContainer === 'cone' ? 2.50 : 3.00;
@@ -25,6 +43,12 @@ const Builder: React.FC = () => {
     const handleAddToCart = () => {
         if (selectedFlavors.length === 0) {
             alert('Please select at least one flavor!');
+            
+            // Track validation error
+            appInsights.trackEvent(
+                { name: 'BuilderValidationError' },
+                { error: 'NoFlavorSelected', flavorCount: 0 }
+            );
             return;
         }
 
@@ -37,6 +61,17 @@ const Builder: React.FC = () => {
         console.log('Adding ice cream to cart:', iceCream); // Debug log
         addToCart(iceCream);
         console.log('Cart items after adding:', cartItems.length); // Debug log
+        
+        // Track successful creation
+        appInsights.trackEvent(
+            { name: 'IceCreamCreated' },
+            {
+                container: selectedContainer,
+                flavorCount: selectedFlavors.length,
+                toppingCount: selectedToppings.length,
+                price: calculatePrice()
+            }
+        );
         
         // Show success animation
         setShowSuccess(true);
@@ -80,7 +115,7 @@ const Builder: React.FC = () => {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {/* Left Column - Selections */}
                     <div className="lg:col-span-2 space-y-8">
-                        <ContainerSelector selectedContainer={selectedContainer} setSelectedContainer={setSelectedContainer} />
+                        <ContainerSelector selectedContainer={selectedContainer} setSelectedContainer={handleContainerChange} />
                         <FlavorSelector selectedFlavors={selectedFlavors} setSelectedFlavors={setSelectedFlavors} />
                         <ToppingsSelector selectedToppings={selectedToppings} setSelectedToppings={setSelectedToppings} />
                     </div>

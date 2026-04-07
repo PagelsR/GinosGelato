@@ -246,8 +246,11 @@ jobs:
       - name: Configure API URL for production
         run: |
           API_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
+          APPINSIGHTS_CONNECTION_STRING="${{ needs.provision-infrastructure.outputs.appInsightsConnectionString }}"
           echo "Configuring API URL: $API_URL"
+          echo "Configuring Application Insights..."
           echo "VITE_API_URL=$API_URL" > .env.production
+          echo "VITE_APPINSIGHTS_CONNECTION_STRING=$APPINSIGHTS_CONNECTION_STRING" >> .env.production
           cat .env.production
         working-directory: ./ginos-gelato/client
       
