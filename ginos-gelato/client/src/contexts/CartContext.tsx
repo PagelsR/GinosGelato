@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { IceCream } from '../types';
+import { appInsights } from '../services/appInsights';
 
 interface CartContextType {
     cart: IceCream[];
@@ -30,14 +31,49 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         setCart((prevCart) => [...prevCart, iceCreamWithId]);
         console.log('Added to cart:', iceCreamWithId); // Debug log
         console.log('Cart now contains:', cart.length + 1, 'items'); // Debug log
+        
+        // Track add to cart event in Application Insights
+        appInsights.trackEvent(
+            { name: 'AddToCart' },
+            {
+                container: iceCream.container,
+                flavorCount: iceCream.flavors.length,
+                flavors: iceCream.flavors.map(f => f.name).join(', '),
+                toppingCount: iceCream.toppings.length,
+                toppings: iceCream.toppings.map(t => t.name).join(', '),
+                cartItemCount: cart.length + 1
+            }
+        );
     };
 
     const removeFromCart = (index: number) => {
+        const removedItem = cart[index];
         setCart((prevCart) => prevCart.filter((_, i) => i !== index));
+        
+        // Track remove from cart event
+        if (removedItem) {
+            appInsights.trackEvent(
+                { name: 'RemoveFromCart' },
+                {
+                    container: removedItem.container,
+                    flavorCount: removedItem.flavors.length,
+                    cartItemCount: cart.length - 1
+                }
+            );
+        }
     };
 
     const clearCart = () => {
+        const itemCount = cart.length;
         setCart([]);
+        
+        // Track cart cleared event
+        if (itemCount > 0) {
+            appInsights.trackEvent(
+                { name: 'ClearCart' },
+                { itemsRemoved: itemCount }
+            );
+        }
     };
 
     const getTotalItems = () => {

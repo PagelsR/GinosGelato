@@ -19,6 +19,9 @@ param costCenter string = 'GinosGelato'
 var appServicePlanName = 'plan-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appServiceName = 'app-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var staticWebAppName = 'swa-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsightsName = 'appi-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsightsWorkspaceName = 'log-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsightsAlertName = 'alert-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
 // Tags
 var defaultTags = {
@@ -48,6 +51,20 @@ module staticWebApp 'staticWebApp.bicep' = {
   }
 }
 
+// Deploy Application Insights
+module appInsights 'appInsights.bicep' = {
+  name: 'appInsightsDeployment'
+  params: {
+    location: location
+    appInsightsName: appInsightsName
+    appInsightsWorkspaceName: appInsightsWorkspaceName
+    appInsightsAlertName: appInsightsAlertName
+    defaultTags: defaultTags
+    appServiceUrl: 'https://${appServiceName}.azurewebsites.net'
+    staticWebAppUrl: staticWebApp.outputs.staticWebAppUrl
+  }
+}
+
 // Deploy App Service (depends on App Service Plan and Static Web App for CORS)
 module appService 'appService.bicep' = {
   name: 'appServiceDeployment'
@@ -56,6 +73,8 @@ module appService 'appService.bicep' = {
     appServiceName: appServiceName
     appServicePlanId: appServicePlan.outputs.appServicePlanId
     staticWebAppUrl: staticWebApp.outputs.staticWebAppUrl
+    appInsightsConnectionString: appInsights.outputs.appInsightsConnectionString
+    appInsightsInstrumentationKey: appInsights.outputs.appInsightsInstrumentationKey
     defaultTags: defaultTags
   }
 }
@@ -66,3 +85,6 @@ output appServiceUrl string = 'https://${appService.outputs.appServiceDefaultHos
 output appServicePrincipalId string = appService.outputs.appServicePrincipalId
 output staticWebAppName string = staticWebAppName
 output staticWebAppUrl string = staticWebApp.outputs.staticWebAppUrl
+output appInsightsInstrumentationKey string = appInsights.outputs.appInsightsInstrumentationKey
+output appInsightsConnectionString string = appInsights.outputs.appInsightsConnectionString
+output appInsightsName string = appInsights.outputs.appInsightsName

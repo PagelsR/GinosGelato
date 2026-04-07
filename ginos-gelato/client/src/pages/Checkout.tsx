@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/UI/Button';
+import { appInsights } from '../services/appInsights';
+import { shouldSimulateError, simulateApiError, isDemoMode } from '../utils/demoErrors';
 
 interface CustomerInfo {
     firstName: string;
@@ -33,6 +35,30 @@ const Checkout: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [orderComplete, setOrderComplete] = useState(false);
     const [orderNumber, setOrderNumber] = useState('');
+
+    // Track checkout started
+    useEffect(() => {
+        appInsights.trackEvent(
+            { name: 'CheckoutStarted' },
+            { 
+                itemCount: cartItems.length,
+                cartTotal: getCartTotal()
+            }
+        );
+    }, []);
+
+    // Track step changes
+    useEffect(() => {
+        if (currentStep > 1) {
+            appInsights.trackEvent(
+                { name: 'CheckoutStepCompleted' },
+                { 
+                    step: currentStep - 1,
+                    stepName: currentStep === 2 ? 'CustomerInfo' : currentStep === 3 ? 'Delivery' : 'Payment'
+                }
+            );
+        }
+    }, [currentStep]);
     
     const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
         firstName: '',
@@ -64,15 +90,61 @@ const Checkout: React.FC = () => {
     const handleProcessOrder = async () => {
         setIsProcessing(true);
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        
-        // Generate fake order number
-        const orderNum = 'GG' + Date.now().toString().slice(-6);
-        setOrderNumber(orderNum);
-        setOrderComplete(true);
-        clearCart();
-        setIsProcessing(false);
+        try {
+            // Demo: Simulate payment processing errors 2% of the time (rare)
+            if (shouldSimulateError(0.02)) {
+                const paymentError = simulateApiError(503); // Service unavailable
+                paymentError.message = 'Payment gateway temporarily unavailable. Please try again.';
+                throw paymentError;
+            }
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Generate fake order number
+            const orderNum = 'GG' + Date.now().toString().slice(-6);
+            setOrderNumber(orderNum);
+            setOrderComplete(true);
+            
+            // Track successful order completion
+            appInsights.trackEvent(
+                { name: 'OrderCompleted' },
+                {
+                    orderNumber: orderNum,
+                    orderTotal: total,
+                    itemCount: cartItems.length,
+                    deliveryType: deliveryInfo.type,
+                    deliveryFee: deliveryFee,
+                    tax: tax,
+                    subtotal: subtotal,
+                    demoMode: isDemoMode()
+                }
+            );
+            
+            // Track as a metric for revenue
+            appInsights.trackMetric(
+                { name: 'OrderRevenue', average: total },
+                { orderNumber: orderNum }
+            );
+            
+            clearCart();
+        } catch (error) {
+            // Track checkout errors
+            appInsights.trackException(
+                { exception: error as Error },
+                { 
+                    step: 'OrderProcessing', 
+                    orderTotal: total,
+                    itemCount: cartItems.length,
+                    demoMode: isDemoMode()
+                }
+            );
+            
+            // Show error to user
+            alert(`Error processing order: ${(error as Error).message}`);
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const renderStepIndicator = () => (
@@ -164,7 +236,10 @@ const Checkout: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4">
                     <div 
                         className={`selection-card p-4 text-center cursor-pointer ${deliveryInfo.type === 'pickup' ? 'selected' : ''}`}
-                        onClick={() => setDeliveryInfo({...deliveryInfo, type: 'pickup'})}
+                        onClick={() => {
+                            setDeliveryInfo({...deliveryInfo, type: 'pickup'});
+                            appInsights.trackEvent({ name: 'DeliveryMethodSelected' }, { method: 'pickup' });
+                        }}
                     >
                         <div className="text-3xl mb-2">🏪</div>
                         <h3 className="font-semibold">Store Pickup</h3>
@@ -173,7 +248,10 @@ const Checkout: React.FC = () => {
                     </div>
                     <div 
                         className={`selection-card p-4 text-center cursor-pointer ${deliveryInfo.type === 'delivery' ? 'selected' : ''}`}
-                        onClick={() => setDeliveryInfo({...deliveryInfo, type: 'delivery'})}
+                        onClick={() => {
+                            setDeliveryInfo({...deliveryInfo, type: 'delivery'});
+                            appInsights.trackEvent({ name: 'DeliveryMethodSelected' }, { method: 'delivery', fee: 4.99 });
+                        }}
                     >
                         <div className="text-3xl mb-2">🚚</div>
                         <h3 className="font-semibold">Home Delivery</h3>
