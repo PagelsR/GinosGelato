@@ -5,7 +5,7 @@ import { ReactPlugin } from '@microsoft/applicationinsights-react-js';
 const reactPlugin = new ReactPlugin();
 
 // Get connection string from environment variable (set during build)
-const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING;
+const connectionString = import.meta.env.VITE_APPINSIGHTS_CONNECTION_STRING as string | undefined;
 
 // Initialize Application Insights
 const appInsights = new ApplicationInsights({

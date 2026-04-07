@@ -21,25 +21,25 @@ export const useAppInsights = () => {
 
   const trackEvent = (name: string, properties?: Record<string, any>) => {
     if (appInsights) {
-      appInsights.trackEvent({ name }, properties);
+      appInsights.trackEvent({ name }, properties || {});
     }
   };
 
   const trackException = (error: Error, properties?: Record<string, any>) => {
     if (appInsights) {
-      appInsights.trackException({ exception: error }, properties);
+      appInsights.trackException({ exception: error }, properties || {});
     }
   };
 
   const trackMetric = (name: string, value: number, properties?: Record<string, any>) => {
     if (appInsights) {
-      appInsights.trackMetric({ name, average: value }, properties);
+      appInsights.trackMetric({ name, average: value }, properties || {});
     }
   };
 
   const trackTrace = (message: string, properties?: Record<string, any>) => {
     if (appInsights) {
-      appInsights.trackTrace({ message }, properties);
+      appInsights.trackTrace({ message }, properties || {});
     }
   };
 
