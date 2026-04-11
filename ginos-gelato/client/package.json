@@ -12,7 +12,7 @@
   "dependencies": {
     "@microsoft/applicationinsights-react-js": "^17.3.3",
     "@microsoft/applicationinsights-web": "^3.3.3",
-    "axios": "^1.7.0",
+    "axios": "^1.15.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.26.0"
