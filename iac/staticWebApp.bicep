@@ -13,7 +13,7 @@ param skuName string = 'Free'
 @description('Resource tags')
 param defaultTags object
 
-resource staticWebApp 'Microsoft.Web/staticSites@2023-01-01' = {
+resource staticWebApp 'Microsoft.Web/staticSites@2025-03-01' = {
   name: staticWebAppName
   location: location
   tags: defaultTags
