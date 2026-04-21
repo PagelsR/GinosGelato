@@ -19,5 +19,5 @@ failureCriteria:
   - POST /api/Orders: avg(latency) > 4000
 
 autoStop:
-  errorPercentage: 80
+  errorPercentage: 85
   timeWindow: 120
