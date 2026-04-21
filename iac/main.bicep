@@ -22,6 +22,7 @@ var staticWebAppName = 'swa-${uniqueString(subscription().subscriptionId, resour
 var appInsightsName = 'appi-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appInsightsWorkspaceName = 'log-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appInsightsAlertName = 'alert-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var loadTestingName = 'loadtest-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
 // Tags
 var defaultTags = {
@@ -79,6 +80,16 @@ module appService 'appService.bicep' = {
   }
 }
 
+// Deploy Azure Load Testing
+module loadTesting 'loadTesting.bicep' = {
+  name: 'loadTestingDeployment'
+  params: {
+    location: location
+    loadTestingName: loadTestingName
+    defaultTags: defaultTags
+  }
+}
+
 // Outputs for pipeline and verification
 output appServiceName string = appServiceName
 output appServiceUrl string = 'https://${appService.outputs.appServiceDefaultHostName}'
@@ -88,3 +99,4 @@ output staticWebAppUrl string = staticWebApp.outputs.staticWebAppUrl
 output appInsightsInstrumentationKey string = appInsights.outputs.appInsightsInstrumentationKey
 output appInsightsConnectionString string = appInsights.outputs.appInsightsConnectionString
 output appInsightsName string = appInsights.outputs.appInsightsName
+output loadTestingName string = loadTesting.outputs.loadTestingName

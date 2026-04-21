@@ -1,0 +1,11 @@
+version: v0.1
+testName: GinosGelato_API_Load_Test
+testPlan: API_Testing.jmx
+description: Load test for all Gino's Gelato API endpoints (Flavors, Toppings, Orders)
+engineInstances: 1
+env:
+  - name: webapp
+    value: $(webapp)
+failureCriteria:
+  - avg(response_time_ms) > 5000
+  - percentage(error) > 20
