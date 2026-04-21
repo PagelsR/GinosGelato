@@ -19,7 +19,7 @@ param skuCapacity int = 1
 @description('Resource tags')
 param defaultTags object
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2023-01-01' = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2025-03-01' = {
   name: appServicePlanName
   location: location
   tags: defaultTags

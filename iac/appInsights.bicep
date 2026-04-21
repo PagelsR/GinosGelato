@@ -23,7 +23,7 @@ param appServiceUrl string = ''
 param staticWebAppUrl string = ''
 
 // Log Analytics workspace for Application Insights
-resource applicationInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+resource applicationInsightsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' = {
   name: appInsightsWorkspaceName
   location: location
   tags: defaultTags
@@ -54,7 +54,7 @@ resource applicationInsights 'Microsoft.Insights/components@2020-02-02' = {
 }
 
 // Metric Alert for Response Time
-resource metricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
+resource metricAlert 'Microsoft.Insights/metricAlerts@2024-03-01-preview' = {
   name: appInsightsAlertName
   location: 'global'
   tags: defaultTags
@@ -89,7 +89,7 @@ resource metricAlert 'Microsoft.Insights/metricAlerts@2018-03-01' = {
 }
 
 // Email Action Group
-resource emailActionGroup 'Microsoft.Insights/actionGroups@2023-01-01' = {
+resource emailActionGroup 'Microsoft.Insights/actionGroups@2024-10-01-preview' = {
   name: 'ag-ginosgelato-${uniqueString(resourceGroup().id)}'
   location: 'global'
   tags: defaultTags

@@ -22,7 +22,7 @@ param appInsightsInstrumentationKey string = ''
 @description('Resource tags')
 param defaultTags object
 
-resource appService 'Microsoft.Web/sites@2023-01-01' = {
+resource appService 'Microsoft.Web/sites@2025-03-01' = {
   name: appServiceName
   location: location
   kind: 'app,linux'

@@ -5,7 +5,7 @@ param location string
 param loadTestingName string
 param defaultTags object
 
-resource loadTesting 'Microsoft.LoadTestService/loadTests@2022-12-01' = {
+resource loadTesting 'Microsoft.LoadTestService/loadTests@2024-12-01-preview' = {
   name: loadTestingName
   location: location
   tags: defaultTags
