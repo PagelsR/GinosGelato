@@ -92,7 +92,7 @@ jobs:
   provision-infrastructure:
     name: 1️⃣ Provision Infrastructure (Bicep/IaC)
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     needs: build-and-test
     outputs:
       resourceGroupName: ${{ env.RESOURCE_GROUP }}
@@ -139,7 +139,7 @@ jobs:
   build-and-deploy-backend:
     name: 2️⃣ Build, Test & Deploy Backend API
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     needs: [provision-infrastructure]
     
     steps:
@@ -224,7 +224,7 @@ jobs:
 
   build-and-deploy-frontend:
     name: 3️⃣ Build & Deploy Frontend (Static Web App)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: [provision-infrastructure, build-and-deploy-backend]
     
@@ -301,7 +301,7 @@ jobs:
 
   run-playwright-tests:
     name: 4️⃣ Run Playwright Tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: [build-and-deploy-frontend]
     env:
@@ -407,7 +407,7 @@ jobs:
 
   run-load-tests:
     name: 5️⃣ Run Azure Load Tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: false # TODO: Re-enable when Azure Load Testing resource is provisioned
     runs-on: ubuntu-latest
     needs: [provision-infrastructure, run-playwright-tests]
 
@@ -464,10 +464,10 @@ jobs:
           echo "📊 Download the **load-test-results** artifact for full JMeter report" >> $GITHUB_STEP_SUMMARY
 
   post-deployment-verification:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     name: 6️⃣ Post-Deployment Verification
     runs-on: ubuntu-latest
-    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests, run-load-tests]
+    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests]
     
     steps:
       - name: Azure Login
