@@ -407,7 +407,7 @@ jobs:
 
   run-load-tests:
     name: 5️⃣ Run Azure Load Tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: false # TODO: Re-enable when Azure Load Testing resource is provisioned
     runs-on: ubuntu-latest
     needs: [provision-infrastructure, run-playwright-tests]
 
@@ -467,7 +467,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     name: 6️⃣ Post-Deployment Verification
     runs-on: ubuntu-latest
-    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests, run-load-tests]
+    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests]
     
     steps:
       - name: Azure Login
