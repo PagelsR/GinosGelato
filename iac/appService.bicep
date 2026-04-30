@@ -46,22 +46,23 @@ resource appService 'Microsoft.Web/sites@2025-03-01' = {
       functionAppScaleLimit: 0
       minimumElasticInstanceCount: 0
       appSettings: [
-        {
-          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-          value: appInsightsConnectionString
-        }
-        {
-          name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
-          value: '~3'
-        }
-        {
-          name: 'XDT_MicrosoftApplicationInsights_Mode'
-          value: 'recommended'
-        }
-        {
-          name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-          value: appInsightsInstrumentationKey
-        }
+        // Application Insights settings disabled
+        // {
+        //   name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+        //   value: appInsightsConnectionString
+        // }
+        // {
+        //   name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
+        //   value: '~3'
+        // }
+        // {
+        //   name: 'XDT_MicrosoftApplicationInsights_Mode'
+        //   value: 'recommended'
+        // }
+        // {
+        //   name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
+        //   value: appInsightsInstrumentationKey
+        // }
       ]
       cors: {
         allowedOrigins: [
