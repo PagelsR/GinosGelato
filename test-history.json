@@ -1,19 +1,5 @@
 [
   {
-    "runId": "2026-03-11-run-28",
-    "timestamp": "2026-03-11T22:33:06.933Z",
-    "date": "2026-03-11",
-    "runNumber": "28",
-    "total": 17,
-    "passed": 13,
-    "failed": 4,
-    "flaky": 4,
-    "skipped": 0,
-    "duration": 77,
-    "passRate": 76,
-    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-03-11-run-28"
-  },
-  {
     "runId": "2026-03-12-run-29",
     "timestamp": "2026-03-12T02:33:15.361Z",
     "date": "2026-03-12",
@@ -698,5 +684,19 @@
     "duration": 360,
     "passRate": 64,
     "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-04-30-run-74"
+  },
+  {
+    "runId": "2026-04-30-run-76",
+    "timestamp": "2026-04-30T12:21:05.264Z",
+    "date": "2026-04-30",
+    "runNumber": "76",
+    "total": 25,
+    "passed": 18,
+    "failed": 7,
+    "flaky": 2,
+    "skipped": 0,
+    "duration": 349,
+    "passRate": 72,
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-04-30-run-76"
   }
 ]
