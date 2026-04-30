@@ -99,7 +99,7 @@ jobs:
       appServiceName: ${{ steps.deploy.outputs.appServiceName }}
       appServiceUrl: ${{ steps.deploy.outputs.appServiceUrl }}
       staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
-      loadTestingName: ${{ steps.deploy.outputs.loadTestingName }}
+      # loadTestingName: ${{ steps.deploy.outputs.loadTestingName }}
     
     steps:
       - name: Checkout code
@@ -134,7 +134,7 @@ jobs:
           echo "| App Service URL | ${{ steps.deploy.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Static Web App | ${{ steps.deploy.outputs.staticWebAppName }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Location | ${{ env.LOCATION }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Load Testing | ${{ steps.deploy.outputs.loadTestingName }} |" >> $GITHUB_STEP_SUMMARY
+          # echo "| Load Testing | ${{ steps.deploy.outputs.loadTestingName }} |" >> $GITHUB_STEP_SUMMARY
 
   build-and-deploy-backend:
     name: 2️⃣ Build, Test & Deploy Backend API
@@ -405,63 +405,55 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy test report for run #${{ github.run_number }}'
 
-  run-load-tests:
-    name: 5️⃣ Run Azure Load Tests
-    if: false # TODO: Re-enable when Azure Load Testing resource is provisioned
-    runs-on: ubuntu-latest
-    needs: [provision-infrastructure, run-playwright-tests]
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Prepare Load Test Variables
-        id: prep
-        run: |
-          APP_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
-          # Strip https:// - JMeter needs hostname only
-          WEBAPP_HOST="${APP_URL#https://}"
-          echo "webapp_host=${WEBAPP_HOST}" >> $GITHUB_OUTPUT
-          echo "Target host: ${WEBAPP_HOST}"
-
-      - name: Run Azure Load Tests
-        uses: azure/load-testing@v1
-        continue-on-error: true
-        with:
-          loadTestConfigFile: './load-tests/API_Testing.yaml'
-          loadTestResource: ${{ needs.provision-infrastructure.outputs.loadTestingName }}
-          resourceGroup: ${{ env.RESOURCE_GROUP }}
-          env: |
-            [
-              {"name": "webapp", "value": "${{ steps.prep.outputs.webapp_host }}"}
-            ]
-
-      - name: Upload Load Test Results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: load-test-results
-          path: ${{ github.workspace }}/loadTest
-          retention-days: 30
-
-      - name: Load Test Summary
-        if: always()
-        run: |
-          echo "### Azure Load Test Complete" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Load Test Resource | ${{ needs.provision-infrastructure.outputs.loadTestingName }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Target API | ${{ needs.provision-infrastructure.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Endpoints Tested | GET /api/Flavors, GET /api/Toppings, GET /api/Orders, POST /api/Orders |" >> $GITHUB_STEP_SUMMARY
-          echo "| Failure Criteria | avg response > 5s OR error rate > 20% |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📊 Download the **load-test-results** artifact for full JMeter report" >> $GITHUB_STEP_SUMMARY
+  # run-load-tests: (disabled - Azure Load Testing resource not provisioned)
+  # run-load-tests:
+  #   name: 5️⃣ Run Azure Load Tests
+  #   runs-on: ubuntu-latest
+  #   needs: [provision-infrastructure, run-playwright-tests]
+  #
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Azure Login
+  #       uses: azure/login@v2
+  #       with:
+  #         creds: ${{ secrets.AZURE_CREDENTIALS }}
+  #
+  #     - name: Prepare Load Test Variables
+  #       id: prep
+  #       run: |
+  #         APP_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
+  #         WEBAPP_HOST="${APP_URL#https://}"
+  #         echo "webapp_host=${WEBAPP_HOST}" >> $GITHUB_OUTPUT
+  #         echo "Target host: ${WEBAPP_HOST}"
+  #
+  #     - name: Run Azure Load Tests
+  #       uses: azure/load-testing@v1
+  #       continue-on-error: true
+  #       with:
+  #         loadTestConfigFile: './load-tests/API_Testing.yaml'
+  #         loadTestResource: ${{ needs.provision-infrastructure.outputs.loadTestingName }}
+  #         resourceGroup: ${{ env.RESOURCE_GROUP }}
+  #         env: |
+  #           [
+  #             {"name": "webapp", "value": "${{ steps.prep.outputs.webapp_host }}"}
+  #           ]
+  #
+  #     - name: Upload Load Test Results
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: load-test-results
+  #         path: ${{ github.workspace }}/loadTest
+  #         retention-days: 30
+  #
+  #     - name: Load Test Summary
+  #       if: always()
+  #       run: |
+  #         echo "### Azure Load Test Complete" >> $GITHUB_STEP_SUMMARY
+  #         echo "| Load Test Resource | ${{ needs.provision-infrastructure.outputs.loadTestingName }} |" >> $GITHUB_STEP_SUMMARY
+  #         echo "| Target API | ${{ needs.provision-infrastructure.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
 
   post-deployment-verification:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
