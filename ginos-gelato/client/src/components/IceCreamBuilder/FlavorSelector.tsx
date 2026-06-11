@@ -38,10 +38,10 @@ const FlavorSelector: React.FC<FlavorSelectorProps> = ({ selectedFlavors, setSel
   return (
     <div className="gelato-card">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
           🍦 Choose Your Flavors
         </h2>
-        <div className="text-sm text-gray-600 bg-gradient-to-r from-pink-100 to-orange-100 px-4 py-2 rounded-full">
+        <div className="text-sm text-gray-600 dark:text-gray-400 bg-gradient-to-r from-pink-100 to-orange-100 dark:from-pink-900/40 dark:to-orange-900/40 px-4 py-2 rounded-full">
           {selectedFlavors.length}/3 Selected
         </div>
       </div>
@@ -61,7 +61,7 @@ const FlavorSelector: React.FC<FlavorSelectorProps> = ({ selectedFlavors, setSel
                 <div className="text-3xl mb-2">{flavor.emoji}</div>
                 <div className="text-lg font-semibold text-gray-800">{flavor.name}</div>
               </div>
-              <p className="text-xs text-gray-600 text-center leading-tight">{flavor.description}</p>
+              <p className="text-xs text-gray-600 dark:text-gray-400 text-center leading-tight">{flavor.description}</p>
               {isSelected && (
                 <div className="text-center mt-2">
                   <span className="inline-block bg-pink-500 text-white text-xs px-2 py-1 rounded-full">
@@ -75,8 +75,8 @@ const FlavorSelector: React.FC<FlavorSelectorProps> = ({ selectedFlavors, setSel
       </div>
       
       {selectedFlavors.length >= 3 && (
-        <div className="mt-4 p-3 bg-gradient-to-r from-orange-100 to-yellow-100 rounded-lg text-center">
-          <p className="text-orange-700 font-medium">🎯 Perfect! You've selected the maximum 3 flavors.</p>
+        <div className="mt-4 p-3 bg-gradient-to-r from-orange-100 to-yellow-100 dark:from-orange-900/30 dark:to-yellow-900/30 rounded-lg text-center">
+          <p className="text-orange-700 dark:text-orange-400 font-medium">🎯 Perfect! You've selected the maximum 3 flavors.</p>
         </div>
       )}
     </div>
