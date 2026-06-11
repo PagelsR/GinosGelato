@@ -1,11 +1,13 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const Header: React.FC = () => {
     const { getTotalItems } = useCart();
+    const { isDarkMode, toggleDarkMode } = useTheme();
     return (
-        <header className="bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-400 shadow-xl relative overflow-hidden">
+        <header className="bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-400 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 shadow-xl relative overflow-hidden transition-colors duration-300">
             {/* Decorative elements */}
             <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
             <div className="absolute top-2 left-10 text-white/20 text-4xl animate-bounce-slow">🍦</div>
@@ -20,7 +22,7 @@ const Header: React.FC = () => {
                         </Link>
                     </h1>
                     <nav>
-                        <ul className="flex space-x-8">
+                        <ul className="flex items-center space-x-8">
                             <li>
                                 <Link 
                                     to="/" 
@@ -52,6 +54,21 @@ const Header: React.FC = () => {
                                     )}
                                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-200 group-hover:w-full transition-all duration-300"></span>
                                 </Link>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={toggleDarkMode}
+                                    aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                                    title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                                    className="relative flex items-center gap-1.5 bg-white/20 hover:bg-white/30 text-white rounded-full px-3 py-1.5 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                >
+                                    <span className="text-base leading-none" aria-hidden="true">
+                                        {isDarkMode ? '☀️' : '🌙'}
+                                    </span>
+                                    <span className="text-sm font-medium hidden sm:inline">
+                                        {isDarkMode ? 'Light' : 'Dark'}
+                                    </span>
+                                </button>
                             </li>
                         </ul>
                     </nav>

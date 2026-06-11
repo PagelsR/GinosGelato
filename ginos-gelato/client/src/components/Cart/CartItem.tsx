@@ -18,7 +18,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
     };
 
     return (
-        <div className="gelato-card bg-gradient-to-br from-white to-pink-50 hover:shadow-xl transition-all duration-300">
+        <div className="gelato-card bg-gradient-to-br from-white to-pink-50 dark:from-gray-800 dark:to-gray-700 hover:shadow-xl transition-all duration-300">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 {/* Ice Cream Visual & Info */}
                 <div className="flex gap-4 flex-1">
@@ -27,18 +27,18 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
                     </div>
                     
                     <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">
                             Custom {container === 'cone' ? 'Cone' : 'Cup'} Creation
                         </h3>
                         
                         {/* Flavors */}
                         <div className="mb-2">
-                            <span className="text-sm font-medium text-gray-600">Flavors: </span>
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Flavors: </span>
                             <div className="flex flex-wrap gap-1 mt-1">
                                 {flavors.map((flavor) => (
                                     <span 
                                         key={flavor.id}
-                                        className="bg-gradient-to-r from-pink-200 to-orange-200 text-gray-800 text-xs px-2 py-1 rounded-full"
+                                        className="bg-gradient-to-r from-pink-200 to-orange-200 dark:from-pink-900/50 dark:to-orange-900/50 dark:text-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full"
                                     >
                                         {flavor.name}
                                     </span>
@@ -48,20 +48,20 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
                         
                         {/* Toppings */}
                         <div className="mb-2">
-                            <span className="text-sm font-medium text-gray-600">Toppings: </span>
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Toppings: </span>
                             {toppings.length > 0 ? (
                                 <div className="flex flex-wrap gap-1 mt-1">
                                     {toppings.map((topping) => (
                                         <span 
                                             key={topping.id}
-                                            className="bg-gradient-to-r from-yellow-200 to-orange-200 text-gray-800 text-xs px-2 py-1 rounded-full"
+                                            className="bg-gradient-to-r from-yellow-200 to-orange-200 dark:from-yellow-900/50 dark:to-orange-900/50 dark:text-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full"
                                         >
                                             {topping.name}
                                         </span>
                                     ))}
                                 </div>
                             ) : (
-                                <span className="text-gray-500 text-sm">None</span>
+                                <span className="text-gray-500 dark:text-gray-400 text-sm">None</span>
                             )}
                         </div>
                     </div>
@@ -70,10 +70,10 @@ const CartItem: React.FC<CartItemProps> = ({ item, onRemove }) => {
                 {/* Price & Remove */}
                 <div className="flex flex-row md:flex-col items-center gap-3">
                     <div className="text-right">
-                        <div className="text-xl font-bold text-green-600">
+                        <div className="text-xl font-bold text-green-600 dark:text-green-400">
                             ${calculateItemPrice().toFixed(2)}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                             per item
                         </div>
                     </div>

@@ -13,10 +13,12 @@ import Catering from './pages/Catering';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import { CartProvider } from './contexts/CartContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const App: React.FC = () => {
   return (
     <AppInsightsContext.Provider value={reactPlugin}>
+      <ThemeProvider>
       <CartProvider>
         <Router>
           <div className="flex flex-col min-h-screen">
@@ -37,6 +39,7 @@ const App: React.FC = () => {
           </div>
         </Router>
       </CartProvider>
+      </ThemeProvider>
     </AppInsightsContext.Provider>
   );
 };

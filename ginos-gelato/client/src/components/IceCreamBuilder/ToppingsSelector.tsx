@@ -57,11 +57,11 @@ const ToppingsSelector: React.FC<ToppingsSelectorProps> = ({ selectedToppings, s
     return (
         <div className="gelato-card">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-semibold text-gray-800">
+                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
                     🧁 Add Your Toppings
                 </h2>
                 {selectedToppings.length > 0 && (
-                    <div className="text-sm text-gray-600 bg-gradient-to-r from-yellow-100 to-orange-100 px-4 py-2 rounded-full">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 bg-gradient-to-r from-yellow-100 to-orange-100 dark:from-yellow-900/40 dark:to-orange-900/40 px-4 py-2 rounded-full">
                         {selectedToppings.length} toppings • +${getTotalToppingsPrice().toFixed(2)}
                     </div>
                 )}
@@ -97,8 +97,8 @@ const ToppingsSelector: React.FC<ToppingsSelectorProps> = ({ selectedToppings, s
             </div>
             
             {selectedToppings.length === 0 && (
-                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg text-center">
-                    <p className="text-gray-600">
+                <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg text-center">
+                    <p className="text-gray-600 dark:text-gray-400">
                         🎯 Click on toppings to add them to your ice cream!
                     </p>
                 </div>
