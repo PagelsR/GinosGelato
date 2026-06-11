@@ -59,12 +59,12 @@ const FlavorSelector: React.FC<FlavorSelectorProps> = ({ selectedFlavors, setSel
             >
               <div className={`bg-gradient-to-br ${flavor.color} rounded-lg p-4 mb-3 text-center`}>
                 <div className="text-3xl mb-2">{flavor.emoji}</div>
-                <div className="text-lg font-semibold text-gray-800">{flavor.name}</div>
+              <div className="text-lg font-semibold text-gray-800 dark:text-gray-100">{flavor.name}</div>
               </div>
               <p className="text-xs text-gray-600 dark:text-gray-400 text-center leading-tight">{flavor.description}</p>
               {isSelected && (
                 <div className="text-center mt-2">
-                  <span className="inline-block bg-pink-500 text-white text-xs px-2 py-1 rounded-full">
+                <span className="inline-block bg-pink-500 dark:bg-pink-600 text-white text-xs px-2 py-1 rounded-full">
                     ✓ Selected
                   </span>
                 </div>

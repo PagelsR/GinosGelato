@@ -30,7 +30,7 @@ const ContainerSelector: React.FC<ContainerSelectorProps> = ({ selectedContainer
                         <p className="text-gray-600 dark:text-gray-400 text-sm mb-3">{container.description}</p>
                         <div className="text-lg font-bold text-green-600 dark:text-green-400">${container.price.toFixed(2)}</div>
                         {selectedContainer === container.type && (
-                            <div className="mt-3 text-pink-500 font-medium">✓ Selected</div>
+                            <div className="mt-3 text-pink-500 dark:text-pink-400 font-medium">✓ Selected</div>
                         )}
                     </div>
                 ))}
