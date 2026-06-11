@@ -85,7 +85,7 @@ const Builder: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
             {/* Background decorative elements */}
             <div className="absolute top-10 left-20 text-pink-200 text-6xl animate-float opacity-20">🍦</div>
             <div className="absolute bottom-20 right-20 text-blue-200 text-5xl animate-bounce-slow opacity-20">🍨</div>
@@ -107,7 +107,7 @@ const Builder: React.FC = () => {
                     <h1 className="text-5xl font-fredoka text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400 mb-4">
                         🎨 Build Your Perfect Ice Cream
                     </h1>
-                    <p className="text-xl text-gray-600">
+                    <p className="text-xl text-gray-600 dark:text-gray-300">
                         Choose your container, pick up to 3 flavors, and add your favorite toppings!
                     </p>
                 </div>
@@ -123,56 +123,56 @@ const Builder: React.FC = () => {
                     {/* Right Column - Preview & Summary */}
                     <div className="space-y-6">
                         {/* Ice Cream Preview */}
-                        <div className="gelato-card bg-gradient-to-br from-white to-pink-50 sticky top-6">
-                            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">🍦 Your Creation</h3>
+                        <div className="gelato-card bg-gradient-to-br from-white to-pink-50 dark:from-gray-800 dark:to-pink-900/20 sticky top-6">
+                            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4 text-center">🍦 Your Creation</h3>
                             
                             {/* Visual Preview */}
                             <div className="text-center mb-6">
                                 <div className="text-6xl mb-2">
                                     {selectedContainer === 'cone' ? '🍦' : '🍨'}
                                 </div>
-                                <p className="font-medium text-gray-700 capitalize">
+                                <p className="font-medium text-gray-700 dark:text-gray-300 capitalize">
                                     {selectedContainer === 'cone' ? 'Waffle Cone' : 'Cup'}
                                 </p>
                             </div>
 
                             {/* Flavors Summary */}
                             <div className="mb-4">
-                                <h4 className="font-medium text-gray-700 mb-2">Flavors ({selectedFlavors.length}/3):</h4>
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Flavors ({selectedFlavors.length}/3):</h4>
                                 {selectedFlavors.length > 0 ? (
                                     <div className="space-y-1">
                                         {selectedFlavors.map(flavor => (
-                                            <div key={flavor.id} className="text-sm bg-gradient-to-r from-pink-100 to-orange-100 px-3 py-1 rounded-full">
+                                            <div key={flavor.id} className="text-sm bg-gradient-to-r from-pink-100 to-orange-100 dark:from-pink-900/40 dark:to-orange-900/40 dark:text-gray-200 px-3 py-1 rounded-full">
                                                 {flavor.name}
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-gray-500 text-sm">No flavors selected</p>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">No flavors selected</p>
                                 )}
                             </div>
 
                             {/* Toppings Summary */}
                             <div className="mb-6">
-                                <h4 className="font-medium text-gray-700 mb-2">Toppings ({selectedToppings.length}):</h4>
+                                <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Toppings ({selectedToppings.length}):</h4>
                                 {selectedToppings.length > 0 ? (
                                     <div className="flex flex-wrap gap-1">
                                         {selectedToppings.map(topping => (
-                                            <span key={topping.id} className="text-xs bg-gradient-to-r from-yellow-200 to-orange-200 px-2 py-1 rounded-full">
+                                            <span key={topping.id} className="text-xs bg-gradient-to-r from-yellow-200 to-orange-200 dark:from-yellow-800/60 dark:to-orange-800/60 dark:text-gray-200 px-2 py-1 rounded-full">
                                                 {topping.name}
                                             </span>
                                         ))}
                                     </div>
                                 ) : (
-                                    <p className="text-gray-500 text-sm">No toppings selected</p>
+                                    <p className="text-gray-500 dark:text-gray-400 text-sm">No toppings selected</p>
                                 )}
                             </div>
 
                             {/* Price */}
-                            <div className="border-t border-gray-200 pt-4 mb-6">
+                            <div className="border-t border-gray-200 dark:border-gray-600 pt-4 mb-6">
                                 <div className="flex justify-between items-center">
-                                    <span className="font-semibold text-gray-800">Total Price:</span>
-                                    <span className="text-xl font-bold text-green-600">${calculatePrice().toFixed(2)}</span>
+                                    <span className="font-semibold text-gray-800 dark:text-gray-200">Total Price:</span>
+                                    <span className="text-xl font-bold text-green-600 dark:text-green-400">${calculatePrice().toFixed(2)}</span>
                                 </div>
                             </div>
 

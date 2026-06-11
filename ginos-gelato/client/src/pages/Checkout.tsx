@@ -152,13 +152,13 @@ const Checkout: React.FC = () => {
             {[1, 2, 3].map((step) => (
                 <React.Fragment key={step}>
                     <div className={`flex items-center justify-center w-10 h-10 rounded-full text-white font-semibold ${
-                        currentStep >= step ? 'bg-gradient-to-r from-pink-500 to-orange-400' : 'bg-gray-300'
+                        currentStep >= step ? 'bg-gradient-to-r from-pink-500 to-orange-400' : 'bg-gray-300 dark:bg-gray-600'
                     }`}>
                         {step}
                     </div>
                     {step < 3 && (
                         <div className={`w-16 h-1 mx-2 ${
-                            currentStep > step ? 'bg-gradient-to-r from-pink-500 to-orange-400' : 'bg-gray-300'
+                            currentStep > step ? 'bg-gradient-to-r from-pink-500 to-orange-400' : 'bg-gray-300 dark:bg-gray-600'
                         }`} />
                     )}
                 </React.Fragment>
@@ -168,48 +168,48 @@ const Checkout: React.FC = () => {
 
     const renderCustomerInfoStep = () => (
         <div className="gelato-card">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">👤 Customer Information</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">👤 Customer Information</h2>
             <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">First Name *</label>
                     <input
                         type="text"
                         value={customerInfo.firstName}
                         onChange={(e) => setCustomerInfo({...customerInfo, firstName: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="Enter your first name"
                         required
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Last Name *</label>
                     <input
                         type="text"
                         value={customerInfo.lastName}
                         onChange={(e) => setCustomerInfo({...customerInfo, lastName: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="Enter your last name"
                         required
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email *</label>
                     <input
                         type="email"
                         value={customerInfo.email}
                         onChange={(e) => setCustomerInfo({...customerInfo, email: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="your@email.com"
                         required
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phone *</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Phone *</label>
                     <input
                         type="tel"
                         value={customerInfo.phone}
                         onChange={(e) => setCustomerInfo({...customerInfo, phone: e.target.value})}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                         placeholder="(555) 123-4567"
                         required
                     />
@@ -228,11 +228,11 @@ const Checkout: React.FC = () => {
 
     const renderDeliveryStep = () => (
         <div className="gelato-card">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">🚚 Delivery Information</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">🚚 Delivery Information</h2>
             
             {/* Delivery Type Selection */}
             <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-3">Delivery Method</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Delivery Method</label>
                 <div className="grid grid-cols-2 gap-4">
                     <div 
                         className={`selection-card p-4 text-center cursor-pointer ${deliveryInfo.type === 'pickup' ? 'selected' : ''}`}
@@ -242,9 +242,9 @@ const Checkout: React.FC = () => {
                         }}
                     >
                         <div className="text-3xl mb-2">🏪</div>
-                        <h3 className="font-semibold">Store Pickup</h3>
-                        <p className="text-sm text-gray-600">Ready in 15 minutes</p>
-                        <p className="text-green-600 font-medium">FREE</p>
+                        <h3 className="font-semibold dark:text-gray-100">Store Pickup</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Ready in 15 minutes</p>
+                        <p className="text-green-600 dark:text-green-400 font-medium">FREE</p>
                     </div>
                     <div 
                         className={`selection-card p-4 text-center cursor-pointer ${deliveryInfo.type === 'delivery' ? 'selected' : ''}`}
@@ -254,9 +254,9 @@ const Checkout: React.FC = () => {
                         }}
                     >
                         <div className="text-3xl mb-2">🚚</div>
-                        <h3 className="font-semibold">Home Delivery</h3>
-                        <p className="text-sm text-gray-600">30-45 minutes</p>
-                        <p className="text-orange-600 font-medium">$4.99</p>
+                        <h3 className="font-semibold dark:text-gray-100">Home Delivery</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">30-45 minutes</p>
+                        <p className="text-orange-600 dark:text-orange-400 font-medium">$4.99</p>
                     </div>
                 </div>
             </div>
@@ -265,35 +265,35 @@ const Checkout: React.FC = () => {
             {deliveryInfo.type === 'delivery' && (
                 <div className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Address *</label>
                         <input
                             type="text"
                             value={deliveryInfo.address}
                             onChange={(e) => setDeliveryInfo({...deliveryInfo, address: e.target.value})}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                            className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                             placeholder="123 Main Street"
                             required
                         />
                     </div>
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">City *</label>
                             <input
                                 type="text"
                                 value={deliveryInfo.city}
                                 onChange={(e) => setDeliveryInfo({...deliveryInfo, city: e.target.value})}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                 placeholder="Your city"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">ZIP Code *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">ZIP Code *</label>
                             <input
                                 type="text"
                                 value={deliveryInfo.zipCode}
                                 onChange={(e) => setDeliveryInfo({...deliveryInfo, zipCode: e.target.value})}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                 placeholder="12345"
                                 required
                             />
@@ -304,11 +304,11 @@ const Checkout: React.FC = () => {
 
             {/* Special Instructions */}
             <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Special Instructions</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Special Instructions</label>
                 <textarea
                     value={deliveryInfo.specialInstructions}
                     onChange={(e) => setDeliveryInfo({...deliveryInfo, specialInstructions: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                     rows={3}
                     placeholder="Any special requests or delivery instructions..."
                 />
@@ -333,22 +333,22 @@ const Checkout: React.FC = () => {
             {/* Payment Form */}
             <div className="lg:col-span-2">
                 <div className="gelato-card">
-                    <h2 className="text-2xl font-semibold text-gray-800 mb-6">💳 Payment Information</h2>
+                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100 mb-6">💳 Payment Information</h2>
                     
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Name on Card *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Name on Card *</label>
                             <input
                                 type="text"
                                 value={paymentInfo.nameOnCard}
                                 onChange={(e) => setPaymentInfo({...paymentInfo, nameOnCard: e.target.value})}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                 placeholder="John Doe"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Card Number *</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Card Number *</label>
                             <input
                                 type="text"
                                 value={paymentInfo.cardNumber}
@@ -359,7 +359,7 @@ const Checkout: React.FC = () => {
                                         setPaymentInfo({...paymentInfo, cardNumber: formatted});
                                     }
                                 }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                 placeholder="1234 5678 9012 3456"
                                 maxLength={19}
                                 required
@@ -367,7 +367,7 @@ const Checkout: React.FC = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Expiry Date *</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Expiry Date *</label>
                                 <input
                                     type="text"
                                     value={paymentInfo.expiryDate}
@@ -378,14 +378,14 @@ const Checkout: React.FC = () => {
                                             setPaymentInfo({...paymentInfo, expiryDate: formatted});
                                         }
                                     }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                     placeholder="MM/YY"
                                     maxLength={5}
                                     required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">CVV *</label>
+                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">CVV *</label>
                                 <input
                                     type="text"
                                     value={paymentInfo.cvv}
@@ -395,7 +395,7 @@ const Checkout: React.FC = () => {
                                             setPaymentInfo({...paymentInfo, cvv: value});
                                         }
                                     }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                                     placeholder="123"
                                     maxLength={3}
                                     required
@@ -421,18 +421,18 @@ const Checkout: React.FC = () => {
 
             {/* Order Summary */}
             <div>
-                <div className="gelato-card bg-gradient-to-br from-white to-green-50 sticky top-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">📋 Order Summary</h3>
+                <div className="gelato-card bg-gradient-to-br from-white to-green-50 dark:from-gray-800 dark:to-green-900/20 sticky top-6">
+                    <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">📋 Order Summary</h3>
                     
                     {/* Items */}
                     <div className="space-y-3 mb-4">
                         {cartItems.map((item, index) => (
-                            <div key={index} className="text-sm border-b border-gray-200 pb-2">
-                                <div className="flex justify-between font-medium">
+                            <div key={index} className="text-sm border-b border-gray-200 dark:border-gray-600 pb-2">
+                                <div className="flex justify-between font-medium dark:text-gray-200">
                                     <span>{item.container === 'cone' ? '🍦' : '🍨'} {item.container === 'cone' ? 'Cone' : 'Cup'}</span>
                                     <span>${((item.container === 'cone' ? 2.50 : 3.00) + item.flavors.length * 2.00 + item.toppings.reduce((sum, t) => sum + (t.price || 0.50), 0)).toFixed(2)}</span>
                                 </div>
-                                <div className="text-gray-600 text-xs">
+                                <div className="text-gray-600 dark:text-gray-400 text-xs">
                                     {item.flavors.map(f => f.name).join(', ')}
                                     {item.toppings.length > 0 && ` + ${item.toppings.map(t => t.name).join(', ')}`}
                                 </div>
@@ -441,7 +441,7 @@ const Checkout: React.FC = () => {
                     </div>
 
                     {/* Totals */}
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-2 text-sm dark:text-gray-300">
                         <div className="flex justify-between">
                             <span>Subtotal:</span>
                             <span>${subtotal.toFixed(2)}</span>
@@ -456,10 +456,10 @@ const Checkout: React.FC = () => {
                                 <span>${deliveryFee.toFixed(2)}</span>
                             </div>
                         )}
-                        <hr className="border-gray-300" />
-                        <div className="flex justify-between font-bold text-lg">
+                        <hr className="border-gray-300 dark:border-gray-600" />
+                        <div className="flex justify-between font-bold text-lg dark:text-gray-100">
                             <span>Total:</span>
-                            <span className="text-green-600">${total.toFixed(2)}</span>
+                            <span className="text-green-600 dark:text-green-400">${total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -469,14 +469,14 @@ const Checkout: React.FC = () => {
 
     const renderOrderComplete = () => (
         <div className="text-center">
-            <div className="gelato-card max-w-md mx-auto bg-gradient-to-br from-green-50 to-blue-50">
+            <div className="gelato-card max-w-md mx-auto bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/30 dark:to-blue-900/30">
                 <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-3xl font-bold text-green-600 mb-4">Order Confirmed!</h2>
-                <div className="bg-white rounded-lg p-4 mb-6">
-                    <p className="text-lg font-semibold text-gray-800">Order #{orderNumber}</p>
-                    <p className="text-gray-600">Total: ${total.toFixed(2)}</p>
+                <h2 className="text-3xl font-bold text-green-600 dark:text-green-400 mb-4">Order Confirmed!</h2>
+                <div className="bg-white dark:bg-gray-700 rounded-lg p-4 mb-6">
+                    <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">Order #{orderNumber}</p>
+                    <p className="text-gray-600 dark:text-gray-300">Total: ${total.toFixed(2)}</p>
                 </div>
-                <p className="text-gray-700 mb-6">
+                <p className="text-gray-700 dark:text-gray-300 mb-6">
                     Thank you for your order! We're preparing your delicious ice cream now. 
                     {deliveryInfo.type === 'pickup' ? 
                         ' Your order will be ready for pickup in 15 minutes.' : 
@@ -497,12 +497,12 @@ const Checkout: React.FC = () => {
 
     if (cartItems.length === 0 && !orderComplete) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 relative overflow-hidden">
+            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
                 <div className="gelato-container relative z-10">
-                    <div className="gelato-card text-center bg-gradient-to-br from-white to-blue-50 max-w-md mx-auto mt-20">
+                    <div className="gelato-card text-center bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900/20 max-w-md mx-auto mt-20">
                         <div className="text-6xl mb-4">🛒</div>
-                        <h2 className="text-2xl font-semibold text-gray-700 mb-4">Your cart is empty!</h2>
-                        <p className="text-gray-600 mb-6">Add some delicious ice cream to your cart before checking out.</p>
+                        <h2 className="text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-4">Your cart is empty!</h2>
+                        <p className="text-gray-600 dark:text-gray-300 mb-6">Add some delicious ice cream to your cart before checking out.</p>
                         <Button variant="primary" onClick={() => navigate('/builder')}>
                             🎨 Build Your Ice Cream
                         </Button>
@@ -513,7 +513,7 @@ const Checkout: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
             {/* Background decorative elements */}
             <div className="absolute top-20 right-20 text-pink-200 text-6xl animate-float opacity-20">💳</div>
             <div className="absolute bottom-32 left-20 text-blue-200 text-5xl animate-bounce-slow opacity-20">🍦</div>
@@ -525,7 +525,7 @@ const Checkout: React.FC = () => {
                             <h1 className="text-5xl font-fredoka text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-orange-400 mb-4">
                                 💳 Secure Checkout
                             </h1>
-                            <p className="text-xl text-gray-600">
+                            <p className="text-xl text-gray-600 dark:text-gray-300">
                                 Complete your ice cream order safely and securely
                             </p>
                         </div>
