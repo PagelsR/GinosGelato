@@ -17,6 +17,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Add custom services
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddSingleton<OrderQueueService>();
 
 // Add Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
