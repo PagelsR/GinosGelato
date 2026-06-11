@@ -1,0 +1,95 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]: 🍦
+    - generic [ref=e7]: 🍨
+    - generic [ref=e8]: 🧁
+    - generic [ref=e10]:
+      - heading "🍦 Gino's Gelato" [level=1] [ref=e11]:
+        - link "🍦 Gino's Gelato" [ref=e12] [cursor=pointer]:
+          - /url: /
+      - navigation [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link "Home" [ref=e16] [cursor=pointer]:
+              - /url: /
+              - text: Home
+          - listitem [ref=e17]:
+            - link "🎨 Build Ice Cream" [ref=e18] [cursor=pointer]:
+              - /url: /builder
+              - text: 🎨 Build Ice Cream
+          - listitem [ref=e19]:
+            - link "🛒 Cart 1" [ref=e302] [cursor=pointer]:
+              - /url: /cart
+              - text: 🛒 Cart
+              - generic [ref=e303]: "1"
+  - main [ref=e21]:
+    - generic [ref=e369]:
+      - generic [ref=e370]: 💳
+      - generic [ref=e371]: 🍦
+      - generic [ref=e372]:
+        - generic [ref=e373]:
+          - heading "💳 Secure Checkout" [level=1] [ref=e374]
+          - paragraph [ref=e375]: Complete your ice cream order safely and securely
+        - generic [ref=e376]:
+          - generic [ref=e377]: "1"
+          - generic [ref=e379]: "2"
+          - generic [ref=e381]: "3"
+        - generic [ref=e382]:
+          - heading "👤 Customer Information" [level=2] [ref=e383]
+          - generic [ref=e384]:
+            - generic [ref=e385]:
+              - generic [ref=e386]: First Name *
+              - textbox "Enter your first name" [ref=e387]
+            - generic [ref=e388]:
+              - generic [ref=e389]: Last Name *
+              - textbox "Enter your last name" [ref=e390]
+            - generic [ref=e391]:
+              - generic [ref=e392]: Email *
+              - textbox "your@email.com" [ref=e393]
+            - generic [ref=e394]:
+              - generic [ref=e395]: Phone *
+              - textbox "(555) 123-4567" [ref=e396]
+          - button "Continue to Delivery →" [disabled] [ref=e398]
+  - contentinfo [ref=e54]:
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - heading "🍦 Gino's Gelato" [level=3] [ref=e58]
+          - paragraph [ref=e59]: Crafting authentic Italian gelato with the finest ingredients since 1952. Every scoop is a journey to Italy!
+          - generic [ref=e60]:
+            - generic [ref=e61] [cursor=pointer]: 📧
+            - generic [ref=e62] [cursor=pointer]: 📞
+            - generic [ref=e63] [cursor=pointer]: 🌍
+        - generic [ref=e64]:
+          - heading "Quick Links" [level=4] [ref=e65]
+          - list [ref=e66]:
+            - listitem [ref=e67]:
+              - link "About Us" [ref=e68] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e69]:
+              - link "Our Flavors" [ref=e70] [cursor=pointer]:
+                - /url: /flavors
+            - listitem [ref=e71]:
+              - link "Locations" [ref=e72] [cursor=pointer]:
+                - /url: /locations
+            - listitem [ref=e73]:
+              - link "Catering" [ref=e74] [cursor=pointer]:
+                - /url: /catering
+        - generic [ref=e75]:
+          - heading "Contact" [level=4] [ref=e76]
+          - generic [ref=e77]:
+            - paragraph [ref=e78]: 👤 Randy Pagels
+            - paragraph [ref=e79]: ✉️ randy.pagels@xebia.com
+            - paragraph [ref=e80]: 📍 123 Gelato Street
+            - paragraph [ref=e81]: 🌟 Sweet City, SC 12345
+            - paragraph [ref=e82]: 📞 (555) 123-GELATO
+            - paragraph [ref=e83]: "🕒 Daily: 10AM - 10PM"
+      - generic [ref=e84]:
+        - paragraph [ref=e85]: © 2026 Gino's Gelato. All rights reserved. Made with ❤️ and lots of ice cream!
+        - generic [ref=e86]:
+          - link "Privacy Policy" [ref=e87] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms of Service" [ref=e88] [cursor=pointer]:
+            - /url: /terms
+          - link "Nutrition Info" [ref=e89] [cursor=pointer]:
+            - /url: /nutrition

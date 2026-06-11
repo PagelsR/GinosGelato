@@ -20,3 +20,13 @@ export const validateOrder = (order: IceCream): string | null => {
     }
     return null;
 };
+
+// Create a function that applies a 15% discount if order total exceeds $15
+// Return the discounted price formatted with currency symbol
+export const applyDiscount = (totalPrice: number): string => {
+    if (totalPrice > 15) {
+        const discountedPrice = totalPrice * 0.85;
+        return `$${discountedPrice.toFixed(2)}`;
+    }
+    return `$${totalPrice.toFixed(2)}`;
+}

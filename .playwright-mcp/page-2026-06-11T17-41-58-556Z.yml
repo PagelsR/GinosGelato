@@ -1,0 +1,126 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]: 🍦
+    - generic [ref=e7]: 🍨
+    - generic [ref=e8]: 🧁
+    - generic [ref=e10]:
+      - heading "🍦 Gino's Gelato" [level=1] [ref=e11]:
+        - link "🍦 Gino's Gelato" [ref=e12] [cursor=pointer]:
+          - /url: /
+      - navigation [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link "Home" [ref=e16] [cursor=pointer]:
+              - /url: /
+              - text: Home
+          - listitem [ref=e17]:
+            - link "🎨 Build Ice Cream" [ref=e18] [cursor=pointer]:
+              - /url: /builder
+              - text: 🎨 Build Ice Cream
+          - listitem [ref=e19]:
+            - link "🛒 Cart 1" [ref=e302] [cursor=pointer]:
+              - /url: /cart
+              - text: 🛒 Cart
+              - generic [ref=e303]: "1"
+  - main [ref=e21]:
+    - generic [ref=e313]:
+      - generic [ref=e314]: 🛒
+      - generic [ref=e315]: 🍦
+      - generic [ref=e316]:
+        - generic [ref=e317]:
+          - heading "🛒 Your Ice Cream Cart" [level=1] [ref=e318]
+          - paragraph [ref=e319]: Review your delicious selections before checkout
+        - generic [ref=e320]:
+          - generic [ref=e323]:
+            - generic [ref=e324]:
+              - generic [ref=e325]: 🍨
+              - generic [ref=e326]:
+                - heading "Custom Cup Creation" [level=3] [ref=e327]
+                - generic [ref=e328]:
+                  - text: "Flavors:"
+                  - generic [ref=e329]:
+                    - generic [ref=e330]: Strawberry Bliss
+                    - generic [ref=e331]: Mint Chocolate Chip
+                    - generic [ref=e332]: Salted Caramel
+                - generic [ref=e333]:
+                  - text: "Toppings:"
+                  - generic [ref=e334]:
+                    - generic [ref=e335]: Caramel Sauce
+                    - generic [ref=e336]: Whipped Cream
+                    - generic [ref=e337]: Cherry
+            - generic [ref=e338]:
+              - generic [ref=e339]:
+                - generic [ref=e340]: $10.50
+                - generic [ref=e341]: per item
+              - button "🗑️ Remove" [ref=e342] [cursor=pointer]
+          - generic [ref=e343]:
+            - generic [ref=e344]:
+              - heading "📋 Order Summary" [level=3] [ref=e345]
+              - generic [ref=e346]:
+                - generic [ref=e347]:
+                  - generic [ref=e348]: Items (1)
+                  - generic [ref=e349]: $10.50
+                - generic [ref=e350]:
+                  - generic [ref=e351]: Tax (8.5%)
+                  - generic [ref=e352]: $0.89
+                - separator [ref=e353]
+                - generic [ref=e354]:
+                  - generic [ref=e355]: Total
+                  - generic [ref=e356]: $11.39
+              - generic [ref=e357]:
+                - link "💳 Proceed to Checkout" [ref=e358] [cursor=pointer]:
+                  - /url: /checkout
+                  - button "💳 Proceed to Checkout" [ref=e359]
+                - button "🗑️ Clear Cart" [ref=e360] [cursor=pointer]
+                - link "➕ Add More Ice Cream" [ref=e361] [cursor=pointer]:
+                  - /url: /builder
+                  - button "➕ Add More Ice Cream" [ref=e362]
+            - generic [ref=e363]:
+              - heading "🎁 Special Offers" [level=4] [ref=e364]
+              - list [ref=e365]:
+                - listitem [ref=e366]: • Free topping with 3+ items
+                - listitem [ref=e367]: • 10% off orders over $25
+                - listitem [ref=e368]: • Free delivery on $30+ orders
+  - contentinfo [ref=e54]:
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - heading "🍦 Gino's Gelato" [level=3] [ref=e58]
+          - paragraph [ref=e59]: Crafting authentic Italian gelato with the finest ingredients since 1952. Every scoop is a journey to Italy!
+          - generic [ref=e60]:
+            - generic [ref=e61] [cursor=pointer]: 📧
+            - generic [ref=e62] [cursor=pointer]: 📞
+            - generic [ref=e63] [cursor=pointer]: 🌍
+        - generic [ref=e64]:
+          - heading "Quick Links" [level=4] [ref=e65]
+          - list [ref=e66]:
+            - listitem [ref=e67]:
+              - link "About Us" [ref=e68] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e69]:
+              - link "Our Flavors" [ref=e70] [cursor=pointer]:
+                - /url: /flavors
+            - listitem [ref=e71]:
+              - link "Locations" [ref=e72] [cursor=pointer]:
+                - /url: /locations
+            - listitem [ref=e73]:
+              - link "Catering" [ref=e74] [cursor=pointer]:
+                - /url: /catering
+        - generic [ref=e75]:
+          - heading "Contact" [level=4] [ref=e76]
+          - generic [ref=e77]:
+            - paragraph [ref=e78]: 👤 Randy Pagels
+            - paragraph [ref=e79]: ✉️ randy.pagels@xebia.com
+            - paragraph [ref=e80]: 📍 123 Gelato Street
+            - paragraph [ref=e81]: 🌟 Sweet City, SC 12345
+            - paragraph [ref=e82]: 📞 (555) 123-GELATO
+            - paragraph [ref=e83]: "🕒 Daily: 10AM - 10PM"
+      - generic [ref=e84]:
+        - paragraph [ref=e85]: © 2026 Gino's Gelato. All rights reserved. Made with ❤️ and lots of ice cream!
+        - generic [ref=e86]:
+          - link "Privacy Policy" [ref=e87] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms of Service" [ref=e88] [cursor=pointer]:
+            - /url: /terms
+          - link "Nutrition Info" [ref=e89] [cursor=pointer]:
+            - /url: /nutrition

@@ -1,0 +1,236 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]: 🍦
+    - generic [ref=e7]: 🍨
+    - generic [ref=e8]: 🧁
+    - generic [ref=e10]:
+      - heading "🍦 Gino's Gelato" [level=1] [ref=e11]:
+        - link "🍦 Gino's Gelato" [ref=e12] [cursor=pointer]:
+          - /url: /
+      - navigation [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link "Home" [ref=e16] [cursor=pointer]:
+              - /url: /
+              - text: Home
+          - listitem [ref=e17]:
+            - link "🎨 Build Ice Cream" [ref=e18] [cursor=pointer]:
+              - /url: /builder
+              - text: 🎨 Build Ice Cream
+          - listitem [ref=e19]:
+            - link "🛒 Cart" [ref=e20] [cursor=pointer]:
+              - /url: /cart
+              - text: 🛒 Cart
+  - main [ref=e21]:
+    - generic [ref=e90]:
+      - generic [ref=e91]: 🍦
+      - generic [ref=e92]: 🍨
+      - generic [ref=e93]: 🧁
+      - generic [ref=e94]:
+        - generic [ref=e95]:
+          - heading "🎨 Build Your Perfect Ice Cream" [level=1] [ref=e96]
+          - paragraph [ref=e97]: Choose your container, pick up to 3 flavors, and add your favorite toppings!
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - generic [ref=e100]:
+              - heading "🏺 Choose Your Container" [level=2] [ref=e101]
+              - generic [ref=e102]:
+                - generic [ref=e103] [cursor=pointer]:
+                  - generic [ref=e104]: 🍦
+                  - heading "Waffle Cone" [level=3] [ref=e105]
+                  - paragraph [ref=e106]: Crispy waffle cone, perfect for on-the-go
+                  - generic [ref=e107]: $2.50
+                  - generic [ref=e108]: ✓ Selected
+                - generic [ref=e109] [cursor=pointer]:
+                  - generic [ref=e110]: 🍨
+                  - heading "Bowl Cup" [level=3] [ref=e111]
+                  - paragraph [ref=e112]: Classic bowl, great for extra toppings
+                  - generic [ref=e113]: $3.00
+            - generic [ref=e114]:
+              - generic [ref=e115]:
+                - heading "🍦 Choose Your Flavors" [level=2] [ref=e116]
+                - generic [ref=e117]: 0/3 Selected
+              - generic [ref=e118]:
+                - generic [ref=e119] [cursor=pointer]:
+                  - generic [ref=e120]:
+                    - generic [ref=e121]: 🤍
+                    - generic [ref=e122]: Vanilla Dream
+                  - paragraph [ref=e123]: Classic vanilla with Madagascar beans
+                - generic [ref=e124] [cursor=pointer]:
+                  - generic [ref=e125]:
+                    - generic [ref=e126]: 🤎
+                    - generic [ref=e127]: Chocolate Fudge
+                  - paragraph [ref=e128]: Rich dark chocolate delight
+                - generic [ref=e129] [cursor=pointer]:
+                  - generic [ref=e130]:
+                    - generic [ref=e131]: 🍓
+                    - generic [ref=e132]: Strawberry Bliss
+                  - paragraph [ref=e133]: Fresh strawberries and cream
+                - generic [ref=e134] [cursor=pointer]:
+                  - generic [ref=e135]:
+                    - generic [ref=e136]: 🌿
+                    - generic [ref=e137]: Mint Chocolate Chip
+                  - paragraph [ref=e138]: Cool mint with chocolate chips
+                - generic [ref=e139] [cursor=pointer]:
+                  - generic [ref=e140]:
+                    - generic [ref=e141]: 🍪
+                    - generic [ref=e142]: Cookies & Cream
+                  - paragraph [ref=e143]: Crushed Oreo cookies in vanilla
+                - generic [ref=e144] [cursor=pointer]:
+                  - generic [ref=e145]:
+                    - generic [ref=e146]: 🏔️
+                    - generic [ref=e147]: Rocky Road
+                  - paragraph [ref=e148]: Chocolate with marshmallows & nuts
+                - generic [ref=e149] [cursor=pointer]:
+                  - generic [ref=e150]:
+                    - generic [ref=e151]: 🫐
+                    - generic [ref=e152]: Berry Burst
+                  - paragraph [ref=e153]: Mixed berry explosion
+                - generic [ref=e154] [cursor=pointer]:
+                  - generic [ref=e155]:
+                    - generic [ref=e156]: 🥜
+                    - generic [ref=e157]: Pistachio
+                  - paragraph [ref=e158]: Authentic Italian pistachio
+                - generic [ref=e159] [cursor=pointer]:
+                  - generic [ref=e160]:
+                    - generic [ref=e161]: 🍋
+                    - generic [ref=e162]: Lemon Sorbet
+                  - paragraph [ref=e163]: Refreshing lemon zest
+                - generic [ref=e164] [cursor=pointer]:
+                  - generic [ref=e165]:
+                    - generic [ref=e166]: 🧈
+                    - generic [ref=e167]: Salted Caramel
+                  - paragraph [ref=e168]: Sweet caramel with sea salt
+                - generic [ref=e169] [cursor=pointer]:
+                  - generic [ref=e170]:
+                    - generic [ref=e171]: ☕
+                    - generic [ref=e172]: Coffee Crunch
+                  - paragraph [ref=e173]: Espresso with coffee bean crunch
+                - generic [ref=e174] [cursor=pointer]:
+                  - generic [ref=e175]:
+                    - generic [ref=e176]: 🌈
+                    - generic [ref=e177]: Rainbow Sherbet
+                  - paragraph [ref=e178]: Colorful fruit sherbet mix
+            - generic [ref=e179]:
+              - heading "🧁 Add Your Toppings" [level=2] [ref=e181]
+              - generic [ref=e182]:
+                - generic [ref=e184] [cursor=pointer]:
+                  - generic [ref=e185]:
+                    - generic [ref=e186]: 🌈
+                    - generic [ref=e187]: Rainbow Sprinkles
+                  - generic [ref=e188]: +$0.50
+                - generic [ref=e190] [cursor=pointer]:
+                  - generic [ref=e191]:
+                    - generic [ref=e192]: 🍫
+                    - generic [ref=e193]: Chocolate Chips
+                  - generic [ref=e194]: +$0.75
+                - generic [ref=e196] [cursor=pointer]:
+                  - generic [ref=e197]:
+                    - generic [ref=e198]: 🍪
+                    - generic [ref=e199]: Crushed Oreos
+                  - generic [ref=e200]: +$1.00
+                - generic [ref=e202] [cursor=pointer]:
+                  - generic [ref=e203]:
+                    - generic [ref=e204]: 🧈
+                    - generic [ref=e205]: Caramel Sauce
+                  - generic [ref=e206]: +$0.75
+                - generic [ref=e208] [cursor=pointer]:
+                  - generic [ref=e209]:
+                    - generic [ref=e210]: ☕
+                    - generic [ref=e211]: Hot Fudge
+                  - generic [ref=e212]: +$0.75
+                - generic [ref=e214] [cursor=pointer]:
+                  - generic [ref=e215]:
+                    - generic [ref=e216]: 🥛
+                    - generic [ref=e217]: Whipped Cream
+                  - generic [ref=e218]: +$0.50
+                - generic [ref=e220] [cursor=pointer]:
+                  - generic [ref=e221]:
+                    - generic [ref=e222]: 🍒
+                    - generic [ref=e223]: Cherry
+                  - generic [ref=e224]: +$0.25
+                - generic [ref=e226] [cursor=pointer]:
+                  - generic [ref=e227]:
+                    - generic [ref=e228]: 🥜
+                    - generic [ref=e229]: Crushed Nuts
+                  - generic [ref=e230]: +$1.00
+                - generic [ref=e232] [cursor=pointer]:
+                  - generic [ref=e233]:
+                    - generic [ref=e234]: 🍓
+                    - generic [ref=e235]: Fresh Strawberries
+                  - generic [ref=e236]: +$1.25
+                - generic [ref=e238] [cursor=pointer]:
+                  - generic [ref=e239]:
+                    - generic [ref=e240]: 🐻
+                    - generic [ref=e241]: Gummy Bears
+                  - generic [ref=e242]: +$0.75
+                - generic [ref=e244] [cursor=pointer]:
+                  - generic [ref=e245]:
+                    - generic [ref=e246]: 🥥
+                    - generic [ref=e247]: Coconut Flakes
+                  - generic [ref=e248]: +$0.50
+                - generic [ref=e250] [cursor=pointer]:
+                  - generic [ref=e251]:
+                    - generic [ref=e252]: 🍪
+                    - generic [ref=e253]: Graham Cracker
+                  - generic [ref=e254]: +$0.75
+              - paragraph [ref=e256]: 🎯 Click on toppings to add them to your ice cream!
+          - generic [ref=e258]:
+            - heading "🍦 Your Creation" [level=3] [ref=e259]
+            - generic [ref=e260]:
+              - generic [ref=e261]: 🍦
+              - paragraph [ref=e262]: Waffle Cone
+            - generic [ref=e263]:
+              - heading "Flavors (0/3):" [level=4] [ref=e264]
+              - paragraph [ref=e265]: No flavors selected
+            - generic [ref=e266]:
+              - heading "Toppings (0):" [level=4] [ref=e267]
+              - paragraph [ref=e268]: No toppings selected
+            - generic [ref=e270]:
+              - generic [ref=e271]: "Total Price:"
+              - generic [ref=e272]: $2.50
+            - button "🛒 Add to Cart" [disabled] [ref=e273]
+            - button "View Cart" [ref=e274] [cursor=pointer]
+  - contentinfo [ref=e54]:
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - heading "🍦 Gino's Gelato" [level=3] [ref=e58]
+          - paragraph [ref=e59]: Crafting authentic Italian gelato with the finest ingredients since 1952. Every scoop is a journey to Italy!
+          - generic [ref=e60]:
+            - generic [ref=e61] [cursor=pointer]: 📧
+            - generic [ref=e62] [cursor=pointer]: 📞
+            - generic [ref=e63] [cursor=pointer]: 🌍
+        - generic [ref=e64]:
+          - heading "Quick Links" [level=4] [ref=e65]
+          - list [ref=e66]:
+            - listitem [ref=e67]:
+              - link "About Us" [ref=e68] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e69]:
+              - link "Our Flavors" [ref=e70] [cursor=pointer]:
+                - /url: /flavors
+            - listitem [ref=e71]:
+              - link "Locations" [ref=e72] [cursor=pointer]:
+                - /url: /locations
+            - listitem [ref=e73]:
+              - link "Catering" [ref=e74] [cursor=pointer]:
+                - /url: /catering
+        - generic [ref=e75]:
+          - heading "Contact" [level=4] [ref=e76]
+          - generic [ref=e77]:
+            - paragraph [ref=e78]: 👤 Randy Pagels
+            - paragraph [ref=e79]: ✉️ randy.pagels@xebia.com
+            - paragraph [ref=e80]: 📍 123 Gelato Street
+            - paragraph [ref=e81]: 🌟 Sweet City, SC 12345
+            - paragraph [ref=e82]: 📞 (555) 123-GELATO
+            - paragraph [ref=e83]: "🕒 Daily: 10AM - 10PM"
+      - generic [ref=e84]:
+        - paragraph [ref=e85]: © 2026 Gino's Gelato. All rights reserved. Made with ❤️ and lots of ice cream!
+        - generic [ref=e86]:
+          - link "Privacy Policy" [ref=e87] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms of Service" [ref=e88] [cursor=pointer]:
+            - /url: /terms
+          - link "Nutrition Info" [ref=e89] [cursor=pointer]:
+            - /url: /nutrition

@@ -32,6 +32,18 @@ namespace GinosGelato.Controllers
             return Ok(_flavors);
         }
 
+        // GET: api/flavors/search?name=vanilla
+        [HttpGet("search")]
+        public ActionResult<IEnumerable<Flavor>> SearchFlavors(string name)
+        {
+            var matchingFlavors = _flavors.Where(f => f.Name.ToLower().Contains(name.ToLower())).ToList();
+            if (matchingFlavors.Count == 0)
+            {
+                return NotFound();
+            }
+            return Ok(matchingFlavors);
+        }
+
         // GET: api/flavors/{id}
         [HttpGet("{id}")]
         public ActionResult<Flavor> GetFlavor(int id)
