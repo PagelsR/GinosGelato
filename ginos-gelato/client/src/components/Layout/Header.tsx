@@ -1,9 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../../contexts/CartContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const Header: React.FC = () => {
     const { getTotalItems } = useCart();
+    const { isDark, toggleTheme } = useTheme();
     return (
         <header className="bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-400 shadow-xl relative overflow-hidden">
             {/* Decorative elements */}
@@ -20,7 +22,7 @@ const Header: React.FC = () => {
                         </Link>
                     </h1>
                     <nav>
-                        <ul className="flex space-x-8">
+                        <ul className="flex items-center space-x-8">
                             <li>
                                 <Link 
                                     to="/" 
@@ -52,6 +54,15 @@ const Header: React.FC = () => {
                                     )}
                                     <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-200 group-hover:w-full transition-all duration-300"></span>
                                 </Link>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={toggleTheme}
+                                    aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                                    className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 text-white transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                >
+                                    {isDark ? '☀️' : '🌙'}
+                                </button>
                             </li>
                         </ul>
                     </nav>

@@ -10,7 +10,7 @@ const Home: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 relative overflow-hidden">
+        <div className="min-h-screen bg-gradient-to-br from-pink-50 via-blue-50 to-yellow-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 relative overflow-hidden">
             {/* Floating Background Elements */}
             <div className="absolute top-20 left-10 text-pink-200 text-8xl animate-float opacity-30">🍦</div>
             <div className="absolute top-40 right-16 text-blue-200 text-6xl animate-bounce-slow opacity-30">🍨</div>
@@ -25,7 +25,7 @@ const Home: React.FC = () => {
                         <h1 className="text-4xl md:text-7xl font-fredoka text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-400 mb-6 animate-pulse">
                             🍦 Gino's Gelato! 🍨
                         </h1>
-                        <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
+                        <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                             Create your perfect ice cream masterpiece with our premium flavors, 
                             delicious toppings, and artisanal containers. Every scoop is a celebration!
                         </p>
@@ -39,26 +39,26 @@ const Home: React.FC = () => {
 
                     {/* Feature Cards */}
                     <div className="grid md:grid-cols-3 gap-6 mb-8">
-                        <div className="gelato-card text-center bg-gradient-to-br from-pink-100 to-pink-50">
+                        <div className="gelato-card text-center bg-gradient-to-br from-pink-100 to-pink-50 dark:from-pink-900/40 dark:to-pink-800/20">
                             <div className="text-4xl mb-4">🏆</div>
-                            <h3 className="text-xl font-semibold text-pink-700 mb-2">Premium Quality</h3>
-                            <p className="text-gray-600">Made with the finest ingredients and traditional Italian recipes</p>
+                            <h3 className="text-xl font-semibold text-pink-700 dark:text-pink-300 mb-2">Premium Quality</h3>
+                            <p className="text-gray-600 dark:text-gray-300">Made with the finest ingredients and traditional Italian recipes</p>
                         </div>
-                        <div className="gelato-card text-center bg-gradient-to-br from-blue-100 to-blue-50">
+                        <div className="gelato-card text-center bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/40 dark:to-blue-800/20">
                             <div className="text-4xl mb-4">🎨</div>
-                            <h3 className="text-xl font-semibold text-blue-700 mb-2">Custom Creations</h3>
-                            <p className="text-gray-600">Mix and match flavors, toppings, and containers to create your perfect treat</p>
+                            <h3 className="text-xl font-semibold text-blue-700 dark:text-blue-300 mb-2">Custom Creations</h3>
+                            <p className="text-gray-600 dark:text-gray-300">Mix and match flavors, toppings, and containers to create your perfect treat</p>
                         </div>
-                        <div className="gelato-card text-center bg-gradient-to-br from-yellow-100 to-yellow-50">
+                        <div className="gelato-card text-center bg-gradient-to-br from-yellow-100 to-yellow-50 dark:from-yellow-900/40 dark:to-yellow-800/20">
                             <div className="text-4xl mb-4">🚀</div>
-                            <h3 className="text-xl font-semibold text-yellow-700 mb-2">Fresh Daily</h3>
-                            <p className="text-gray-600">Made fresh every day with love and passion for authentic gelato</p>
+                            <h3 className="text-xl font-semibold text-yellow-700 dark:text-yellow-300 mb-2">Fresh Daily</h3>
+                            <p className="text-gray-600 dark:text-gray-300">Made fresh every day with love and passion for authentic gelato</p>
                         </div>
                     </div>
 
                     {/* Popular Flavors Preview */}
-                    <div className="gelato-card bg-gradient-to-r from-purple-50 to-pink-50">
-                        <h2 className="text-3xl font-semibold text-gray-800 mb-6">🌟 Today's Featured Flavors</h2>
+                    <div className="gelato-card bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30">
+                        <h2 className="text-3xl font-semibold text-gray-800 dark:text-gray-100 mb-6">🌟 Today's Featured Flavors</h2>
                         <div className="flex justify-center gap-4 flex-wrap">
                             <span className="bg-gradient-to-r from-pink-400 to-red-400 text-white px-4 py-2 rounded-full font-medium shadow-lg">🍓 Strawberry Bliss</span>
                             <span className="bg-gradient-to-r from-yellow-400 to-orange-400 text-white px-4 py-2 rounded-full font-medium shadow-lg">🍋 Lemon Zest</span>

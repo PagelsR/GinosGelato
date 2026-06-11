@@ -13,30 +13,33 @@ import Catering from './pages/Catering';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import { CartProvider } from './contexts/CartContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const App: React.FC = () => {
   return (
     <AppInsightsContext.Provider value={reactPlugin}>
-      <CartProvider>
-        <Router>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/builder" element={<Builder />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/about" element={<AboutUs />} />
-                <Route path="/flavors" element={<OurFlavors />} />
-                <Route path="/locations" element={<Locations />} />
-                <Route path="/catering" element={<Catering />} />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </Router>
-      </CartProvider>
+      <ThemeProvider>
+        <CartProvider>
+          <Router>
+            <div className="flex flex-col min-h-screen transition-colors duration-300">
+              <Header />
+              <main className="flex-grow">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/builder" element={<Builder />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/about" element={<AboutUs />} />
+                  <Route path="/flavors" element={<OurFlavors />} />
+                  <Route path="/locations" element={<Locations />} />
+                  <Route path="/catering" element={<Catering />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+        </CartProvider>
+      </ThemeProvider>
     </AppInsightsContext.Provider>
   );
 };

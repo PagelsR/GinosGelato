@@ -20,6 +20,12 @@ body {
     background: linear-gradient(to bottom right, #fdf2f8, #eff6ff, #fefce8);
     color: #1f2937;
     min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+    background: linear-gradient(to bottom right, #1a0a12, #0f172a, #1a1500);
+    color: #f3f4f6;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -29,6 +35,10 @@ h1, h2, h3, h4, h5, h6 {
 /* Ice Cream Theme Components */
 .gelato-card {
     @apply bg-white/80 backdrop-blur-sm shadow-xl rounded-2xl p-6 border border-white/20 hover:shadow-2xl transition-all duration-300 hover:scale-105;
+}
+
+.dark .gelato-card {
+    @apply bg-gray-800/80 border-gray-700/40 shadow-gray-900/50;
 }
 
 .gelato-button-primary {
@@ -53,8 +63,16 @@ h1, h2, h3, h4, h5, h6 {
     @apply bg-white/70 backdrop-blur-sm rounded-xl p-4 border-2 border-transparent hover:border-pink-300 cursor-pointer transition-all duration-300 hover:shadow-lg;
 }
 
+.dark .selection-card {
+    @apply bg-gray-700/70 hover:border-pink-400;
+}
+
 .selection-card.selected {
     @apply border-pink-500 bg-pink-50/80 shadow-lg scale-105;
+}
+
+.dark .selection-card.selected {
+    @apply bg-pink-900/40;
 }
 
 /* Flavor Grid */
@@ -67,6 +85,10 @@ h1, h2, h3, h4, h5, h6 {
     background: linear-gradient(135deg, var(--cream) 0%, #f8f9fa 100%);
 }
 
+.dark .flavor-card {
+    background: linear-gradient(135deg, #2d1f1a 0%, #1e293b 100%);
+}
+
 .flavor-card.selected {
     @apply ring-4 ring-pink-400 scale-105;
 }
@@ -76,6 +98,14 @@ h1, h2, h3, h4, h5, h6 {
     @apply inline-block bg-gradient-to-r from-yellow-200 to-orange-200 text-gray-800 px-4 py-2 rounded-full mr-2 mb-2 cursor-pointer border-2 border-transparent hover:border-yellow-400 transition-all duration-300;
 }
 
+.dark .topping-pill {
+    @apply from-yellow-800 to-orange-800 text-gray-100;
+}
+
 .topping-pill.selected {
     @apply bg-gradient-to-r from-yellow-400 to-orange-400 text-white border-orange-500 shadow-lg;
+}
+
+.dark .topping-pill.selected {
+    @apply from-yellow-500 to-orange-500;
 }
