@@ -7,7 +7,7 @@ agent: agent
 # 02 - Observability Foundation
 
 ## Read First
-Read and follow the authoritative project specification: [00 - Project Vision](../../docs/ai/00-Project-Vision.md)
+Read and follow the authoritative project specification: [00 - Project Vision](../docs/ai/00-Project-Vision.md)
 
 Treat that document as the source of truth for:
 

@@ -6,7 +6,7 @@ applyTo: '**'
 
 Before making architectural or repository-wide changes, follow:
 
-[Project Vision](../docs/ai/00-Project-Vision.md)
+[Project Vision](docs/ai/00-Project-Vision.md)
 
 Core requirements:
 

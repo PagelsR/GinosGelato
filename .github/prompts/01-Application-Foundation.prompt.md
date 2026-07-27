@@ -2,12 +2,14 @@
 name: ginos-application-foundation
 description: Build and deploy the Gino's Gelato application foundation
 agent: agent
+model: Claude Opus 4.8 (copilot)
+tools: ['execute', 'read', 'edit', 'search', 'web', 'agent', 'todo']
 ---
 
 # 01 - Application Foundation
 
 ## Read First
-Read and follow the authoritative project specification: [00 - Project Vision](../../docs/ai/00-Project-Vision.md)
+Read and follow the authoritative project specification: [00 - Project Vision](../docs/ai/00-Project-Vision.md)
 
 Treat that document as the source of truth for:
 

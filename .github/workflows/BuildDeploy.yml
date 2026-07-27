@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  RESOURCE_GROUP: 'rg-GinosGelato'
+  #RESOURCE_GROUP: 'rg-GinosGelato'
+  RESOURCE_GROUP: 'rg-GinosGelato-Modernization'
   LOCATION: 'eastus2'
   DOTNET_VERSION: '8.0.x'
   NODE_VERSION: '20.x'
