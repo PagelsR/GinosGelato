@@ -31,11 +31,12 @@ resource appService 'Microsoft.Web/sites@2025-03-01' = {
     siteConfig: {
       numberOfWorkers: 1
       linuxFxVersion: 'DOTNETCORE|10.0'
-      alwaysOn: true
+      alwaysOn: false // Free (F1) tier does not support Always On
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
-      healthCheckPath: '/health'
-      autoHealEnabled: true
+      // Platform health check requires Basic+; on Free we rely on the app's /health
+      // endpoint (verified by the pipeline). Re-add healthCheckPath on paid tiers.
+      autoHealEnabled: false // Auto Heal requires Basic+
       http20Enabled: false
       functionAppScaleLimit: 0
       minimumElasticInstanceCount: 0
