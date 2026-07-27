@@ -1,7 +1,9 @@
 using Microsoft.ApplicationInsights.DependencyCollector;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.EntityFrameworkCore;
 using GinosGelato.Data;
 using GinosGelato.Services;
+using GinosGelato.Telemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,10 @@ builder.Services.AddApplicationInsightsTelemetry();
 // are diagnosable. Parameter values are not recorded.
 builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>(
     (module, _) => module.EnableSqlCommandTextInstrumentation = true);
+
+// Stamp all telemetry with release/deployment context (application_Version,
+// gitCommitSha, deploymentId, environment) for release correlation.
+builder.Services.AddSingleton<ITelemetryInitializer, ReleaseTelemetryInitializer>();
 
 // The Azure SQL connection string is supplied by configuration:
 //  - Locally: appsettings.Development.json (LocalDB)

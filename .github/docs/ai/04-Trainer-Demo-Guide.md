@@ -327,10 +327,25 @@ random code.
 **Trainer flow (keep it short):**
 1. **Alerts:** describe one or two you would set — failure rate > 5%, or P95
    checkout duration > 3s. Show the Alerts blade briefly if configured.
-2. **Release correlation:** explain that adding deployment properties
-   (`ApplicationVersion`, `GitCommitSha`, `Environment`) as telemetry lets the
-   team answer "did this start after the last deploy?" (Call this a concrete
-   next step for this repo.)
+2. **Release correlation (live):** every telemetry item — browser and API —
+   carries the build identity (`application_Version`, plus `gitCommitSha`,
+   `deploymentId`, `environment`), stamped by the release telemetry initializers
+   (`ReleaseTelemetryInitializer` on the API and the client initializer in
+   `src/services/appInsights.ts`; wired to the deploy in
+   `.github/workflows/BuildDeploy.yml`). In **Logs**, compare failures across
+   builds:
+
+   ```kql
+   requests
+   | where timestamp > ago(1d)
+   | summarize Requests = count(), Failures = countif(success == false)
+       by application_Version
+   | order by application_Version desc
+   ```
+
+   Show failures concentrated on one `application_Version` — the concrete "it
+   started with this release" moment. Drill in with `gitCommitSha` to land on the
+   exact commit.
 3. **Frontend vs. backend:** remind them the browser can break while the API is
    healthy — demonstrated by `/fault?fault=browser-exception`, which surfaces as
    a client-side exception in App Insights.
@@ -338,7 +353,8 @@ random code.
 **Talking point:**
 
 > "We should detect this before a customer opens a support ticket. And because
-> browser and server telemetry correlate, we know which side is actually broken."
+> every signal is tagged with the build that produced it, we can prove whether a
+> regression arrived with the last deploy — down to the commit."
 
 ------------------------------------------------------------------------
 

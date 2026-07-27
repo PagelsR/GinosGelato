@@ -205,6 +205,18 @@ jobs:
           app-name: ${{ needs.provision-infrastructure.outputs.appServiceName }}
           package: ./ginos-gelato/server/publish
       
+      - name: Set Release Correlation App Settings
+        run: |
+          echo "Stamping API telemetry with release/deployment identity..."
+          az webapp config appsettings set \
+            --name "${{ needs.provision-infrastructure.outputs.appServiceName }}" \
+            --resource-group "${{ needs.provision-infrastructure.outputs.resourceGroupName }}" \
+            --settings \
+              Release__Version="1.0.${{ github.run_number }}" \
+              Release__CommitSha="${{ github.sha }}" \
+              Release__DeploymentId="${{ github.run_id }}" \
+            --output none
+      
       - name: Verify Deployment
         run: |
           echo "Verifying API deployment..."
@@ -270,6 +282,10 @@ jobs:
           echo "VITE_API_URL=$API_URL" > .env.production
           # Browser telemetry lands in the same Application Insights resource as the API.
           echo "VITE_APPINSIGHTS_CONNECTION_STRING=${{ needs.provision-infrastructure.outputs.appInsightsConnectionString }}" >> .env.production
+          # Release-correlation identity, matching the API telemetry initializer.
+          echo "VITE_APP_VERSION=1.0.${{ github.run_number }}" >> .env.production
+          echo "VITE_GIT_COMMIT_SHA=${{ github.sha }}" >> .env.production
+          echo "VITE_ENVIRONMENT=Production" >> .env.production
           echo "VITE_API_URL configured (connection string masked)"
         working-directory: ./ginos-gelato/client
       
