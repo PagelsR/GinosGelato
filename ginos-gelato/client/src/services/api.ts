@@ -120,3 +120,33 @@ export const createOrder = async (orderData: CreateOrderRequest): Promise<OrderR
         throw error;
     }
 };
+
+// Demo fault: trigger a deterministic slow Azure SQL dependency on the API so a
+// slow-query scenario appears in Application Insights on demand. Opt-in only.
+export const triggerSlowSql = async (): Promise<{ fault: string; delaySeconds: number }> => {
+    const startedAt = Date.now();
+    const response = await axios.get(`${API_BASE_URL}/demo/slow-sql`);
+    const durationMs = Date.now() - startedAt;
+    appInsights.trackEvent(
+        { name: 'DemoFaultTriggered' },
+        { fault: 'slow-sql', durationMs: String(durationMs) }
+    );
+    return response.data;
+};
+
+// Demo fault: trigger a deterministic API failure (503) so a failed request /
+// dependency appears in Application Insights on demand. Opt-in only.
+export const triggerApiFailure = async (): Promise<never> => {
+    try {
+        await axios.get(`${API_BASE_URL}/demo/api-failure`);
+        // The endpoint always fails when enabled; reaching here means it is disabled.
+        throw new Error('Demo API failure endpoint did not fail (faults may be disabled).');
+    } catch (error) {
+        appInsights.trackException(
+            { exception: error as Error },
+            { api: 'triggerApiFailure', endpoint: `${API_BASE_URL}/demo/api-failure`, fault: 'api-failure' }
+        );
+        appInsights.trackEvent({ name: 'DemoFaultTriggered' }, { fault: 'api-failure' });
+        throw error;
+    }
+};

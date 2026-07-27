@@ -38,6 +38,7 @@ jobs:
 
       - name: Run Playwright Tests
         run: |
+          echo "Running the full suite (journeys + faults + flaky) against the deployed Static Web App..."
           npx playwright test
         continue-on-error: true
 

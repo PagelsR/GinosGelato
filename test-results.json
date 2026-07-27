@@ -10,14 +10,18 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {},
+    "metadata": {
+      "actualWorkers": 1
+    },
     "preserveOutput": "always",
     "projects": [
       {
         "outputDir": "C:/Users/RandyPagels/Repos/GinosGelato/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {},
+        "metadata": {
+          "actualWorkers": 1
+        },
         "id": "chromium",
         "name": "chromium",
         "testDir": "C:/Users/RandyPagels/Repos/GinosGelato/e2e",
@@ -59,21 +63,21 @@
   },
   "suites": [
     {
-      "title": "happy-path.spec.ts",
-      "file": "happy-path.spec.ts",
+      "title": "journey-2-delivery-browse-to-buy.spec.ts",
+      "file": "journey-2-delivery-browse-to-buy.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Ordering happy path",
-          "file": "happy-path.spec.ts",
-          "line": 21,
+          "title": "Journey 2 — Delivery Order Browse-to-Buy",
+          "file": "journey-2-delivery-browse-to-buy.spec.ts",
+          "line": 28,
           "column": 6,
           "specs": [
             {
-              "title": "Pickup order completes end-to-end",
-              "ok": true,
+              "title": "Delivery order completes end-to-end",
+              "ok": false,
               "tags": [],
               "tests": [
                 {
@@ -82,13 +86,49 @@
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
-                  "results": [],
-                  "status": "skipped"
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "timedOut",
+                      "duration": 30343,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\journey-2-delivery-browse-to-buy.spec.ts",
+                            "column": 66,
+                            "line": 61
+                          },
+                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('textbox', { name: 'MI', exact: true })\u001b[22m\n\n\n  59 |     await page.getByRole('textbox', { name: '123 Main Street' }).fill(customer.address);\n  60 |     await page.getByRole('textbox', { name: 'Your city' }).fill(customer.city);\n> 61 |     await page.getByRole('textbox', { name: 'MI', exact: true }).fill(customer.state);\n     |                                                                  ^\n  62 |     await page.getByRole('textbox', { name: '12345' }).fill(customer.zip);\n  63 |     await page.getByRole('button', { name: /Continue to Payment/ }).click();\n  64 |\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\journey-2-delivery-browse-to-buy.spec.ts:61:66"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-07-27T19:10:03.926Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\test-results\\journey-2-delivery-browse--a18e0--order-completes-end-to-end-chromium\\error-context.md"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
                 }
               ],
-              "id": "193f4027a814d80785cd-5a8191a7b23ba306d275",
-              "file": "happy-path.spec.ts",
-              "line": 22,
+              "id": "bf9011771bdaed16aac9-c9779cd820755acc86dc",
+              "file": "journey-2-delivery-browse-to-buy.spec.ts",
+              "line": 29,
               "column": 7
             }
           ]
@@ -98,11 +138,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-07-27T13:17:18.920Z",
-    "duration": 189.38799999999992,
+    "startTime": "2026-07-27T19:10:02.349Z",
+    "duration": 33151.625,
     "expected": 0,
-    "skipped": 1,
-    "unexpected": 0,
+    "skipped": 0,
+    "unexpected": 1,
     "flaky": 0
   }
 }
