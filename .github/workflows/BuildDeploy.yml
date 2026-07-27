@@ -13,7 +13,7 @@ permissions:
 env:
   #RESOURCE_GROUP: 'rg-GinosGelato'
   RESOURCE_GROUP: 'rg-GinosGelato-Modernization'
-  LOCATION: 'eastus2'
+  LOCATION: 'centralus'
   DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '20.x'
 
