@@ -117,6 +117,15 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
+      - name: Ensure Resource Group
+        run: |
+          echo "Ensuring resource group ${{ env.RESOURCE_GROUP }} exists..."
+          az group create \
+            --name "${{ env.RESOURCE_GROUP }}" \
+            --location "${{ env.LOCATION }}" \
+            --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            --output none
+      
       - name: Deploy Bicep Infrastructure
         id: deploy
         uses: azure/arm-deploy@v2
