@@ -8,7 +8,42 @@ import {
     isDemoMode 
 } from '../utils/demoErrors';
 
-const API_BASE_URL = 'http://localhost:5000/api'; // Adjust the base URL as needed
+const API_BASE_URL = `${import.meta.env.VITE_API_URL ?? 'http://localhost:5000'}/api`;
+
+// Shape of the create-order request expected by the API.
+export interface OrderItemRequest {
+    container: string;
+    flavors: string[];
+    toppings: string[];
+}
+
+export interface CreateOrderRequest {
+    customerName: string;
+    email: string;
+    phone: string;
+    fulfillmentType: 'Pickup' | 'Delivery' | 'Shipping';
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    specialInstructions?: string;
+    items: OrderItemRequest[];
+}
+
+export interface OrderResponse {
+    id: number;
+    confirmationNumber: string;
+    customerName: string;
+    fulfillmentType: string;
+    subtotal: number;
+    tax: number;
+    deliveryFee: number;
+    shippingFee: number;
+    total: number;
+    status: string;
+    orderDate: string;
+    items: Array<{ container: string; flavors: string[]; toppings: string[]; linePrice: number }>;
+}
 
 // Function to get all flavors
 export const getFlavors = async () => {
@@ -62,14 +97,14 @@ export const getToppings = async () => {
 };
 
 // Function to create a new order
-export const createOrder = async (orderData: any) => {
+export const createOrder = async (orderData: CreateOrderRequest): Promise<OrderResponse> => {
     try {
         // Demo: Simulate timeout errors 2% of the time (rare)
         if (shouldSimulateError(0.02)) {
             throw simulateTimeoutError();
         }
         
-        const response = await axios.post(`${API_BASE_URL}/orders`, orderData);
+        const response = await axios.post<OrderResponse>(`${API_BASE_URL}/orders`, orderData);
         appInsights.trackTrace({ message: 'Order created successfully' }, { orderId: response.data.id });
         return response.data;
     } catch (error) {
@@ -79,7 +114,6 @@ export const createOrder = async (orderData: any) => {
             { 
                 api: 'createOrder', 
                 endpoint: `${API_BASE_URL}/orders`, 
-                orderData,
                 demoMode: isDemoMode()
             }
         );

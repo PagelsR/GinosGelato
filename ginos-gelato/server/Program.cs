@@ -4,6 +4,12 @@ using GinosGelato.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// The Azure SQL connection string is supplied by configuration:
+//  - Locally: appsettings.Development.json (LocalDB)
+//  - In Azure: an App Service connection string that is a Key Vault reference,
+//    resolved by the App Service managed identity. The client never touches
+//    SQL or Key Vault.
+
 // Add services to the container.
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
@@ -11,29 +17,46 @@ builder.Services.AddControllers()
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
     });
 
-// Add Entity Framework
+// Entity Framework Core backed by Azure SQL (system of record).
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseInMemoryDatabase("GinosGelatoDb")); // Using in-memory database for simplicity
+    options.UseSqlServer(connectionString, sql => sql.EnableRetryOnFailure()));
 
-// Add custom services
+// Application services
 builder.Services.AddScoped<OrderService>();
+builder.Services.AddSingleton<PricingService>();
 
-// Add Swagger/OpenAPI
+// Health checks (includes database connectivity).
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<ApplicationDbContext>("database");
+
+// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add CORS
+// CORS driven by configuration/app settings.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[] { "http://localhost:5173", "https://localhost:5173" };
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "https://localhost:5173") // Vite default ports
+        policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
 var app = builder.Build();
+
+// Apply EF Core migrations on startup so schema and seed data exist. This makes
+// orders durable across App Service restarts.
+if (!string.IsNullOrWhiteSpace(connectionString))
+{
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 // Configure the HTTP request pipeline.
 app.UseSwagger();
@@ -46,5 +69,9 @@ app.UseCors();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
+
+// Exposed so integration tests can reference the application entry point.
+public partial class Program { }

@@ -13,12 +13,6 @@ param appServicePlanId string
 @description('Static Web App URL for CORS')
 param staticWebAppUrl string = ''
 
-@description('Application Insights Connection String')
-param appInsightsConnectionString string = ''
-
-@description('Application Insights Instrumentation Key')
-param appInsightsInstrumentationKey string = ''
-
 @description('Resource tags')
 param defaultTags object
 
@@ -36,34 +30,16 @@ resource appService 'Microsoft.Web/sites@2025-03-01' = {
     httpsOnly: true
     siteConfig: {
       numberOfWorkers: 1
-      linuxFxVersion: 'DOTNETCORE|8.0'
+      linuxFxVersion: 'DOTNETCORE|10.0'
       alwaysOn: true
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
-      healthCheckPath: '/api/flavors'
+      healthCheckPath: '/health'
       autoHealEnabled: true
       http20Enabled: false
       functionAppScaleLimit: 0
       minimumElasticInstanceCount: 0
-      appSettings: [
-        // Application Insights settings disabled
-        // {
-        //   name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        //   value: appInsightsConnectionString
-        // }
-        // {
-        //   name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
-        //   value: '~3'
-        // }
-        // {
-        //   name: 'XDT_MicrosoftApplicationInsights_Mode'
-        //   value: 'recommended'
-        // }
-        // {
-        //   name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-        //   value: appInsightsInstrumentationKey
-        // }
-      ]
+      // App settings and connection strings are configured by configSettings.bicep.
       cors: {
         allowedOrigins: [
           'http://localhost:5173'

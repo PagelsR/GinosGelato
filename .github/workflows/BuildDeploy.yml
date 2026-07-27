@@ -7,24 +7,32 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   #RESOURCE_GROUP: 'rg-GinosGelato'
   RESOURCE_GROUP: 'rg-GinosGelato-Modernization'
   LOCATION: 'eastus2'
-  DOTNET_VERSION: '8.0.x'
+  DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '20.x'
 
 jobs:
   # ============================================================================
-  # REQUIRED SECRETS CONFIGURATION
+  # REQUIRED CONFIGURATION (GitHub → Settings → Secrets and variables → Actions)
   # ============================================================================
-  # TODO: Add AZURE_CREDENTIALS secret here for service principal authentication
-  #       Format: JSON object with clientId, clientSecret, subscriptionId, tenantId
-  #       Create via: az ad sp create-for-rbac --name "GinosGelato-GitHub-Actions" 
-  #                   --role contributor --scopes /subscriptions/{subscription-id} --sdk-auth
+  # Secrets (required):
+  #   AZURE_CREDENTIALS      - Service principal JSON (az ad sp create-for-rbac --sdk-auth)
+  #                            Used by azure/login. You already have this.
+  #   AZURE_SUBSCRIPTION_ID  - Target subscription ID (GUID). You already have this.
+  #   SQL_ADMIN_PASSWORD     - Azure SQL administrator password (NEW - never committed)
   #
-  # TODO: Add AZURE_SUBSCRIPTION_ID secret here
-  #       Your Azure subscription ID (GUID format)
+  # Note: the admin Key Vault access (RPagels object ID) is set as the
+  #   'adminObjectId' default directly in iac/main.bicep (object IDs are not secrets).
+  #
+  # Optional:
+  #   AZURE_DEPLOY_SP_OBJECT_ID - Object ID of the AZURE_CREDENTIALS service principal,
+  #                               if the pipeline itself needs to read Key Vault secrets.
   # ============================================================================
 
   build-and-test:
@@ -55,9 +63,7 @@ jobs:
       - name: Run Backend Tests
         run: |
           echo "Running unit tests..."
-          dotnet test --configuration Release --no-build --verbosity normal
-        working-directory: ./ginos-gelato/server
-        continue-on-error: true
+          dotnet test ginos-gelato/server.Tests/GinosGelato.Tests.csproj --configuration Release --verbosity normal
       
       - name: Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
@@ -121,6 +127,8 @@ jobs:
           template: ./iac/main.bicep
           parameters: >
             location=${{ env.LOCATION }}
+            sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
+            deploymentPrincipalObjectId=${{ secrets.AZURE_DEPLOY_SP_OBJECT_ID }}
           deploymentName: 'ginosgelato-infra-${{ github.run_number }}'
           failOnStdErr: false
       
@@ -167,9 +175,7 @@ jobs:
       - name: Run Tests
         run: |
           echo "Running unit tests..."
-          dotnet test --configuration Release --no-build --verbosity normal
-        working-directory: ./ginos-gelato/server
-        continue-on-error: true
+          dotnet test ginos-gelato/server.Tests/GinosGelato.Tests.csproj --configuration Release --verbosity normal
       
       - name: Publish
         run: |
@@ -192,13 +198,13 @@ jobs:
         run: |
           echo "Verifying API deployment..."
           API_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
-          echo "Testing endpoint: ${API_URL}/api/flavors"
+          echo "Testing endpoint: ${API_URL}/health"
           
           # Wait for app to be ready
           for i in {1..12}; do
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${API_URL}/api/flavors" || echo "000")
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "${API_URL}/health" || echo "000")
             if [ "$HTTP_CODE" = "200" ]; then
-              echo "✅ API is responding (HTTP $HTTP_CODE)"
+              echo "✅ API is healthy (HTTP $HTTP_CODE)"
               curl -s "${API_URL}/api/flavors"
               break
             fi
@@ -249,11 +255,8 @@ jobs:
       - name: Configure API URL for production
         run: |
           API_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
-          APPINSIGHTS_CONNECTION_STRING="${{ needs.provision-infrastructure.outputs.appInsightsConnectionString }}"
           echo "Configuring API URL: $API_URL"
-          echo "Configuring Application Insights..."
           echo "VITE_API_URL=$API_URL" > .env.production
-          echo "VITE_APPINSIGHTS_CONNECTION_STRING=$APPINSIGHTS_CONNECTION_STRING" >> .env.production
           cat .env.production
         working-directory: ./ginos-gelato/client
       

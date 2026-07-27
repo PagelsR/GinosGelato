@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using GinosGelato.Data;
 using GinosGelato.Models;
 
 namespace GinosGelato.Controllers
@@ -10,33 +9,26 @@ namespace GinosGelato.Controllers
     [ApiController]
     public class FlavorsController : ControllerBase
     {
-        private readonly List<Flavor> _flavors;
+        private readonly ApplicationDbContext _context;
 
-        public FlavorsController()
+        public FlavorsController(ApplicationDbContext context)
         {
-            // Sample data for demonstration purposes
-            _flavors = new List<Flavor>
-            {
-                new Flavor { Id = 1, Name = "Vanilla" },
-                new Flavor { Id = 2, Name = "Chocolate" },
-                new Flavor { Id = 3, Name = "Strawberry" },
-                new Flavor { Id = 4, Name = "Mint" },
-                new Flavor { Id = 5, Name = "Cookie Dough" }
-            };
+            _context = context;
         }
 
         // GET: api/flavors
         [HttpGet]
-        public ActionResult<IEnumerable<Flavor>> GetFlavors()
+        public async Task<ActionResult<IEnumerable<Flavor>>> GetFlavors(CancellationToken cancellationToken)
         {
-            return Ok(_flavors);
+            var flavors = await _context.Flavors.AsNoTracking().OrderBy(f => f.Id).ToListAsync(cancellationToken);
+            return Ok(flavors);
         }
 
         // GET: api/flavors/{id}
-        [HttpGet("{id}")]
-        public ActionResult<Flavor> GetFlavor(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Flavor>> GetFlavor(int id, CancellationToken cancellationToken)
         {
-            var flavor = _flavors.FirstOrDefault(f => f.Id == id);
+            var flavor = await _context.Flavors.AsNoTracking().FirstOrDefaultAsync(f => f.Id == id, cancellationToken);
             if (flavor == null)
             {
                 return NotFound();
