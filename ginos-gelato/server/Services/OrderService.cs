@@ -1,3 +1,4 @@
+using Microsoft.ApplicationInsights;
 using Microsoft.EntityFrameworkCore;
 using GinosGelato.Data;
 using GinosGelato.Dtos;
@@ -27,12 +28,14 @@ namespace GinosGelato.Services
         private readonly ApplicationDbContext _context;
         private readonly PricingService _pricing;
         private readonly ILogger<OrderService> _logger;
+        private readonly TelemetryClient? _telemetry;
 
-        public OrderService(ApplicationDbContext context, PricingService pricing, ILogger<OrderService> logger)
+        public OrderService(ApplicationDbContext context, PricingService pricing, ILogger<OrderService> logger, TelemetryClient? telemetry = null)
         {
             _context = context;
             _pricing = pricing;
             _logger = logger;
+            _telemetry = telemetry;
         }
 
         public async Task<OrderResult> CreateOrderAsync(CreateOrderRequest request, CancellationToken cancellationToken = default)
@@ -173,6 +176,23 @@ namespace GinosGelato.Services
 
             _logger.LogInformation("Created order {ConfirmationNumber} with {ItemCount} item(s), total {Total:C}.",
                 order.ConfirmationNumber, order.Items.Count, order.Total);
+
+            // Custom business event correlated with the current request/trace so a
+            // browser checkout, the API request, and this order all share one
+            // operation id in Application Insights.
+            _telemetry?.TrackEvent(
+                "OrderCreated",
+                new Dictionary<string, string>
+                {
+                    ["confirmationNumber"] = order.ConfirmationNumber,
+                    ["fulfillmentType"] = order.FulfillmentType.ToString(),
+                    ["status"] = order.Status.ToString()
+                },
+                new Dictionary<string, double>
+                {
+                    ["orderTotal"] = (double)order.Total,
+                    ["itemCount"] = order.Items.Count
+                });
 
             return OrderResult.Succeeded(order);
         }

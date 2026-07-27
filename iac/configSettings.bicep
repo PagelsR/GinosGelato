@@ -29,6 +29,9 @@ param administratorPassword string
 @description('Static Web App URL (for reference/CORS documentation)')
 param staticWebAppUrl string = ''
 
+@description('Application Insights connection string wired into the App Service.')
+param appInsightsConnectionString string = ''
+
 // Secret name uses '--' which maps to the ':' config separator, becoming
 // ConnectionStrings:DefaultConnection when read from Key Vault.
 var connectionSecretName = 'ConnectionStrings--DefaultConnection'
@@ -57,6 +60,9 @@ var appSettings = {
   KeyVaultName: keyVaultName
   KeyVault__Uri: keyVaultUri
   StaticWebAppUrl: staticWebAppUrl
+  APPLICATIONINSIGHTS_CONNECTION_STRING: appInsightsConnectionString
+  ApplicationInsightsAgent_EXTENSION_VERSION: '~3'
+  XDT_MicrosoftApplicationInsights_Mode: 'recommended'
 }
 
 // Connection string resolved from Key Vault at runtime via managed identity.

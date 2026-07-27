@@ -38,6 +38,9 @@ var staticWebAppName = 'swa-${uniqueString(subscription().subscriptionId, resour
 var sqlServerName = 'sql-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var keyVaultName = 'kv-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var databaseName = 'GinosGelatoDb'
+var appInsightsName = 'appi-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsightsWorkspaceName = 'log-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+var appInsightsAlertName = 'alert-responsetime-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
 // Tags
 var defaultTags = {
@@ -105,6 +108,21 @@ module keyVault 'keyVault.bicep' = {
   }
 }
 
+// Deploy Application Insights + Log Analytics workspace and wire availability
+// tests to the deployed endpoints.
+module appInsights 'appInsights.bicep' = {
+  name: 'appInsightsDeployment'
+  params: {
+    location: location
+    appInsightsName: appInsightsName
+    appInsightsWorkspaceName: appInsightsWorkspaceName
+    appInsightsAlertName: appInsightsAlertName
+    appServiceUrl: 'https://${appService.outputs.appServiceDefaultHostName}'
+    staticWebAppUrl: staticWebApp.outputs.staticWebAppUrl
+    defaultTags: defaultTags
+  }
+}
+
 // Write secrets and wire App Service settings/connection strings (reference style)
 module configSettings 'configSettings.bicep' = {
   name: 'configSettingsDeployment'
@@ -117,6 +135,7 @@ module configSettings 'configSettings.bicep' = {
     administratorLogin: sqlAdminLogin
     administratorPassword: sqlAdminPassword
     staticWebAppUrl: staticWebApp.outputs.staticWebAppUrl
+    appInsightsConnectionString: appInsights.outputs.appInsightsConnectionString
   }
 }
 
@@ -130,3 +149,9 @@ output sqlServerName string = sqlDatabase.outputs.sqlServerName
 output sqlServerFqdn string = sqlDatabase.outputs.sqlServerFqdn
 output databaseName string = sqlDatabase.outputs.databaseName
 output keyVaultName string = keyVault.outputs.keyVaultName
+output appInsightsName string = appInsights.outputs.appInsightsName
+
+// Client build consumes this as VITE_APPINSIGHTS_CONNECTION_STRING so browser
+// telemetry lands in the same Application Insights resource as the API.
+@description('Application Insights connection string for the Static Web App build.')
+output appInsightsConnectionString string = appInsights.outputs.appInsightsConnectionString

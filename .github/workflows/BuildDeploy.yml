@@ -107,6 +107,7 @@ jobs:
       appServiceUrl: ${{ steps.deploy.outputs.appServiceUrl }}
       staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
       staticWebAppUrl: ${{ steps.deploy.outputs.staticWebAppUrl }}
+      appInsightsConnectionString: ${{ steps.deploy.outputs.appInsightsConnectionString }}
       # loadTestingName: ${{ steps.deploy.outputs.loadTestingName }}
     
     steps:
@@ -267,7 +268,9 @@ jobs:
           API_URL="${{ needs.provision-infrastructure.outputs.appServiceUrl }}"
           echo "Configuring API URL: $API_URL"
           echo "VITE_API_URL=$API_URL" > .env.production
-          cat .env.production
+          # Browser telemetry lands in the same Application Insights resource as the API.
+          echo "VITE_APPINSIGHTS_CONNECTION_STRING=${{ needs.provision-infrastructure.outputs.appInsightsConnectionString }}" >> .env.production
+          echo "VITE_API_URL configured (connection string masked)"
         working-directory: ./ginos-gelato/client
       
       - name: Build Frontend

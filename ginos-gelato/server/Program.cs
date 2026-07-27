@@ -1,8 +1,21 @@
+using Microsoft.ApplicationInsights.DependencyCollector;
 using Microsoft.EntityFrameworkCore;
 using GinosGelato.Data;
 using GinosGelato.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Application Insights: request, dependency (including Azure SQL), and
+// distributed-trace telemetry with ILogger integration. The connection string
+// is supplied by the APPLICATIONINSIGHTS_CONNECTION_STRING app setting in Azure.
+// When absent (local development), telemetry is disabled and behavior is
+// unchanged.
+builder.Services.AddApplicationInsightsTelemetry();
+
+// Capture SQL command text on dependency telemetry so slow or failing queries
+// are diagnosable. Parameter values are not recorded.
+builder.Services.ConfigureTelemetryModule<DependencyTrackingTelemetryModule>(
+    (module, _) => module.EnableSqlCommandTextInstrumentation = true);
 
 // The Azure SQL connection string is supplied by configuration:
 //  - Locally: appsettings.Development.json (LocalDB)
@@ -43,7 +56,10 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(allowedOrigins)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              // Expose the Application Insights correlation header so the browser
+              // SDK can link client-side AJAX telemetry to the API request.
+              .WithExposedHeaders("Request-Context");
     });
 });
 
