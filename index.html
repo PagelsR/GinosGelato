@@ -623,6 +623,7 @@
         return `<tr class="row-${sc}">
           <td>${fmtTs(r.timestamp)}</td>
           <td style="font-weight:600;color:var(--text-2)">#${r.runNumber}</td>
+          <td><span class="bdg ${r.branch && r.branch.startsWith('feature') ? 'bdg-a' : 'bdg-sl'}" style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${r.branch || 'main'}</span></td>
           <td>${r.total}</td>
           <td><span class="bdg bdg-g">${r.passed}</span></td>
           <td>${failed>0 ? `<span class="bdg bdg-r">${failed}</span>` : `<span style="color:var(--text-3)">—</span>`}</td>
@@ -637,7 +638,7 @@
       document.getElementById('runs-container').innerHTML =
         `<table class="runs-tbl">
            <thead><tr>
-             <th>Date / Time</th><th>Run #</th><th>Total</th>
+             <th>Date / Time</th><th>Run #</th><th>Branch</th><th>Total</th>
              <th>Passed</th><th>Failed</th><th>Flaky</th>
              <th>Pass Rate</th><th>Δ Rate</th><th>Status</th><th>Report</th>
            </tr></thead>
