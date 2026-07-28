@@ -659,7 +659,7 @@
 
     /* ── Helpers ─────────────────────────────────────────── */
     function statusClass(rate) {
-      return rate >= 90 ? 'healthy' : rate >= 70 ? 'degraded' : 'critical';
+      return rate >= 85 ? 'healthy' : rate >= 55 ? 'degraded' : 'critical';
     }
     function pct(n) { return Math.round(n); }
     function fmtDate(d) {
