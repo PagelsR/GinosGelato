@@ -52,7 +52,7 @@
       flex-wrap: wrap;
     }
     .header-brand h1 {
-      font-size: 20px;
+      font-size: 25px;
       font-weight: 800;
       color: #f8fafc;
       letter-spacing: -0.4px;
@@ -485,7 +485,9 @@
 
     /* ── KPIs ─────────────────────────────────────────────── */
     function renderKPIs(h) {
-      const l = h[h.length - 1];
+      const full = allHistory;
+      const l = full[full.length - 1];          // latest run is always from full history
+      const isFiltered = h.length < full.length;
       const failed = l.failed - (l.flaky || 0);
       const avgAll = pct(h.reduce((s,r) => s+r.passRate, 0) / h.length);
       const r7  = h.slice(-7);
@@ -500,12 +502,15 @@
                : delta < 0 ? `↓ ${delta}% vs prior 7 runs`
                : '→ No change vs prior 7 runs';
 
+      const totalSub = isFiltered ? `of ${full.length} total` : 'All recorded runs';
+      const avgSub   = isFiltered ? `last ${h.length} runs` : 'all-time average';
+
       document.getElementById('kpi-strip').innerHTML =
-        kpi('c-slate', 'Total Runs',        h.length,    'All recorded runs') +
+        kpi('c-slate', 'Total Runs',        h.length,    totalSub) +
         kpi('c-green', 'Passed — Latest',   l.passed,    `of ${l.total} tests`) +
         kpi('c-red',   'Failed — Latest',   failed,      'deterministic failures') +
         kpi('c-amber', 'Flaky — Latest',    l.flaky||0,  'passed on retry') +
-        kpi('c-blue',  'Avg Pass Rate',     avgAll+'%',  'all-time average') +
+        kpi('c-blue',  'Avg Pass Rate',     avgAll+'%',  avgSub) +
         `<div class="kpi-card c-violet">
            <div class="kpi-lbl">7-Day Pass Rate</div>
            <div class="kpi-val">${avg7}%</div>
@@ -623,7 +628,6 @@
         return `<tr class="row-${sc}">
           <td>${fmtTs(r.timestamp)}</td>
           <td style="font-weight:600;color:var(--text-2)">#${r.runNumber}</td>
-          <td><span class="bdg ${r.branch && r.branch.startsWith('feature') ? 'bdg-a' : 'bdg-sl'}" style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis">${r.branch || 'main'}</span></td>
           <td>${r.total}</td>
           <td><span class="bdg bdg-g">${r.passed}</span></td>
           <td>${failed>0 ? `<span class="bdg bdg-r">${failed}</span>` : `<span style="color:var(--text-3)">—</span>`}</td>
@@ -638,7 +642,7 @@
       document.getElementById('runs-container').innerHTML =
         `<table class="runs-tbl">
            <thead><tr>
-             <th>Date / Time</th><th>Run #</th><th>Branch</th><th>Total</th>
+             <th>Date / Time</th><th>Run #</th><th>Total</th>
              <th>Passed</th><th>Failed</th><th>Flaky</th>
              <th>Pass Rate</th><th>Δ Rate</th><th>Status</th><th>Report</th>
            </tr></thead>
@@ -677,7 +681,12 @@
       renderTrend(allHistory);
     });
 
-    document.getElementById('run-count').addEventListener('change', () => renderTrend(allHistory));
+    document.getElementById('run-count').addEventListener('change', () => {
+      const n = parseInt(document.getElementById('run-count').value, 10);
+      const slice = n === 0 ? allHistory : allHistory.slice(-n);
+      renderKPIs(slice);
+      renderTrend(allHistory);
+    });
 
     init();
   </script>
