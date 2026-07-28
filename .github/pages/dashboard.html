@@ -3,508 +3,682 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gino's Gelato - Test Dashboard</title>
+  <title>Gino's UX Test Automation Rig</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #f1f5f9;
+      --surface:      #ffffff;
+      --border:       #e2e8f0;
+      --text-1:       #0f172a;
+      --text-2:       #475569;
+      --text-3:       #94a3b8;
+      --blue:         #2563eb;
+      --blue-lt:      #dbeafe;
+      --green:        #16a34a;
+      --green-lt:     #dcfce7;
+      --red:          #dc2626;
+      --red-lt:       #fee2e2;
+      --amber:        #d97706;
+      --amber-lt:     #fef3c7;
+      --violet:       #7c3aed;
+      --violet-lt:    #ede9fe;
+      --radius:       8px;
+      --shadow:       0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
     }
-    
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #333;
-      padding: 20px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      font-size: 14px;
+      line-height: 1.5;
       min-height: 100vh;
     }
-    
-    .container {
-      max-width: 1400px;
+
+    /* ── Header ─────────────────────────────────────────── */
+    .site-header {
+      background: linear-gradient(100deg, #0f172a 0%, #1e3a8a 100%);
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .header-brand h1 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: -0.4px;
+    }
+    .header-brand .sub {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 3px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    .header-meta {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-shrink: 0;
+    }
+    .hstat { text-align: right; }
+    .hstat .hval {
+      font-size: 26px;
+      font-weight: 800;
+      color: #f8fafc;
+      line-height: 1;
+    }
+    .hstat .hlbl {
+      font-size: 10px;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    .hdivider {
+      width: 1px; height: 36px;
+      background: rgba(255,255,255,0.12);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status-badge::before {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    .status-badge.healthy  { background: rgba(22,163,74,.18);  color: #86efac; }
+    .status-badge.healthy::before  { background: #4ade80; box-shadow: 0 0 5px #4ade80; }
+    .status-badge.degraded { background: rgba(217,119,6,.18);  color: #fcd34d; }
+    .status-badge.degraded::before { background: #fbbf24; box-shadow: 0 0 5px #fbbf24; }
+    .status-badge.critical { background: rgba(220,38,38,.18);  color: #fca5a5; }
+    .status-badge.critical::before { background: #f87171; box-shadow: 0 0 5px #f87171; }
+
+    /* ── Page body ───────────────────────────────────────── */
+    .page-body {
+      max-width: 1480px;
       margin: 0 auto;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+      padding: 28px 32px 56px;
+    }
+
+    /* ── KPI strip ───────────────────────────────────────── */
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px 14px;
+      box-shadow: var(--shadow);
+      position: relative;
       overflow: hidden;
     }
-    
-    header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 40px;
-      text-align: center;
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
     }
-    
-    header h1 {
-      font-size: 2.5em;
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-    
-    header p {
-      font-size: 1.1em;
-      opacity: 0.9;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 20px;
-      padding: 30px;
-      background: #f8f9fa;
-    }
-    
-    .stat-card {
-      background: white;
-      padding: 25px;
-      border-radius: 8px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      border-left: 4px solid #667eea;
-    }
-    
-    .stat-card.success {
-      border-left-color: #10b981;
-    }
-    
-    .stat-card.danger {
-      border-left-color: #ef4444;
-    }
-    
-    .stat-card.warning {
-      border-left-color: #f59e0b;
-    }
-    
-    .stat-value {
-      font-size: 2.5em;
-      font-weight: 700;
-      margin-bottom: 5px;
-    }
-    
-    .stat-label {
-      color: #6b7280;
-      font-size: 0.9em;
+    .kpi-card.c-slate::after  { background: #64748b; }
+    .kpi-card.c-green::after  { background: var(--green); }
+    .kpi-card.c-red::after    { background: var(--red); }
+    .kpi-card.c-amber::after  { background: var(--amber); }
+    .kpi-card.c-blue::after   { background: var(--blue); }
+    .kpi-card.c-violet::after { background: var(--violet); }
+    .kpi-lbl {
+      font-size: 10px;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.7px;
+      color: var(--text-2);
+      margin-bottom: 8px;
     }
-    
-    .content {
-      padding: 30px;
+    .kpi-val {
+      font-size: 34px;
+      font-weight: 800;
+      color: var(--text-1);
+      letter-spacing: -1.5px;
+      line-height: 1;
     }
-    
-    .chart-container {
-      margin: 30px 0;
-      padding: 20px;
-      background: #f8f9fa;
-      border-radius: 8px;
+    .kpi-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 5px;
     }
-    
-    .chart-wrapper {
-      position: relative;
-      height: 400px;
+    .kpi-delta {
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 5px;
     }
-    
-    h2 {
-      font-size: 1.8em;
+    .kpi-delta.up   { color: var(--green); }
+    .kpi-delta.dn   { color: var(--red); }
+    .kpi-delta.flat { color: var(--text-3); }
+
+    /* ── Section card ────────────────────────────────────── */
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
       margin-bottom: 20px;
-      color: #1f2937;
+      overflow: hidden;
     }
-    
-    .test-runs-table {
+    .section-hdr {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -0.2px;
+    }
+    .section-body { padding: 22px; }
+    .chart-wrap {
+      position: relative;
+      height: 300px;
+    }
+    .chart-wrap.sm { height: 200px; }
+
+    /* ── Chart controls ──────────────────────────────────── */
+    .ctrl-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .toggle-group { display: flex; gap: 6px; }
+    .tgl {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 11px;
+      border-radius: 20px;
+      border: 1.5px solid;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all .12s;
+      background: transparent;
+    }
+    .tgl .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .tgl.on-green  { border-color: var(--green); color: var(--green); background: var(--green-lt); }
+    .tgl.on-red    { border-color: var(--red);   color: var(--red);   background: var(--red-lt); }
+    .tgl.on-amber  { border-color: var(--amber); color: var(--amber); background: var(--amber-lt); }
+    .tgl.off { border-color: var(--border); color: var(--text-3); }
+    .tgl.off .dot  { background: var(--border); }
+    .sel {
+      padding: 4px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: 12px;
+      font-family: inherit;
+      color: var(--text-2);
+      background: var(--surface);
+      cursor: pointer;
+      outline: none;
+    }
+    .sel:focus { border-color: var(--blue); }
+
+    /* ── Runs table ──────────────────────────────────────── */
+    .tbl-wrap { overflow-x: auto; }
+    .runs-tbl {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      border-radius: 8px;
-      overflow: hidden;
+      font-size: 13px;
     }
-    
-    .test-runs-table thead {
-      background: #667eea;
-      color: white;
+    .runs-tbl thead tr {
+      background: #f8fafc;
+      border-bottom: 2px solid var(--border);
     }
-    
-    .test-runs-table th {
-      padding: 15px;
+    .runs-tbl th {
+      padding: 9px 14px;
       text-align: left;
       font-weight: 600;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-2);
+      white-space: nowrap;
     }
-    
-    .test-runs-table td {
-      padding: 12px 15px;
-      border-bottom: 1px solid #e5e7eb;
+    .runs-tbl td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #f1f5f9;
+      vertical-align: middle;
+      white-space: nowrap;
     }
-    
-    .test-runs-table tbody tr:hover {
-      background: #f3f4f6;
-    }
-    
-    .badge {
-      display: inline-block;
-      padding: 4px 12px;
+    .runs-tbl tbody tr { transition: background .1s; }
+    .runs-tbl tbody tr:hover { background: #f8fafc; }
+    .runs-tbl tbody tr:last-child td { border-bottom: none; }
+    .runs-tbl tbody tr.row-healthy  td:first-child { border-left: 3px solid var(--green); padding-left: 11px; }
+    .runs-tbl tbody tr.row-degraded td:first-child { border-left: 3px solid var(--amber); padding-left: 11px; }
+    .runs-tbl tbody tr.row-critical td:first-child { border-left: 3px solid var(--red);   padding-left: 11px; }
+
+    /* ── Badges ──────────────────────────────────────────── */
+    .bdg {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 9px;
       border-radius: 12px;
-      font-size: 0.85em;
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 30px;
+    }
+    .bdg-g  { background: var(--green-lt);  color: #15803d; }
+    .bdg-r  { background: var(--red-lt);    color: #b91c1c; }
+    .bdg-a  { background: var(--amber-lt);  color: #b45309; }
+    .bdg-b  { background: var(--blue-lt);   color: #1d4ed8; }
+    .bdg-sl { background: #f1f5f9;          color: #475569; }
+
+    .spill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 9px;
+      border-radius: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
-    
-    .badge.success {
-      background: #d1fae5;
-      color: #065f46;
-    }
-    
-    .badge.warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-    
-    .badge.danger {
-      background: #fee2e2;
-      color: #991b1b;
-    }
-    
-    .link-button {
-      display: inline-block;
-      padding: 6px 14px;
-      background: #667eea;
-      color: white;
+    .spill::before { content: ''; width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+    .spill.healthy  { background: var(--green-lt);  color: #15803d; }
+    .spill.healthy::before  { background: var(--green); }
+    .spill.degraded { background: var(--amber-lt);  color: #b45309; }
+    .spill.degraded::before { background: var(--amber); }
+    .spill.critical { background: var(--red-lt);    color: #b91c1c; }
+    .spill.critical::before { background: var(--red); }
+
+    .delta { font-size: 12px; font-weight: 600; }
+    .delta.pos { color: var(--green); }
+    .delta.neg { color: var(--red); }
+    .delta.neu { color: var(--text-3); }
+
+    .rpt-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border: 1.5px solid var(--blue);
+      border-radius: 5px;
+      color: var(--blue);
       text-decoration: none;
-      border-radius: 6px;
-      font-size: 0.9em;
-      transition: background 0.2s;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all .12s;
     }
-    
-    .link-button:hover {
-      background: #5568d3;
+    .rpt-link:hover { background: var(--blue); color: white; }
+
+    /* ── Loading / Error ─────────────────────────────────── */
+    .loading-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 56px;
+      color: var(--text-3);
+      gap: 10px;
     }
-    
-    .loading {
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .error-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 56px;
+      color: var(--red);
+      gap: 8px;
       text-align: center;
-      padding: 60px;
-      color: #6b7280;
-      font-size: 1.2em;
     }
-    
-    .error {
-      background: #fee2e2;
-      color: #991b1b;
+
+    /* ── Footer ──────────────────────────────────────────── */
+    .site-footer {
+      text-align: center;
       padding: 20px;
-      border-radius: 8px;
-      margin: 20px;
-      text-align: center;
+      font-size: 11px;
+      color: var(--text-3);
+      letter-spacing: 0.3px;
     }
+
+    @media (max-width: 1100px) { .kpi-strip { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 700px)  { .kpi-strip { grid-template-columns: repeat(2,1fr); }
+                                 .site-header { flex-direction: column; align-items: flex-start; }
+                                 .page-body { padding: 16px; } }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🍦 Gino's Gelato</h1>
-      <p>Test Results Dashboard & Trends</p>
-    </header>
-    
-    <div id="stats-container" class="stats-grid">
-      <div class="loading">Loading test data...</div>
+
+  <header class="site-header">
+    <div class="header-brand">
+      <h1>Gino's UX Test Automation Rig</h1>
+      <div class="sub">End-to-End Regression Suite &nbsp;·&nbsp; Chromium &nbsp;·&nbsp; Azure Static Web Apps</div>
     </div>
-    
-    <div class="content">
-      <div class="chart-container">
-        <h2>📈 Test Trend - Pass/Fail/Flaky Over Time</h2>
-        <div class="chart-wrapper">
-          <canvas id="trendChart"></canvas>
-        </div>
-      </div>
-      
-      <div class="chart-container">
-        <h2>🔄 Flaky Test Trend</h2>
-        <div class="chart-wrapper">
-          <canvas id="flakyChart"></canvas>
-        </div>
-      </div>
-      
-      <div class="chart-container">
-        <h2>⏱️ Test Duration Trend</h2>
-        <div class="chart-wrapper">
-          <canvas id="durationChart"></canvas>
-        </div>
-      </div>
-      
-      <h2>📋 Recent Test Runs</h2>
-      <div id="test-runs-container">
-        <div class="loading">Loading test runs...</div>
-      </div>
+    <div class="header-meta" id="header-meta"><!-- JS --></div>
+  </header>
+
+  <main class="page-body">
+
+    <div class="kpi-strip" id="kpi-strip">
+      <div class="loading-state" style="grid-column:1/-1"><div class="spinner"></div>&nbsp;Loading…</div>
     </div>
-  </div>
-  
-  <script>
-    async function loadTestHistory() {
-      try {
-        const response = await fetch('./test-history.json');
-        if (!response.ok) {
-          throw new Error('No test history found');
-        }
-        const history = await response.json();
-        
-        if (!history || history.length === 0) {
-          throw new Error('No test runs recorded yet');
-        }
-        
-        renderStats(history);
-        renderTrendChart(history);
-        renderFlakyChart(history);
-        renderDurationChart(history);
-        renderTestRunsTable(history);
-      } catch (error) {
-        console.error('Error loading test history:', error);
-        document.getElementById('stats-container').innerHTML = `
-          <div class="error">
-            <strong>⚠️ Error Loading Test Data</strong><br>
-            ${error.message}<br>
-            <small>Run your tests to generate history data.</small>
+
+    <!-- Trend chart -->
+    <div class="section">
+      <div class="section-hdr">
+        <span class="section-title">Test Outcome Trend</span>
+        <div class="ctrl-row">
+          <div class="toggle-group" id="series-toggles">
+            <button class="tgl on-green" data-series="passed"><span class="dot" style="background:var(--green)"></span>Passed</button>
+            <button class="tgl on-red"   data-series="failed"><span class="dot" style="background:var(--red)"></span>Failed</button>
+            <button class="tgl on-amber" data-series="flaky"><span class="dot" style="background:var(--amber)"></span>Flaky</button>
           </div>
-        `;
-        document.getElementById('test-runs-container').innerHTML = '';
+          <select class="sel" id="run-count">
+            <option value="20">Last 20 runs</option>
+            <option value="50">Last 50 runs</option>
+            <option value="100">Last 100 runs</option>
+            <option value="0" selected>All runs</option>
+          </select>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Flaky chart -->
+    <div class="section">
+      <div class="section-hdr">
+        <span class="section-title">Flaky Test Distribution</span>
+        <span style="font-size:12px;color:var(--text-3)">Tests that passed on retry — last 50 runs</span>
+      </div>
+      <div class="section-body">
+        <div class="chart-wrap sm"><canvas id="flakyChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Runs table -->
+    <div class="section">
+      <div class="section-hdr">
+        <span class="section-title">Recent Test Runs</span>
+        <span style="font-size:12px;color:var(--text-3)">Most recent first · up to 100 rows</span>
+      </div>
+      <div class="tbl-wrap" id="runs-container">
+        <div class="loading-state"><div class="spinner"></div>&nbsp;Loading…</div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <script>
+    let allHistory = [];
+    let trendChart = null;
+    let vis = { passed: true, failed: true, flaky: true };
+
+    async function init() {
+      try {
+        const r = await fetch('./test-history.json');
+        if (!r.ok) throw new Error('No test history found');
+        const h = await r.json();
+        if (!h || !h.length) throw new Error('No test runs recorded yet');
+        allHistory = h;
+        renderHeader(h);
+        renderKPIs(h);
+        renderTrend(h);
+        renderFlaky(h);
+        renderTable(h);
+        renderFooter(h);
+      } catch (e) {
+        document.getElementById('kpi-strip').innerHTML =
+          `<div class="error-state" style="grid-column:1/-1">
+             <strong>Unable to load test data</strong>
+             <span>${e.message}</span>
+             <small>Trigger a workflow run to generate history.</small>
+           </div>`;
+        document.getElementById('runs-container').innerHTML = '';
       }
     }
-    
-    function renderStats(history) {
-      const latest = history[history.length - 1];
-      const totalRuns = history.length;
-      const avgPassRate = Math.round(
-        history.reduce((sum, run) => sum + run.passRate, 0) / history.length
-      );
-      const totalFlaky = history.reduce((sum, run) => sum + (run.flaky || 0), 0);
-      
-      // Calculate actual failures (excluding flaky) for consistency with table display
-      const actualFailed = latest.failed - (latest.flaky || 0);
-      
-      const statsHtml = `
-        <div class="stat-card">
-          <div class="stat-value">${totalRuns}</div>
-          <div class="stat-label">Total Runs</div>
-        </div>
-        <div class="stat-card success">
-          <div class="stat-value">${latest.passed}</div>
-          <div class="stat-label">Last Run Passed</div>
-        </div>
-        <div class="stat-card danger">
-          <div class="stat-value">${actualFailed}</div>
-          <div class="stat-label">Last Run Failed</div>
-        </div>
-        <div class="stat-card warning">
-          <div class="stat-value">${latest.flaky || 0}</div>
-          <div class="stat-label">Last Run Flaky</div>
-        </div>
-        <div class="stat-card warning">
-          <div class="stat-value">${avgPassRate}%</div>
-          <div class="stat-label">Avg Pass Rate</div>
-        </div>
-      `;
-      
-      document.getElementById('stats-container').innerHTML = statsHtml;
+
+    /* ── Header ──────────────────────────────────────────── */
+    function renderHeader(h) {
+      const l = h[h.length - 1];
+      const sc = statusClass(l.passRate);
+      document.getElementById('header-meta').innerHTML =
+        `<div class="hstat"><div class="hval">${l.passRate}%</div><div class="hlbl">Latest Pass Rate</div></div>
+         <div class="hdivider"></div>
+         <div class="hstat"><div class="hval">#${l.runNumber}</div><div class="hlbl">Latest Run</div></div>
+         <div class="hdivider"></div>
+         <div class="status-badge ${sc}">${sc.charAt(0).toUpperCase()+sc.slice(1)}</div>`;
     }
-    
-    function renderTrendChart(history) {
+
+    /* ── KPIs ─────────────────────────────────────────────── */
+    function renderKPIs(h) {
+      const l = h[h.length - 1];
+      const failed = l.failed - (l.flaky || 0);
+      const avgAll = pct(h.reduce((s,r) => s+r.passRate, 0) / h.length);
+      const r7  = h.slice(-7);
+      const p7  = h.slice(-14, -7);
+      const avg7 = pct(r7.reduce((s,r)=>s+r.passRate,0) / r7.length);
+      const delta = p7.length
+        ? avg7 - pct(p7.reduce((s,r)=>s+r.passRate,0) / p7.length)
+        : null;
+      const dc = delta === null ? 'flat' : delta > 0 ? 'up' : delta < 0 ? 'dn' : 'flat';
+      const dl = delta === null ? '— no prior data'
+               : delta > 0 ? `↑ +${delta}% vs prior 7 runs`
+               : delta < 0 ? `↓ ${delta}% vs prior 7 runs`
+               : '→ No change vs prior 7 runs';
+
+      document.getElementById('kpi-strip').innerHTML =
+        kpi('c-slate', 'Total Runs',        h.length,    'All recorded runs') +
+        kpi('c-green', 'Passed — Latest',   l.passed,    `of ${l.total} tests`) +
+        kpi('c-red',   'Failed — Latest',   failed,      'deterministic failures') +
+        kpi('c-amber', 'Flaky — Latest',    l.flaky||0,  'passed on retry') +
+        kpi('c-blue',  'Avg Pass Rate',     avgAll+'%',  'all-time average') +
+        `<div class="kpi-card c-violet">
+           <div class="kpi-lbl">7-Day Pass Rate</div>
+           <div class="kpi-val">${avg7}%</div>
+           <div class="kpi-delta ${dc}">${dl}</div>
+         </div>`;
+    }
+
+    function kpi(cls, lbl, val, sub) {
+      return `<div class="kpi-card ${cls}">
+        <div class="kpi-lbl">${lbl}</div>
+        <div class="kpi-val">${val}</div>
+        <div class="kpi-sub">${sub}</div>
+      </div>`;
+    }
+
+    /* ── Trend chart ─────────────────────────────────────── */
+    function renderTrend(h) {
+      const n = parseInt(document.getElementById('run-count').value, 10);
+      const s = n === 0 ? h : h.slice(-n);
+      const dense = s.length > 40;
+
+      const ds = [];
+      if (vis.passed) ds.push({
+        label: 'Passed', data: s.map(r=>r.passed),
+        borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,.07)',
+        tension: .3, fill: true, pointRadius: dense ? 1 : 3, pointHoverRadius: 5, borderWidth: 2
+      });
+      if (vis.failed) ds.push({
+        label: 'Failed', data: s.map(r=>r.failed-(r.flaky||0)),
+        borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,.07)',
+        tension: .3, fill: true, pointRadius: dense ? 1 : 3, pointHoverRadius: 5, borderWidth: 2
+      });
+      if (vis.flaky) ds.push({
+        label: 'Flaky', data: s.map(r=>r.flaky||0),
+        borderColor: '#d97706', backgroundColor: 'rgba(217,119,6,.06)',
+        tension: .3, fill: true, pointRadius: dense ? 1 : 3, pointHoverRadius: 5,
+        borderWidth: 2, borderDash: [5,3]
+      });
+
       const ctx = document.getElementById('trendChart').getContext('2d');
-      
-      // Take last 20 runs for readability
-      const recentHistory = history.slice(-20);
-      
-      new Chart(ctx, {
+      if (trendChart) trendChart.destroy();
+      trendChart = new Chart(ctx, {
         type: 'line',
-        data: {
-          labels: recentHistory.map(r => r.date),
-          datasets: [
-            {
-              label: 'Passed',
-              data: recentHistory.map(r => r.passed),
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16, 185, 129, 0.1)',
-              tension: 0.4,
-              fill: true
-            },
-            {
-              label: 'Failed',
-              data: recentHistory.map(r => r.failed - (r.flaky || 0)),
-              borderColor: '#ef4444',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
-              tension: 0.4,
-              fill: true
-            },
-            {
-              label: 'Flaky (Counted as Failed)',
-              data: recentHistory.map(r => r.flaky || 0),
-              borderColor: '#f59e0b',
-              backgroundColor: 'rgba(245, 158, 11, 0.1)',
-              tension: 0.4,
-              fill: true
-            }
-          ]
-        },
+        data: { labels: s.map(r=>fmtDate(r.date)), datasets: ds },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
           plugins: {
-            legend: {
-              display: true,
-              position: 'top'
-            },
+            legend: { display: false },
             tooltip: {
+              backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1',
+              padding: 12, cornerRadius: 6,
               callbacks: {
-                footer: function(tooltipItems) {
-                  const index = tooltipItems[0].dataIndex;
-                  const run = recentHistory[index];
-                  return `Total Failed (including flaky): ${run.failed}`;
+                title: (items) => `Run #${s[items[0].dataIndex].runNumber}  ·  ${items[0].label}`,
+                footer: (items) => {
+                  const r = s[items[0].dataIndex];
+                  return `Pass rate: ${r.passRate}%   Total tests: ${r.total}`;
                 }
               }
             }
           },
           scales: {
-            y: {
-              stacked: true,
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1
-              }
-            },
-            x: {
-              stacked: true
-            }
+            x: { grid:{ color:'#f1f5f9' }, ticks:{ color:'#94a3b8', font:{size:11}, maxTicksLimit:18 } },
+            y: { beginAtZero:true, grid:{ color:'#f1f5f9' }, ticks:{ color:'#94a3b8', font:{size:11}, stepSize:1 } }
           }
         }
       });
     }
-    
-    function renderFlakyChart(history) {
-      const ctx = document.getElementById('flakyChart').getContext('2d');
-      
-      const recentHistory = history.slice(-20);
-      
-      new Chart(ctx, {
+
+    /* ── Flaky chart ─────────────────────────────────────── */
+    function renderFlaky(h) {
+      const s = h.slice(-50);
+      new Chart(document.getElementById('flakyChart').getContext('2d'), {
         type: 'bar',
         data: {
-          labels: recentHistory.map(r => r.date),
-          datasets: [{
-            label: 'Flaky Tests (Unstable)',
-            data: recentHistory.map(r => r.flaky || 0),
-            backgroundColor: 'rgba(245, 158, 11, 0.7)',
-            borderColor: '#f59e0b',
-            borderWidth: 1
-          }]
+          labels: s.map(r=>fmtDate(r.date)),
+          datasets: [{ label:'Flaky', data: s.map(r=>r.flaky||0),
+            backgroundColor: 'rgba(217,119,6,.45)', borderColor:'#d97706',
+            borderWidth:1, borderRadius:3 }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: {
-              display: false
-            },
+            legend: { display:false },
             tooltip: {
+              backgroundColor:'#0f172a', titleColor:'#f8fafc', bodyColor:'#cbd5e1',
+              padding:10, cornerRadius:6,
               callbacks: {
-                label: function(context) {
-                  return `Flaky Tests: ${context.parsed.y}`;
-                },
-                afterLabel: function(context) {
-                  return 'These tests passed after retry';
-                }
+                title: (i) => `Run #${s[i[0].dataIndex].runNumber}`,
+                label: (c) => ` Flaky: ${c.parsed.y} test${c.parsed.y!==1?'s':''}`
               }
             }
           },
           scales: {
-            y: {
-              beginAtZero: true,
-              ticks: {
-                stepSize: 1
-              }
-            }
+            x: { grid:{display:false}, ticks:{color:'#94a3b8', font:{size:11}, maxTicksLimit:20} },
+            y: { beginAtZero:true, grid:{color:'#f1f5f9'}, ticks:{color:'#94a3b8', font:{size:11}, stepSize:1} }
           }
         }
       });
     }
-    
-    function renderDurationChart(history) {
-      const ctx = document.getElementById('durationChart').getContext('2d');
-      
-      const recentHistory = history.slice(-20);
-      
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: recentHistory.map(r => r.date),
-          datasets: [{
-            label: 'Duration (seconds)',
-            data: recentHistory.map(r => r.duration),
-            backgroundColor: 'rgba(102, 126, 234, 0.7)',
-            borderColor: '#667eea',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
+
+    /* ── Runs table ──────────────────────────────────────── */
+    function renderTable(h) {
+      const rows = [...h].reverse().slice(0, 100).map((r, i, arr) => {
+        const prev = arr[i + 1];
+        const failed = r.failed - (r.flaky || 0);
+        const sc = statusClass(r.passRate);
+        let d = '—', dc2 = 'neu';
+        if (prev) {
+          const diff = r.passRate - prev.passRate;
+          if (diff > 0)       { d = `+${diff}%`; dc2 = 'pos'; }
+          else if (diff < 0)  { d = `${diff}%`;  dc2 = 'neg'; }
         }
-      });
+        const href = r.reportUrl ? r.reportUrl + '/index.html' : `./reports/${r.runId}/index.html`;
+        return `<tr class="row-${sc}">
+          <td>${fmtTs(r.timestamp)}</td>
+          <td style="font-weight:600;color:var(--text-2)">#${r.runNumber}</td>
+          <td>${r.total}</td>
+          <td><span class="bdg bdg-g">${r.passed}</span></td>
+          <td>${failed>0 ? `<span class="bdg bdg-r">${failed}</span>` : `<span style="color:var(--text-3)">—</span>`}</td>
+          <td>${(r.flaky||0)>0 ? `<span class="bdg bdg-a">${r.flaky}</span>` : `<span style="color:var(--text-3)">—</span>`}</td>
+          <td><span class="bdg ${r.passRate===100?'bdg-g':r.passRate>=80?'bdg-b':r.passRate>=60?'bdg-a':'bdg-r'}">${r.passRate}%</span></td>
+          <td><span class="delta ${dc2}">${d}</span></td>
+          <td><span class="spill ${sc}">${sc.charAt(0).toUpperCase()+sc.slice(1)}</span></td>
+          <td><a href="${href}" class="rpt-link" target="_blank">↗ Report</a></td>
+        </tr>`;
+      }).join('');
+
+      document.getElementById('runs-container').innerHTML =
+        `<table class="runs-tbl">
+           <thead><tr>
+             <th>Date / Time</th><th>Run #</th><th>Total</th>
+             <th>Passed</th><th>Failed</th><th>Flaky</th>
+             <th>Pass Rate</th><th>Δ Rate</th><th>Status</th><th>Report</th>
+           </tr></thead>
+           <tbody>${rows}</tbody>
+         </table>`;
     }
-    
-    function renderTestRunsTable(history) {
-      // Show most recent runs first
-      const sortedHistory = [...history].reverse().slice(0, 10);
-      
-      const tableHtml = `
-        <table class="test-runs-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Run</th>
-              <th>Total</th>
-              <th>Passed</th>
-              <th>Failed</th>
-              <th>Flaky</th>
-              <th>Pass Rate</th>
-              <th>Duration</th>
-              <th>Report</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${sortedHistory.map(run => `
-              <tr>
-                <td>${new Date(run.timestamp).toLocaleDateString()}</td>
-                <td>#${run.runNumber}</td>
-                <td><strong>${run.total}</strong></td>
-                <td><span class="badge success">${run.passed}</span></td>
-                <td>${run.failed - (run.flaky || 0) > 0 ? `<span class="badge danger">${run.failed - (run.flaky || 0)}</span>` : '-'}</td>
-                <td>${(run.flaky || 0) > 0 ? `<span class="badge warning">${run.flaky}</span>` : '-'}</td>
-                <td>
-                  <span class="badge ${run.passRate === 100 ? 'success' : run.passRate >= 80 ? 'warning' : 'danger'}">
-                    ${run.passRate}%
-                  </span>
-                </td>
-                <td>${run.duration}s</td>
-                <td>
-                  <a href="./reports/${run.runId}/index.html" class="link-button" target="_blank">
-                    View Report
-                  </a>
-                </td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-      
-      document.getElementById('test-runs-container').innerHTML = tableHtml;
+
+    /* ── Footer ──────────────────────────────────────────── */
+    function renderFooter(h) {
+      const l = h[h.length-1];
+      document.getElementById('site-footer').textContent =
+        `Last updated ${new Date(l.timestamp).toUTCString()}  ·  ${h.length} runs recorded  ·  Gino's UX Test Automation Rig`;
     }
-    
-    // Load data on page load
-    loadTestHistory();
+
+    /* ── Helpers ─────────────────────────────────────────── */
+    function statusClass(rate) {
+      return rate >= 90 ? 'healthy' : rate >= 70 ? 'degraded' : 'critical';
+    }
+    function pct(n) { return Math.round(n); }
+    function fmtDate(d) {
+      return d ? new Date(d).toLocaleDateString('en-US', { month:'short', day:'numeric' }) : '';
+    }
+    function fmtTs(ts) {
+      return ts ? new Date(ts).toLocaleString('en-US',
+        { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+    }
+
+    /* ── Toggle + select listeners ───────────────────────── */
+    document.getElementById('series-toggles').addEventListener('click', e => {
+      const btn = e.target.closest('[data-series]');
+      if (!btn) return;
+      const s = btn.dataset.series;
+      vis[s] = !vis[s];
+      const map = { passed:'on-green', failed:'on-red', flaky:'on-amber' };
+      btn.className = vis[s] ? `tgl ${map[s]}` : 'tgl off';
+      renderTrend(allHistory);
+    });
+
+    document.getElementById('run-count').addEventListener('change', () => renderTrend(allHistory));
+
+    init();
   </script>
 </body>
 </html>
