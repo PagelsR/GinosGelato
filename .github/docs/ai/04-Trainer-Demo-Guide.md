@@ -33,7 +33,7 @@ This module runs across three surfaces — no VS 2026 required:
 ## Environment
 
 - Deployed app reachable (Static Web App front end + App Service API).
-  Default demo URL: `https://zealous-sky-008ca630f.1.azurestaticapps.net/`
+  Default demo URL: `https://wonderful-coast-040cb1a10.7.azurestaticapps.net/`
   (this is the Playwright `baseURL` fallback in `playwright.config.ts`).
 - Application Insights resource receiving telemetry from both the browser SDK
   and the API. See [02 - Observability](02-Observability.md) for what is wired.
@@ -100,9 +100,29 @@ care about every screen that follows.
 1. Walk the happy path live: Home → Build Ice Cream (container + flavors +
    toppings) → Cart → Checkout (pickup) → confirmation. Note the confirmation
    number format `GGyyMMdd-#####`.
-2. Now reproduce the symptom deterministically. In a second tab, open:
-   `/fault?fault=slow-sql`
-   The Fault Console shows the request taking ~3 seconds against the database.
+2. Now reproduce the symptom deterministically. In a second browser tab,
+   navigate to the Fault Demo page with the `slow-sql` scenario pre-selected.
+   The `/fault` path is the **FaultDemo** React page; the `?fault=` query
+   parameter tells it which scenario to run automatically on load.
+
+   Copy and paste the full URL:
+
+   ```
+   https://wonderful-coast-040cb1a10.7.azurestaticapps.net/fault?fault=slow-sql
+   ```
+
+   The Fault Console shows the request executing and completing after
+   approximately 3 seconds — that delay is a real `WAITFOR DELAY '00:00:03'`
+   SQL command running against Azure SQL, producing a genuine slow dependency
+   in Application Insights.
+
+   The three available fault values are:
+
+   | `?fault=` value    | What it triggers                                      |
+   |--------------------|-------------------------------------------------------|
+   | `slow-sql`         | 3-second SQL delay → slow dependency in AI            |
+   | `api-failure`      | API returns 503 → failed request + exception in AI    |
+   | `browser-exception`| Client throws unhandled error → exception in AI       |
 
 **Talking point:**
 
@@ -294,19 +314,29 @@ customEvents
 random code.
 
 **Trainer flow:**
-1. Copy the slow SQL dependency detail (or the exception + stack) from the portal.
-2. In VS Code, open the relevant file (e.g. `ginos-gelato/server/Services/OrderService.cs`
-   or `ginos-gelato/server/Controllers/OrdersController.cs`).
-3. Ask Copilot Chat:
+1. In the portal, point at the two back-to-back SQL dependencies visible on
+   every checkout request in **Performance** → **End-to-end transaction**.
+   Both hits come from `SaveChangesAsync` — one to insert the order, one
+   to write the confirmation number back. That extra round-trip is the latency
+   the customer felt.
+2. In VS Code, open **`ginos-gelato/server/Services/OrderService.cs`** and
+   scroll to the `// ── BEFORE (commented out)` block. The commented code is
+   the original implementation Application Insights exposed. The live code
+   below it is the fix already shipped — confirmation number is now generated
+   before saving so one SQL round-trip handles everything.
+3. Ask Copilot Chat with the file open:
 
    ```text
-   This checkout request is taking several seconds. Application Insights shows
-   most of the duration is in this SQL dependency. Review the selected code,
-   explain the likely cause, propose the smallest safe fix that preserves
-   behavior, and tell me which tests to run before deploying.
+   The commented-out block shows our original CreateOrderAsync implementation.
+   Application Insights showed two back-to-back SQL dependencies on every
+   checkout. Explain exactly why the original caused that, confirm the current
+   fix is correct and safe, and tell me which tests to run to validate it
+   before deploying.
    ```
 
-4. Review the suggestion, then run the existing tests:
+4. Copilot will explain the root cause (confirmation number depended on the
+   DB-assigned Id, forcing a second round-trip) and confirm the fix. Then
+   run the tests to show the validation step:
 
    ```powershell
    dotnet test ginos-gelato/server.Tests/GinosGelato.Tests.csproj
@@ -314,9 +344,9 @@ random code.
 
 **Talking point:**
 
-> "AI is most credible here: it's explaining and fixing a problem the telemetry
-> already proved, and we validate the change against existing tests before it
-> ships."
+> "We didn't ask AI to guess. We showed it exactly what Application Insights
+> found, and asked it to explain and validate what we already fixed. The tests
+> are the last gate before it ships."
 
 ------------------------------------------------------------------------
 
@@ -425,11 +455,25 @@ tracing, and diagnosis workflow are exactly what you use on real incidents.
 
 ## Closing Message
 
-Ship the feature. \
-Watch what customers experience. \
-Find failures across every layer. \
-Turn production telemetry into a safe code change.
+Remember the team we met in Demo 0. They were asked to add online ordering to
+Gino's Gelato. Copilot helped them scaffold the feature, generate the API, wire
+up the database, and build automated tests. The feature shipped.
 
-> Shipping the feature is only half the job. Modern application development also
-> means knowing what customers are experiencing, finding failures across every
-> layer, and turning production telemetry into a safe, tested change.
+Then checkout got slow. A customer noticed first.
+
+Today we followed what happened next: the team opened Application Insights,
+traced a slow request through the browser, the API, and down to a single SQL
+dependency. They found the failed request and read the exception. They queried
+the business funnel and saw where orders were stalling. And when they had a
+proven finding — not a guess — they brought it back to VS Code, showed Copilot
+the telemetry, and fixed the code. Then they ran the tests before it shipped.
+
+That is the complete loop:
+
+**Build the feature → ship it → watch what customers experience →
+find failures across every layer → turn production telemetry into a
+safe, tested change.**
+
+> Copilot helped ship the feature on day one. Application Insights made sure it
+> actually worked on day two — and every day after that. Shipping is only half
+> the job.

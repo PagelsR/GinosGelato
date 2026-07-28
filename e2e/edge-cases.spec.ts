@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Edge Cases and Boundary Testing', () => {
+  // Extended timeout: runs against the live deployed app; must survive cold starts.
+  test.setTimeout(90_000);
 
   test('should handle maximum toppings selection', async ({ page }) => {
     await page.goto('/');

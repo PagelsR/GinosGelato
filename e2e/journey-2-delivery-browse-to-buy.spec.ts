@@ -26,6 +26,10 @@ const customer = {
 };
 
 test.describe('Journey 2 — Delivery Order Browse-to-Buy', () => {
+  // Extended timeout: this test runs against the live deployed app and must
+  // survive Azure App Service cold starts, which can take 30–60 seconds.
+  test.setTimeout(90_000);
+
   test('Delivery order completes end-to-end', async ({ page }) => {
     await page.goto('/');
 

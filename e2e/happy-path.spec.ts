@@ -19,6 +19,9 @@ const customer = {
 };
 
 test.describe('Ordering happy path', () => {
+  // Extended timeout: runs against the live deployed app; must survive cold starts.
+  test.setTimeout(90_000);
+
   test('Pickup order completes end-to-end', async ({ page }) => {
     await page.goto('/');
 

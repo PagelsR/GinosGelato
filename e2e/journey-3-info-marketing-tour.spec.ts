@@ -10,6 +10,10 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Journey 3 — Info / Marketing Tour', () => {
+  // Extended timeout: this test runs against the live deployed app and must
+  // survive Azure App Service cold starts, which can take 30–60 seconds.
+  test.setTimeout(90_000);
+
   test('Visitor tours the informational pages', async ({ page }) => {
     await page.goto('/');
 

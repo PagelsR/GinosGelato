@@ -7,11 +7,11 @@ param location string = 'eastus'
 @description('Name for the App Service Plan')
 param appServicePlanName string
 
-@description('SKU for the App Service Plan (F1 = Free, avoids dedicated-VM quota)')
-param skuName string = 'F1'
+@description('SKU for the App Service Plan (B1 = Basic, always-on, no cold starts)')
+param skuName string = 'B1'
 
 @description('SKU tier')
-param skuTier string = 'Free'
+param skuTier string = 'Basic'
 
 @description('SKU capacity')
 param skuCapacity int = 1

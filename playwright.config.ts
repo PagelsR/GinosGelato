@@ -31,7 +31,7 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('')`.
        In CI this is set to the freshly deployed Static Web App via BASE_URL. */
-    baseURL: process.env.BASE_URL || 'https://zealous-sky-008ca630f.1.azurestaticapps.net/',
+    baseURL: process.env.BASE_URL || 'https://wonderful-coast-040cb1a10.7.azurestaticapps.net/',
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

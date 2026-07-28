@@ -8,7 +8,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Test will ${shouldPass ? 'PASS' : 'FAIL'} this time`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     // Simulate an unstable condition
     if (!shouldPass) {
@@ -27,7 +27,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Current second: ${currentSecond}, Test will ${shouldPass ? 'PASS' : 'FAIL'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     if (!shouldPass) {
       expect(shouldPass, `Simulated time-based failure (second: ${currentSecond})`).toBeTruthy();
@@ -43,7 +43,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Delay: ${delay}ms, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     // Simulate waiting for an element with inconsistent timing
     await page.waitForTimeout(delay);
@@ -61,7 +61,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`API timeout test will ${shouldFail ? 'FAIL' : 'PASS'} this time`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     // Navigate to builder page where API calls happen
     await page.click('text=Build Your Gelato');
@@ -81,7 +81,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Memory pressure: ${(memoryPressure * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     // Simulate some memory-intensive operation
     await page.click('text=Our Flavors');
@@ -101,7 +101,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Cache state: ${cacheState}, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     // Navigate to a page that might have caching issues
     await page.click('text=About Us');
@@ -120,7 +120,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Connection pool load: ${connectionPoolLoad.toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     // Simulate action that requires database access
     await page.click('text=Build Your Gelato');
@@ -139,7 +139,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Payment gateway test will ${shouldFail ? 'FAIL' : 'PASS'} this time`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     await page.click('text=Build Your Gelato');
     
     if (shouldFail) {
@@ -156,7 +156,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`CDN health: ${cdnHealth.toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     if (shouldFail) {
       expect(false, `CDN failed to load images - Health at ${cdnHealth.toFixed(1)}%`).toBeTruthy();
@@ -172,7 +172,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Storage integrity: ${(storageIntegrity * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     await page.click('text=Our Flavors');
     
     if (shouldFail) {
@@ -189,7 +189,7 @@ test.describe('Flaky Test Examples', () => {
     
     console.log(`Script load probability: ${(scriptLoaded * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
     
-    await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+    await page.goto('/');
     
     if (shouldFail) {
       expect(false, `Third-party script blocked or failed to load (${(scriptLoaded * 100).toFixed(1)}%)`).toBeTruthy();

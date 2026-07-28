@@ -15,6 +15,10 @@ import { test, expect } from '@playwright/test';
  */
 
 test.describe('Journey 4 — Fault Demo Journey', () => {
+  // Extended timeout: this test runs against the live deployed app and must
+  // survive Azure App Service cold starts plus the deliberate ~3s SQL delay.
+  test.setTimeout(90_000);
+
   test('slow SQL dependency fault emits telemetry', async ({ page }) => {
     await page.goto('/fault?fault=slow-sql');
 

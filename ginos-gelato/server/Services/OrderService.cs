@@ -168,10 +168,23 @@ namespace GinosGelato.Services
                 OrderDate = DateTime.UtcNow
             };
 
-            _context.Orders.Add(order);
-            await _context.SaveChangesAsync(cancellationToken);
+            // ── BEFORE (commented out) ──────────────────────────────────────────────
+            // Original implementation used two SaveChanges calls on every order.
+            // Application Insights surfaced two back-to-back SQL dependencies on every
+            // checkout request. Copilot identified the root cause: the confirmation
+            // number was generated from the DB-assigned Id, which forced a first save
+            // to obtain the Id and a second save to write the number back.
+            //
+            // _context.Orders.Add(order);
+            // await _context.SaveChangesAsync(cancellationToken);                       // round-trip 1: get DB-assigned Id
+            // order.ConfirmationNumber = $"GG{order.OrderDate:yyMMdd}-{order.Id:D5}";  // depends on Id
+            // await _context.SaveChangesAsync(cancellationToken);                       // round-trip 2: write ConfirmationNumber
+            // ─────────────────────────────────────────────────────────────────────────
 
-            order.ConfirmationNumber = $"GG{order.OrderDate:yyMMdd}-{order.Id:D5}";
+            // AFTER: generate the confirmation number before saving so one SQL
+            // round-trip handles both the insert and the confirmation number.
+            order.ConfirmationNumber = $"GG{order.OrderDate:yyMMdd}-{Random.Shared.Next(1, 100000):D5}";
+            _context.Orders.Add(order);
             await _context.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("Created order {ConfirmationNumber} with {ItemCount} item(s), total {Total:C}.",

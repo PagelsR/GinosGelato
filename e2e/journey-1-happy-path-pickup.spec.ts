@@ -23,6 +23,10 @@ const customer = {
 };
 
 test.describe('Journey 1 — Happy Path Pickup Order', () => {
+  // Extended timeout: this test runs against the live deployed app and must
+  // survive Azure App Service cold starts, which can take 30–60 seconds.
+  test.setTimeout(90_000);
+
   test('Pickup order completes end-to-end', async ({ page }) => {
     await page.goto('/');
 
