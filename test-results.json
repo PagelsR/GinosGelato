@@ -10,18 +10,14 @@
     "grep": {},
     "grepInvert": null,
     "maxFailures": 0,
-    "metadata": {
-      "actualWorkers": 1
-    },
+    "metadata": {},
     "preserveOutput": "always",
     "projects": [
       {
         "outputDir": "C:/Users/RandyPagels/Repos/GinosGelato/test-results",
         "repeatEach": 1,
         "retries": 0,
-        "metadata": {
-          "actualWorkers": 1
-        },
+        "metadata": {},
         "id": "chromium",
         "name": "chromium",
         "testDir": "C:/Users/RandyPagels/Repos/GinosGelato/e2e",
@@ -63,72 +59,96 @@
   },
   "suites": [
     {
-      "title": "journey-2-delivery-browse-to-buy.spec.ts",
-      "file": "journey-2-delivery-browse-to-buy.spec.ts",
+      "title": "journey-4-fault-demo.spec.ts",
+      "file": "journey-4-fault-demo.spec.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Journey 2 — Delivery Order Browse-to-Buy",
-          "file": "journey-2-delivery-browse-to-buy.spec.ts",
-          "line": 28,
+          "title": "Journey 4 — Fault Demo Journey",
+          "file": "journey-4-fault-demo.spec.ts",
+          "line": 17,
           "column": 6,
           "specs": [
             {
-              "title": "Delivery order completes end-to-end",
-              "ok": false,
+              "title": "slow SQL dependency fault emits telemetry",
+              "ok": true,
               "tags": [],
               "tests": [
                 {
-                  "timeout": 30000,
+                  "timeout": 90000,
                   "annotations": [],
                   "expectedStatus": "passed",
                   "projectId": "chromium",
                   "projectName": "chromium",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "timedOut",
-                      "duration": 30343,
-                      "error": {
-                        "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m",
-                        "stack": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                      },
-                      "errors": [
-                        {
-                          "message": "\u001b[31mTest timeout of 30000ms exceeded.\u001b[39m"
-                        },
-                        {
-                          "location": {
-                            "file": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\journey-2-delivery-browse-to-buy.spec.ts",
-                            "column": 66,
-                            "line": 61
-                          },
-                          "message": "Error: locator.fill: Test timeout of 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('textbox', { name: 'MI', exact: true })\u001b[22m\n\n\n  59 |     await page.getByRole('textbox', { name: '123 Main Street' }).fill(customer.address);\n  60 |     await page.getByRole('textbox', { name: 'Your city' }).fill(customer.city);\n> 61 |     await page.getByRole('textbox', { name: 'MI', exact: true }).fill(customer.state);\n     |                                                                  ^\n  62 |     await page.getByRole('textbox', { name: '12345' }).fill(customer.zip);\n  63 |     await page.getByRole('button', { name: /Continue to Payment/ }).click();\n  64 |\n    at C:\\Users\\RandyPagels\\Repos\\GinosGelato\\e2e\\journey-2-delivery-browse-to-buy.spec.ts:61:66"
-                        }
-                      ],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2026-07-27T19:10:03.926Z",
-                      "annotations": [],
-                      "attachments": [
-                        {
-                          "name": "error-context",
-                          "contentType": "text/markdown",
-                          "path": "C:\\Users\\RandyPagels\\Repos\\GinosGelato\\test-results\\journey-2-delivery-browse--a18e0--order-completes-end-to-end-chromium\\error-context.md"
-                        }
-                      ]
-                    }
-                  ],
-                  "status": "unexpected"
+                  "results": [],
+                  "status": "skipped"
                 }
               ],
-              "id": "bf9011771bdaed16aac9-c9779cd820755acc86dc",
-              "file": "journey-2-delivery-browse-to-buy.spec.ts",
-              "line": 29,
+              "id": "6afdeade4209aa3b303f-9d45bca3e3115b04e647",
+              "file": "journey-4-fault-demo.spec.ts",
+              "line": 22,
+              "column": 7
+            },
+            {
+              "title": "API failure fault emits failed-request telemetry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6afdeade4209aa3b303f-d77d3e8383b0dbec1ec3",
+              "file": "journey-4-fault-demo.spec.ts",
+              "line": 32,
+              "column": 7
+            },
+            {
+              "title": "SQL failure fault emits failed-dependency telemetry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6afdeade4209aa3b303f-0881555d41e548388579",
+              "file": "journey-4-fault-demo.spec.ts",
+              "line": 41,
+              "column": 7
+            },
+            {
+              "title": "browser exception fault emits exception telemetry",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6afdeade4209aa3b303f-e35347cb7e5db6f695d5",
+              "file": "journey-4-fault-demo.spec.ts",
+              "line": 50,
               "column": 7
             }
           ]
@@ -138,11 +158,11 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-07-27T19:10:02.349Z",
-    "duration": 33151.625,
+    "startTime": "2026-07-28T18:31:21.531Z",
+    "duration": 163.8449999999999,
     "expected": 0,
-    "skipped": 0,
-    "unexpected": 1,
+    "skipped": 4,
+    "unexpected": 0,
     "flaky": 0
   }
 }

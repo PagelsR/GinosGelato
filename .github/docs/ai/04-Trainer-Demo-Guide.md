@@ -121,6 +121,7 @@ care about every screen that follows.
    | `?fault=` value    | What it triggers                                      |
    |--------------------|-------------------------------------------------------|
    | `slow-sql`         | 3-second SQL delay → slow dependency in AI            |
+   | `sql-failure`      | SQL command fails → failed SQL dependency (red SQL node on App Map) |
    | `api-failure`      | API returns 503 → failed request + exception in AI    |
    | `browser-exception`| Client throws unhandled error → exception in AI       |
 
@@ -139,16 +140,21 @@ idea that the customer journey *is* code you can run on demand.
 **Trainer flow:**
 1. In the portal, open the App Insights **Overview**: failed requests, server
    response time, request volume, availability. Do not tour every blade.
-2. Open **Live Metrics**.
-3. In VS Code, open `e2e/journey-1-happy-path-pickup.spec.ts` and scroll it —
+2. Open **Application map** and read the topology aloud — it mirrors the
+   architecture: **Client** (browser) → **App Service** (API) → **Azure SQL**.
+   Point at the call counts and the per-node error percentage; this is the
+   10-second orientation before any drill-down. (Keep it here as the map; you
+   will see a node turn red in Demo 4.)
+3. Open **Live Metrics**.
+4. In VS Code, open `e2e/journey-1-happy-path-pickup.spec.ts` and scroll it —
    this is the real user flow expressed as code.
-4. Run it against the deployed app and watch Live Metrics react:
+5. Run it against the deployed app and watch Live Metrics react:
 
    ```powershell
    npx playwright test e2e/journey-1-happy-path-pickup.spec.ts
    ```
 
-5. Point out incoming requests and dependency calls arriving live.
+6. Point out incoming requests and dependency calls arriving live.
 
 **Talking point:**
 
@@ -216,6 +222,19 @@ context — and correlated across the browser and API.
    `api`, `endpoint`, `demoMode`, and on order failures `itemCount`,
    `orderTotal`, `deliveryType`.
 4. Show the shared operation ID linking the browser event to the API failure.
+5. **Database-layer failure (Application Map turns red).** Trigger a failed SQL
+   dependency — open `/fault?fault=sql-failure`, or:
+
+   ```powershell
+   npx playwright test e2e/journey-4-fault-demo.spec.ts -g "SQL failure"
+   ```
+
+   `GET /api/demo/sql-failure` runs a deliberate `RAISERROR`, so a **failed SQL
+   dependency** is recorded (no order data touched). Return to **Application
+   map** and show the **SQL node/edge now flagged red** with a small error
+   percentage — the same map from Demo 2, now showing a database-layer problem.
+   Because the daily fault journey runs this once a day, that red slice stays an
+   occasional `<1%`, not a constant alarm.
 
 **Talking point:**
 

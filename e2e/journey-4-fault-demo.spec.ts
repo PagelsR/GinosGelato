@@ -38,6 +38,15 @@ test.describe('Journey 4 — Fault Demo Journey', () => {
     await expect(status).toContainText(/api-failure .* failed as expected/);
   });
 
+  test('SQL failure fault emits failed-dependency telemetry', async ({ page }) => {
+    await page.goto('/fault?fault=sql-failure');
+
+    const status = page.getByTestId('fault-status');
+    await expect(status).toHaveAttribute('data-fault', 'sql-failure');
+    await expect(status).toHaveAttribute('data-state', 'failed', { timeout: 20000 });
+    await expect(status).toContainText(/sql-failure .* failed as expected/);
+  });
+
   test('browser exception fault emits exception telemetry', async ({ page }) => {
     // The page deliberately raises an unhandled browser exception; capture it so
     // it does not fail the test while still being auto-collected by App Insights.

@@ -150,3 +150,21 @@ export const triggerApiFailure = async (): Promise<never> => {
         throw error;
     }
 };
+
+// Demo fault: trigger a deterministic Azure SQL failure so a FAILED SQL
+// dependency appears in Application Insights (red SQL node on the Application
+// Map). Opt-in only; touches no order data.
+export const triggerSqlFailure = async (): Promise<never> => {
+    try {
+        await axios.get(`${API_BASE_URL}/demo/sql-failure`);
+        // The endpoint always fails when enabled; reaching here means it is disabled.
+        throw new Error('Demo SQL failure endpoint did not fail (faults may be disabled).');
+    } catch (error) {
+        appInsights.trackException(
+            { exception: error as Error },
+            { api: 'triggerSqlFailure', endpoint: `${API_BASE_URL}/demo/sql-failure`, fault: 'sql-failure' }
+        );
+        appInsights.trackEvent({ name: 'DemoFaultTriggered' }, { fault: 'sql-failure' });
+        throw error;
+    }
+};

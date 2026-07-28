@@ -27,6 +27,7 @@ All journeys live in `/e2e/` and run against the deployed Static Web App
 | 2 | Delivery Order Browse-to-Buy | `e2e/journey-2-delivery-browse-to-buy.spec.ts` | Flavors page view, delivery checkout path, delivery `OrderCompleted` |
 | 3 | Info / Marketing Tour | `e2e/journey-3-info-marketing-tour.spec.ts` | Route-change + page-view telemetry across About / Flavors / Locations / Catering |
 | 4 | Fault Demo Journey | `e2e/journey-4-fault-demo.spec.ts` | Slow SQL dependency, failed API request (503), unhandled browser exception |
+| 5 | U.S. Shipping Orders | `e2e/journey-5-shipping-order.spec.ts` | Shipping fulfillment, $9.99 fee, `Shipping` order persisted; includes one intentional failing test (PO Box rule not implemented) |
 
 Run one journey:
 
@@ -67,6 +68,7 @@ Navigate to the **Fault Console** and pick a fault with the `?fault=` selector:
 | Fault | URL | Result |
 |-------|-----|--------|
 | Slow SQL | `/fault?fault=slow-sql` | Deliberate ~3s Azure SQL dependency (`WAITFOR DELAY`) |
+| SQL failure | `/fault?fault=sql-failure` | Deliberate failed Azure SQL dependency (`RAISERROR`) — red SQL node on the Application Map |
 | API failure | `/fault?fault=api-failure` | API returns `503 Service Unavailable` |
 | Browser exception | `/fault?fault=browser-exception` | Unhandled client-side exception |
 
@@ -83,6 +85,7 @@ localStorage.removeItem('DEMO_FAULT');          // disable
 |----------|----------|
 | `GET /api/demo/status` | Reports whether faults are enabled and lists them |
 | `GET /api/demo/slow-sql` | Runs a deterministic slow SQL query, returns `200` |
+| `GET /api/demo/sql-failure` | Runs a deliberately failing SQL command (`RAISERROR`), returns `500` |
 | `GET /api/demo/api-failure` | Returns `503` with problem details |
 
 ### Enabling / disabling faults per environment

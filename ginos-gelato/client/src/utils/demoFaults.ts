@@ -7,6 +7,7 @@
  *
  * Selection (independently selectable, deterministic):
  *   /fault?fault=slow-sql           -> slow Azure SQL dependency
+ *   /fault?fault=sql-failure        -> failed Azure SQL dependency (red on App Map)
  *   /fault?fault=api-failure        -> failed API request (503)
  *   /fault?fault=browser-exception  -> unhandled browser exception
  *
@@ -15,10 +16,11 @@
  *   localStorage.removeItem('DEMO_FAULT')   // disable
  */
 
-export type DemoFault = 'slow-sql' | 'api-failure' | 'browser-exception';
+export type DemoFault = 'slow-sql' | 'sql-failure' | 'api-failure' | 'browser-exception';
 
 export const DEMO_FAULTS: readonly DemoFault[] = [
   'slow-sql',
+  'sql-failure',
   'api-failure',
   'browser-exception',
 ] as const;

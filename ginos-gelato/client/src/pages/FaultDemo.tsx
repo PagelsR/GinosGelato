@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getActiveFault, DemoFault } from '../utils/demoFaults';
-import { triggerSlowSql, triggerApiFailure } from '../services/api';
+import { triggerSlowSql, triggerSqlFailure, triggerApiFailure } from '../services/api';
 import { appInsights } from '../services/appInsights';
 
 /**
@@ -44,6 +44,21 @@ const FaultDemo: React.FC = () => {
                     if (cancelled) return;
                     setState('failed');
                     setStatus(`Fault: slow-sql — error: ${(error as Error).message}`);
+                }
+                return;
+            }
+
+            if (active === 'sql-failure') {
+                try {
+                    await triggerSqlFailure();
+                    if (cancelled) return;
+                    setState('completed');
+                    setStatus('Fault: sql-failure — endpoint did not fail (faults disabled?)');
+                } catch (error) {
+                    if (cancelled) return;
+                    // Expected: the SQL command deliberately failed.
+                    setState('failed');
+                    setStatus(`Fault: sql-failure — failed as expected (${(error as Error).message})`);
                 }
                 return;
             }
@@ -112,6 +127,7 @@ const FaultDemo: React.FC = () => {
                         <p className="font-semibold text-gray-800">Selectable faults:</p>
                         <ul className="list-disc pl-6 space-y-1">
                             <li><code>/fault?fault=slow-sql</code> — slow Azure SQL dependency</li>
+                            <li><code>/fault?fault=sql-failure</code> — failed Azure SQL dependency (red on App Map)</li>
                             <li><code>/fault?fault=api-failure</code> — failed API request (503)</li>
                             <li><code>/fault?fault=browser-exception</code> — unhandled browser exception</li>
                         </ul>

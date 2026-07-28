@@ -97,5 +97,43 @@ namespace GinosGelato.Controllers
                 detail: "Deliberate demo fault: the API returned 503 Service Unavailable.",
                 statusCode: StatusCodes.Status503ServiceUnavailable);
         }
+
+        // GET: api/demo/sql-failure
+        // Deterministically fails a SQL command so a FAILED Azure SQL dependency
+        // appears in Application Insights (the SQL node/edge turns red on the
+        // Application Map). No order data is read or written.
+        [HttpGet("sql-failure")]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> SqlFailure(CancellationToken cancellationToken)
+        {
+            if (!FaultsEnabled)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                // RAISERROR (severity 16) makes SQL Server return an error, so
+                // ADO.NET records a failed SQL dependency. Nothing is read or written.
+                await _context.Database.ExecuteSqlRawAsync(
+                    "RAISERROR (N'Demo SQL failure (deliberate demo fault).', 16, 1);",
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _telemetry?.TrackException(ex, new Dictionary<string, string> { ["fault"] = "sql-failure" });
+                _telemetry?.TrackEvent("DemoSqlFailure");
+                _logger.LogError(ex, "Demo SQL-failure fault triggered (deliberate SQL error).");
+
+                return Problem(
+                    title: "Demo SQL failure",
+                    detail: "Deliberate demo fault: an Azure SQL command failed on purpose.",
+                    statusCode: StatusCodes.Status500InternalServerError);
+            }
+
+            // RAISERROR always throws, so this is unreachable in practice.
+            return Ok(new { fault = "sql-failure" });
+        }
     }
 }
