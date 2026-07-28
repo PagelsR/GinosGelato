@@ -80,7 +80,7 @@ jobs:
             
             # Extract and append metrics
             REPORT_URL="https://pagelsr.github.io/GinosGelato/reports/${DATE}-run-${RUN_ID}"
-            node .github/scripts/extract-test-metrics.js test-results.json test-history.json $RUN_ID "$REPORT_URL"
+            node .github/scripts/extract-test-metrics.js test-results.json test-history.json $RUN_ID "$REPORT_URL" "${{ github.ref_name }}"
             
             # Copy updated history to deployment
             cp test-history.json deployment-content/

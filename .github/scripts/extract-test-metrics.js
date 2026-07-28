@@ -13,6 +13,7 @@ const resultsPath = process.argv[2] || './test-results.json';
 const historyPath = process.argv[3] || './test-history.json';
 const runNumber = process.argv[4] || Date.now();
 const runUrl = process.argv[5] || '';
+const branch = process.argv[6] || 'unknown';
 
 console.log(`Reading test results from: ${resultsPath}`);
 
@@ -77,6 +78,7 @@ const summary = {
   skipped: 0,
   duration: Math.round(duration / 1000), // convert to seconds
   passRate: total > 0 ? Math.round((effectivePassed / total) * 100) : 0,
+  branch: branch,
   reportUrl: runUrl
 };
 
