@@ -1,6 +1,10 @@
 name: Playwright Testing - Daily Schedule
 
 on:
+  push:
+    branches:
+      - main
+      - feature/azure-modernization
   schedule:
     # Runs daily at 6:00 AM EST (11:00 AM UTC) to generate Application Insights telemetry
     - cron: '0 11 * * *'
