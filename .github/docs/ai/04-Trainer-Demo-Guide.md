@@ -236,6 +236,47 @@ context — and correlated across the browser and API.
    Because the daily fault journey runs this once a day, that red slice stays an
    occasional `<1%`, not a constant alarm.
 
+### Reading the Application Map (narrate left → right)
+
+- **CLIENT** (e.g. "735 views, 434 ms") — the React storefront; browser
+  telemetry. Views are page loads; the number is average client load time.
+- **AVAILABILITY 100%** — synthetic availability pings; the app answered them all.
+- **App Service node** (e.g. "4 instances, 2%, 224 ms, 349 calls") — the
+  ASP.NET Core API. Green = healthy; the small red tick is the error slice.
+- **The red edge → SQL** (e.g. "48.4 ms | 0.2% ❗", 499 calls) — the star: of
+  ~499 SQL dependency calls, ~0.2% failed, so the edge and the SQL node flag red.
+  That is the planted `sql-failure` fault appearing as a real **failed Azure SQL
+  dependency**.
+- **SQL node** (`sql-…GinosGelatoDb`) — the Azure SQL database dependency.
+
+Click the red edge, then drill in:
+
+- **Top failing status codes → `50000`** — SQL Server error number **50000** is
+  exactly what our `RAISERROR(N'Demo SQL failure…', 16, 1)` raises.
+- **operation_Name: `GET Demo/SqlFailure`** — proof it came from the demo fault
+  endpoint, *not* a real checkout path. Nothing in ordering is broken.
+- **Sample dependency: `Success == false`, response code `50000`,
+  `…GinosGelatoDb`** — the exact failed SQL call, timestamped and correlated to
+  one operation.
+
+**Talking point (Application Map):**
+
+> "Two things to notice. First, it's a *database dependency* failing — not the
+> API, not the browser — and the map points right at it without me guessing.
+> Second, it's only ~0.2%: an occasional blip, not an outage, which is what real
+> triage looks like. I click 'Investigate failures,' land on the exact SQL
+> command and error code 50000, and see it came from `GET Demo/SqlFailure` — from
+> 'something's red' to 'this query, this instance, this time' in about three
+> clicks."
+
+**Honesty beat (recommended):**
+
+> "Full transparency — I planted this one. It's a deterministic demo fault that
+> runs a harmless `RAISERROR`, fired once a day by our Playwright journey so the
+> map always has a realistic sub-1% database error to investigate. The tooling
+> and workflow are exactly what you'd use on a real failure; only the cause is
+> simulated."
+
 **Talking point:**
 
 > "The exception is far more useful when logs, requests, dependencies, and
