@@ -51,24 +51,13 @@ npm ci
 npx playwright install chromium
 ```
 
-## Seed telemetry before the audience arrives
+## Telemetry is already fresh
 
-The branch already contains a scheduled workflow:
-
-`.github/workflows/playwright-testing.yml`
-
-It runs the full suite daily and can also be run manually.
-
-In GitHub:
-
-1. Open the repo.
-2. Click **Actions**.
-3. Select **Playwright Testing - Daily Schedule**.
-4. Click **Run workflow**.
-5. Select branch **feature/azure-modernization**.
-6. Click **Run workflow**.
-
-Do this early enough that recent healthy and fault telemetry is already available.
+The branch's scheduled workflow (`.github/workflows/playwright-testing.yml`)
+runs the full suite — journeys, faults, and flaky specs — automatically every
+day at 11:00 UTC against the deployed Static Web App. No manual pre-session
+run is required: by the time you present, healthy and fault telemetry from
+the last run is already in Application Insights.
 
 ## Open Azure once
 
@@ -622,7 +611,7 @@ Because we are not storing a persistent fault flag, there is no PowerShell clean
 - [ ] `/fault?fault=slow-sql` works
 - [ ] `/fault?fault=api-failure` works
 - [ ] `/fault?fault=browser-exception` works
-- [ ] Recent telemetry exists before the talk
+- [ ] Daily scheduled workflow ran successfully in the last 24h (Actions tab)
 - [ ] User Flows can start from `CheckoutStarted`
 - [ ] Three KQL queries return useful rows
 - [ ] Copilot prompt rehearsed

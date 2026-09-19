@@ -30,7 +30,13 @@ try {
 const suites = results.suites || [];
 const allTests = [];
 
-function extractTests(suite) {
+// Tests that are deliberately unstable (chaos-testing specs, not real regressions).
+function isChaosTest(file, title) {
+  return /flaky-tests\.spec\.ts$/.test(file || '') || /^FLAKY:/i.test(title || '');
+}
+
+function extractTests(suite, file) {
+  const suiteFile = suite.file || file;
   if (suite.specs) {
     suite.specs.forEach(spec => {
       // Check if test is flaky (passed after retry)
@@ -39,21 +45,22 @@ function extractTests(suite) {
         // Flaky = has multiple results and eventually passed
         return results.length > 1 && spec.ok;
       });
-      
+
       allTests.push({
         title: spec.title,
         ok: spec.ok,
         tests: spec.tests || [],
-        isFlaky: isFlaky
+        isFlaky: isFlaky,
+        isChaos: isChaosTest(suiteFile, spec.title)
       });
     });
   }
   if (suite.suites) {
-    suite.suites.forEach(extractTests);
+    suite.suites.forEach(s => extractTests(s, suiteFile));
   }
 }
 
-suites.forEach(extractTests);
+suites.forEach(s => extractTests(s));
 
 const total = allTests.length;
 const flaky = allTests.filter(t => t.isFlaky).length;
@@ -65,6 +72,12 @@ const duration = results.stats?.duration || 0;
 const effectiveFailed = failed + flaky;
 const effectivePassed = passed;
 
+// Split failures into deliberate chaos-testing specs vs. genuine regressions,
+// so the dashboard doesn't conflate "designed to fail sometimes" with "broke".
+const notPassed = allTests.filter(t => !t.ok || t.isFlaky);
+const chaosFailed = notPassed.filter(t => t.isChaos).length;
+const regressionFailed = notPassed.filter(t => !t.isChaos).length;
+
 // Create summary object
 const summary = {
   runId: `${new Date().toISOString().split('T')[0]}-run-${runNumber}`,
@@ -74,6 +87,8 @@ const summary = {
   total: total,
   passed: effectivePassed,
   failed: effectiveFailed,
+  regressionFailed: regressionFailed,
+  chaosFailed: chaosFailed,
   flaky: flaky,
   skipped: 0,
   duration: Math.round(duration / 1000), // convert to seconds
