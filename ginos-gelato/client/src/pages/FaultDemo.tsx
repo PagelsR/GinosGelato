@@ -85,6 +85,10 @@ const FaultDemo: React.FC = () => {
                     { exception: error },
                     { fault: 'browser-exception', demo: 'true' }
                 );
+                // Force an immediate send: the SDK otherwise batches telemetry
+                // for up to 15s, and this fault's Playwright test tears down
+                // the browser well before that timer would fire.
+                appInsights.flush();
                 setState('completed');
                 setStatus('Fault: browser-exception — thrown (see Application Insights exceptions)');
                 // Rethrow asynchronously so it surfaces as an unhandled window
