@@ -32,13 +32,9 @@ For the presentation, use the **VS Code integrated terminal**. PowerShell is not
 
 Only one command is needed live for Playwright:
 
-✅ **COPY THIS**
-
 ```text
 npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --headed --workers=1
 ```
-
-✅ **END COPY**
 
 Everything else in the fault demos can be triggered with browser URLs.
 
@@ -50,33 +46,18 @@ Everything else in the fault demos can be triggered with browser URLs.
 
 Do this before the conference, not on stage.
 
-✅ **COPY THIS**
-
 ```text
 npm ci
 npx playwright install chromium
 ```
 
-✅ **END COPY**
+## Telemetry is already fresh
 
-## Seed telemetry before the audience arrives
-
-The branch already contains a scheduled workflow:
-
-`.github/workflows/playwright-testing.yml`
-
-It runs the full suite daily and can also be run manually.
-
-In GitHub:
-
-1. Open the repo.
-2. Click **Actions**.
-3. Select **Playwright Testing - Daily Schedule**.
-4. Click **Run workflow**.
-5. Select branch **feature/azure-modernization**.
-6. Click **Run workflow**.
-
-Do this early enough that recent healthy and fault telemetry is already available.
+The branch's scheduled workflow (`.github/workflows/playwright-testing.yml`)
+runs the full suite — journeys, faults, and flaky specs — automatically every
+day at 11:00 UTC against the deployed Static Web App. No manual pre-session
+run is required: by the time you present, healthy and fault telemetry from
+the last run is already in Application Insights.
 
 ## Open Azure once
 
@@ -149,13 +130,9 @@ Scroll only enough to show the business steps.
 
 Then run:
 
-✅ **COPY THIS**
-
 ```text
 npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --headed --workers=1
 ```
-
-✅ **END COPY**
 
 ## SHOW
 
@@ -198,13 +175,9 @@ Leave Live Metrics visible.
 
 Run Journey 1 again from the VS Code terminal:
 
-✅ **COPY THIS**
-
 ```text
 npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --workers=1
 ```
-
-✅ **END COPY**
 
 ## SHOW
 
@@ -246,13 +219,9 @@ Do not explain every chart.
 
 Open this browser URL:
 
-✅ **COPY THIS**
-
 ```text
 https://wonderful-coast-040cb1a10.7.azurestaticapps.net/fault?fault=slow-sql
 ```
-
-✅ **END COPY**
 
 The page should report that `slow-sql` completed after approximately 3 seconds.
 
@@ -318,13 +287,9 @@ Then:
 
 ### TRIGGER
 
-✅ **COPY THIS**
-
 ```text
 https://wonderful-coast-040cb1a10.7.azurestaticapps.net/fault?fault=api-failure
 ```
-
-✅ **END COPY**
 
 The API deliberately returns **503 Service Unavailable**.
 
@@ -356,13 +321,9 @@ Then:
 
 ### TRIGGER
 
-✅ **COPY THIS**
-
 ```text
 https://wonderful-coast-040cb1a10.7.azurestaticapps.net/fault?fault=browser-exception
 ```
-
-✅ **END COPY**
 
 The client deliberately reports and throws:
 
@@ -456,8 +417,6 @@ Use the Application Insights resource scope.
 
 ### Question 1 - Which operations are slowest?
 
-✅ **COPY THIS**
-
 ```kusto
 requests
 | where timestamp > ago(24h)
@@ -469,11 +428,7 @@ requests
 | order by P95 desc
 ```
 
-✅ **END COPY**
-
 ### Question 2 - Which exceptions happen most often?
-
-✅ **COPY THIS**
 
 ```kusto
 exceptions
@@ -482,13 +437,9 @@ exceptions
 | order by Count desc
 ```
 
-✅ **END COPY**
-
 ### Question 3 - Which fulfillment method is selected most often?
 
 This replaces the current slide question **"Which fulfillment method fails most?"** because the branch does not emit an `OrderFailed` business event.
-
-✅ **COPY THIS**
 
 ```kusto
 customEvents
@@ -498,8 +449,6 @@ customEvents
 | summarize Count = count() by method
 | order by Count desc
 ```
-
-✅ **END COPY**
 
 ## SAY
 
@@ -538,8 +487,6 @@ Open GitHub Copilot Chat.
 
 ## PROMPT
 
-✅ **COPY THIS**
-
 ```text
 Application Insights shows this request taking about 3 seconds, with nearly all of the duration inside an Azure SQL dependency.
 
@@ -553,8 +500,6 @@ Review the selected SlowSql code and:
 
 Do not modify the code.
 ```
-
-✅ **END COPY**
 
 ## SHOW
 
@@ -645,13 +590,9 @@ Do **not** use the optional `DEMO_FAULT` localStorage setting during the present
 
 To return to normal, simply navigate back to:
 
-✅ **COPY THIS**
-
 ```text
 https://wonderful-coast-040cb1a10.7.azurestaticapps.net/
 ```
-
-✅ **END COPY**
 
 Because we are not storing a persistent fault flag, there is no PowerShell cleanup command and no reset script required.
 
@@ -670,7 +611,7 @@ Because we are not storing a persistent fault flag, there is no PowerShell clean
 - [ ] `/fault?fault=slow-sql` works
 - [ ] `/fault?fault=api-failure` works
 - [ ] `/fault?fault=browser-exception` works
-- [ ] Recent telemetry exists before the talk
+- [ ] Daily scheduled workflow ran successfully in the last 24h (Actions tab)
 - [ ] User Flows can start from `CheckoutStarted`
 - [ ] Three KQL queries return useful rows
 - [ ] Copilot prompt rehearsed
@@ -735,3 +676,148 @@ with:
 **Which fulfillment method is selected most often?**
 
 The current branch emits `DeliveryMethodSelected` but does not emit `OrderFailed`.
+
+---
+
+# 🎁 BONUS DEMOS (only if time remains)
+
+> Search for `BONUS DEMO` to jump straight here. These are optional — only run
+> them if you land ahead of the 68-minute plan with real time to spare. Skip
+> silently otherwise; do not mention them if you're not doing them.
+
+## 🎁 BONUS DEMO A — Release Correlation ("did this start after the last deploy?")
+
+**Target:** 4 minutes  
+**Search marker:** `BONUS DEMO A`
+
+### SAY
+
+> "One more question production teams ask constantly: did this problem start
+> after our last deployment?"
+
+### WHY IT WORKS
+
+`ReleaseTelemetryInitializer` (`ginos-gelato/server/Telemetry/ReleaseTelemetryInitializer.cs`)
+stamps **every** piece of server telemetry with release context, populated by
+`BuildDeploy.yml` at deploy time:
+
+- `application_Version` — `1.0.<GitHub run number>`
+- `customDimensions.gitCommitSha` — the exact commit SHA deployed
+- `customDimensions.deploymentId` — the GitHub Actions run ID
+- `customDimensions.environment` — ASP.NET Core environment name
+
+### CLICK
+
+Azure Portal → Application Insights → **Monitoring > Logs**.
+
+```kusto
+requests
+| where timestamp > ago(24h)
+| summarize Count = count(), AvgDuration = avg(duration)
+    by application_Version, tostring(customDimensions.gitCommitSha)
+| order by Count desc
+```
+
+### SHOW
+
+- Every row is tagged with the exact commit SHA that shipped it.
+- If you redeploy mid-conference, you can immediately filter to just the new
+  version and compare error rate / duration against the previous one.
+
+### SAY
+
+> "Every request already knows which commit produced it. If a regression ships,
+> we don't have to ask 'when did this start' — we filter by `application_Version`
+> and get the answer."
+
+### RETURN TO
+
+**Detect It Before the Customer Does**
+
+---
+
+## 🎁 BONUS DEMO B — Alerts and Availability Tests (proactive monitoring)
+
+**Target:** 4 minutes  
+**Search marker:** `BONUS DEMO B`
+
+### SAY
+
+> "Everything so far has been reactive — a human opened the portal and looked.
+> Let's see what's watching when nobody's looking."
+
+### CLICK
+
+Azure Portal → Application Insights → **Alerts**.
+
+- Open the pre-provisioned alert rule (`iac/appInsights.bicep`): fires when
+  **average server response time exceeds 3 seconds**.
+- Point out it's the exact threshold the `slow-sql` fault (Demo 3) is designed
+  to approach — that fault is a deliberate rehearsal of what this alert is
+  meant to catch in production.
+
+Then Azure Portal → Application Insights → **Investigate > Availability**.
+
+- Show the three synthetic availability tests already running from multiple
+  regions: frontend home page, Flavors API, Toppings API.
+- Point out the pass/fail history and multi-region map.
+
+### SAY
+
+> "This is the difference between finding a problem and being told about a
+> problem. The alert and the availability tests run whether or not I'm watching
+> the portal."
+
+### RETURN TO
+
+**Detect It Before the Customer Does**
+
+---
+
+## 🎁 BONUS DEMO C — Find Custom Markers with Search
+
+**Target:** 4 minutes  
+**Search marker:** `BONUS DEMO C`
+
+### SAY
+
+> "Every step of the ordering process drops a custom marker into telemetry.
+> Let's just search for a couple of them by name — no dashboard required."
+
+### CLICK
+
+Azure Portal → Application Insights → **Investigate > Search**.
+
+Type each of these into the search box (one at a time), with **Event type**
+filtered to **Custom Event**:
+
+```text
+IceCreamCreated
+```
+
+```text
+OrderCompleted
+```
+
+### SHOW
+
+- `IceCreamCreated` (client, `Builder.tsx`) — expand a result and show its
+  properties: `container`, `flavorCount`, `toppingCount`, `price`.
+- `OrderCompleted` (client, `Checkout.tsx`) — expand a result and show
+  `orderNumber`, `orderTotal`, `deliveryType`, `deliveryFee`.
+- Click **related items** on an `OrderCompleted` result to jump to the
+  server-side `OrderCreated` event (`OrderService.cs`) sharing the same
+  operation ID — the browser marker and the server marker are the same order.
+
+### SAY
+
+> "These aren't synthetic demo events — they're the same markers that would be
+> in place the day this feature shipped: `BuilderPageVisit`, `IceCreamCreated`,
+> `AddToCart`, `CheckoutStarted`, `CheckoutStepCompleted`,
+> `DeliveryMethodSelected`, `OrderCompleted`, and server-side `OrderCreated`.
+> Search is the fastest way to answer 'did this specific thing happen,' without
+> writing a query or building a dashboard first."
+
+### RETURN TO
+
+**Evidence-Based Debugging with GitHub Copilot**
