@@ -510,7 +510,7 @@ Do not modify the code.
 
 > "Better evidence in, better explanation out."
 
-## RETURN TO
+## RETURN TO NEXT SLIDE
 
 **Detect It Before the Customer Does**
 
@@ -535,84 +535,6 @@ For **The Loop Every Team Lives In**:
 > Build -> Deploy -> Observe -> Diagnose -> Improve -> Validate -> Repeat
 
 For **What to Take Home**, read only 3 or 4 bullets.
-
----
-
-# 68-Minute Timing Plan
-
-| Section | Target |
-|---|---:|
-| Opening slides through Playwright concept | 8 min |
-| Demo 1 - Checkout + Playwright | 5 min |
-| Observability + signals + App Insights overview | 5 min |
-| Demo 2 - Live Metrics | 3 min |
-| Slow-request setup slides | 4 min |
-| Demo 3 - Slow request -> SQL | 8 min |
-| Transaction + failures concept slides | 4 min |
-| Demo 4 - API failure + browser exception | 6 min |
-| Correlation + business telemetry + three questions | 6 min |
-| Demo 5 - User Flow + KQL | 6 min |
-| Copilot concept slide | 2 min |
-| Demo 6 - Copilot root cause | 5 min |
-| Closing slides | 6 min |
-| **Planned total** | **68 min** |
-| **Buffer before hard 75-minute stop** | **7 min** |
-
----
-
-# What To Cut If Time Runs Long
-
-Cut in this order:
-
-1. One of the three KQL queries.
-2. Deep browser-exception details.
-3. Extra Live Metrics explanation.
-4. Manual checkout clicks - jump directly to Playwright.
-
-Do **not** cut:
-
-- Demo 3 slow dependency investigation
-- Demo 6 evidence-grounded Copilot story
-- final takeaway
-
----
-
-# No Reset Is Needed Between Fault Demos
-
-The safest presentation approach is to use only the `?fault=` URLs.
-
-Each URL activates one fault only for that page load.
-
-Do **not** use the optional `DEMO_FAULT` localStorage setting during the presentation.
-
-To return to normal, simply navigate back to:
-
-```text
-https://wonderful-coast-040cb1a10.7.azurestaticapps.net/
-```
-
-Because we are not storing a persistent fault flag, there is no PowerShell cleanup command and no reset script required.
-
----
-
-# Final Rehearsal Checklist
-
-- [ ] Slide 6 instrumentation wording matches the repo (see correction below)
-- [ ] Demo 3 slide/title acknowledges the controlled slow request
-- [ ] Demo 4 title says **API Failure and Browser Exception**
-- [ ] Business-event slide uses actual event names from the code
-- [ ] Third KQL question is fulfillment **mix**, not failures
-- [ ] `npm ci` completed
-- [ ] Playwright Chromium installed
-- [ ] Journey 1 runs headed
-- [ ] `/fault?fault=slow-sql` works
-- [ ] `/fault?fault=api-failure` works
-- [ ] `/fault?fault=browser-exception` works
-- [ ] Daily scheduled workflow ran successfully in the last 24h (Actions tab)
-- [ ] User Flows can start from `CheckoutStarted`
-- [ ] Three KQL queries return useful rows
-- [ ] Copilot prompt rehearsed
-- [ ] Full rehearsal finishes in 65-68 minutes
 
 ---
 
