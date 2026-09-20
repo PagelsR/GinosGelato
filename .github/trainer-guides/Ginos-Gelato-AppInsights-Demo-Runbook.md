@@ -2,8 +2,6 @@
 
 ## AI-Powered Observability: Master Your App Performance with Azure Application Insights
 
-**Hard session limit:** 75 minutes  
-**Target finish:** 68 minutes, leaving ~7 minutes of buffer  
 **Repo:** `https://github.com/PagelsR/GinosGelato`  
 **Branch:** `feature/azure-modernization`  
 **Azure resource group:** `rg-GinosGelato-Modernization`  
@@ -11,22 +9,7 @@
 
 ---
 
-# The Rule for This Talk
-
-**Slides explain WHY. Demos prove it.**
-
-There are only **six live demos**.
-
-Do not tour the Azure portal.  
-Do not teach Playwright syntax.  
-Do not teach KQL syntax.  
-Do not debug a broken demo on stage.
-
----
-
-# Important: No PowerShell Is Required
-
-The repo documentation labels some command blocks as `powershell`, but the Playwright commands themselves are ordinary terminal commands.
+# Important
 
 For the presentation, use the **VS Code integrated terminal**. PowerShell is not required.
 
@@ -65,19 +48,17 @@ In Azure Portal:
 
 1. **Resource groups**
 2. Open **rg-GinosGelato-Modernization**
-3. Select the Application Insights resource named **appi-...**
+3. Select the Application Insights resource named **appi-uxryfogy5mzkc**
 
 Open separate browser tabs for:
 
+- **Investigate > Application map**
 - **Investigate > Live metrics**
 - **Investigate > Performance**
 - **Investigate > Failures**
+- **Investigate > Search**
 - **Usage > User Flows**
 - **Monitoring > Logs**
-
-Optional backup tab:
-
-- **Investigate > Application map**
 
 ## Open VS Code tabs
 
@@ -98,13 +79,13 @@ Open:
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 1.** Show one normal customer checkout, then run Journey 1 in Playwright. The point is that the same customer path becomes repeatable executable code. Return to **The Difference That Matters**.
+> **RUNBOOK: Demo 1.** Show one normal customer checkout, then run Journey 1 in Playwright. The point is that the same customer path becomes repeatable executable code.
 
 ## SAY
 
 > "We've talked about the journey. Let's run it first as a customer, then as automation."
 
-## DO - Manual customer journey
+## Manual customer journey
 
 In the deployed storefront:
 
@@ -116,9 +97,7 @@ In the deployed storefront:
 6. Complete the order.
 7. Show the confirmation.
 
-Do not narrate every click.
-
-## DO - Playwright
+## Playwright
 
 Switch to VS Code.
 
@@ -144,9 +123,9 @@ npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --headed --workers=1
 
 > "This is a customer who never gets tired. It gives us repeatability, regression coverage, and realistic telemetry."
 
-## RETURN TO
+## RETURN TO NEXT SLIDE
 
-**The Difference That Matters**
+**The Difference That Matters**.
 
 ---
 
@@ -157,15 +136,13 @@ npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --headed --workers=1
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 2.** Azure Portal > Application Insights > **Investigate > Live metrics**. Run Journey 1 again and show requests arriving live. Do not tour the whole page. Return to **The First Report**.
+> **RUNBOOK: Demo 2.** Azure Portal > Application Insights > **Investigate > Live metrics**. Run Journey 1 again and show requests arriving live. Do not tour the whole page.
 
 ## SAY
 
 > "Let's start with the simplest production question: what is happening right now?"
 
-## CLICK
-
-Azure Portal:
+## Azure Portal:
 
 **Resource groups > rg-GinosGelato-Modernization > appi-... > Investigate > Live metrics**
 
@@ -194,7 +171,7 @@ Do not explain every chart.
 
 > "Live Metrics answers: is it happening right now, and how broadly is it happening?"
 
-## RETURN TO
+## RETURN TO NEXT SLIDE
 
 **The First Report**
 
@@ -209,7 +186,7 @@ Do not explain every chart.
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 3.** Reproduce a deterministic 3-second Azure SQL delay with `/fault?fault=slow-sql`. In Application Insights go **Investigate > Performance**, open the slow server request, drill into a sample, open **End-to-end transaction details**, then select the SQL dependency. Return to **End-to-End Transaction Details**.
+> **RUNBOOK: Demo 3.** Reproduce a deterministic 3-second Azure SQL delay with `/fault?fault=slow-sql`. In Application Insights go **Investigate > Performance**, open the slow server request, drill into a sample, open **End-to-end transaction details**, then select the SQL dependency.
 
 ## SAY
 
@@ -229,9 +206,7 @@ The server runs a real Azure SQL command:
 
 `WAITFOR DELAY '00:00:03'`
 
-## CLICK
-
-Azure Portal:
+## Azure Portal:
 
 **Application Insights > Investigate > Performance**
 
@@ -262,7 +237,7 @@ Then:
 
 > "The customer experienced a slow request. Application Insights shows that the time lives in the SQL dependency."
 
-## RETURN TO
+## RETURN TO NEXT SLIDE
 
 **End-to-End Transaction Details**
 
@@ -271,19 +246,19 @@ Then:
 # DEMO 4 - API Failure + Browser Exception
 
 **Target:** 6 minutes  
-**Demo slide:** currently "API and Browser Exceptions"
+**Demo slide:** currently "API and Browser Exception"
 
-> **Accuracy note:** `api-failure` intentionally returns HTTP 503. It is a failed API request, not a thrown server exception. Rename this Demo slide to **API Failure and Browser Exception** for exact alignment with the code and telemetry.
+> **Accuracy note:** `api-failure` intentionally returns HTTP 503. It is a failed API request, not a thrown server exception.
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 4.** Trigger `/fault?fault=api-failure`, then use **Investigate > Failures > Server** to find the 503 request. Next trigger `/fault?fault=browser-exception`, switch to the **Browser** failures view and open `DemoBrowserException`. Return to **One Order, One Trace**.
+> **RUNBOOK: Demo 4.** Trigger `/fault?fault=api-failure`, then use **Investigate > Failures > Server** to find the 503 request. Next trigger `/fault?fault=browser-exception`, switch to the **Browser** failures view and open `DemoBrowserException`.
 
 ## PART A - API failure
 
 ### SAY
 
-> "First, let's look at a backend request that fails."
+> "First, let's look at a backend request that fails. To make the symptom deterministic on stage, I'm reproducing the API failure with a safe demo request."
 
 ### TRIGGER
 
@@ -293,9 +268,7 @@ https://wonderful-coast-040cb1a10.7.azurestaticapps.net/fault?fault=api-failure
 
 The API deliberately returns **503 Service Unavailable**.
 
-### CLICK
-
-Azure Portal:
+### Azure Portal:
 
 **Application Insights > Investigate > Failures**
 
@@ -319,8 +292,6 @@ Then:
 
 ## PART B - Browser exception
 
-### TRIGGER
-
 ```text
 https://wonderful-coast-040cb1a10.7.azurestaticapps.net/fault?fault=browser-exception
 ```
@@ -329,9 +300,7 @@ The client deliberately reports and throws:
 
 `DemoBrowserException`
 
-### CLICK
-
-Stay in:
+### Azure Portal
 
 **Application Insights > Investigate > Failures**
 
@@ -349,11 +318,14 @@ If the portal UI does not expose the browser exception where expected, use:
 
 Filter **Event types** to **Exception**, then select `DemoBrowserException`.
 
+```
+DemoBrowserException
+```
 ## SAY
 
 > "A healthy API does not guarantee a healthy customer experience. Some failures live entirely in the browser."
 
-## RETURN TO
+## RETURN TO NEXT SLIDE
 
 **One Order, One Trace**
 
@@ -379,11 +351,9 @@ The real useful events include:
 - `OrderCompleted`
 - server-side `OrderCreated`
 
-Update the Business Telemetry slide to use actual names from the code.
-
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 5.** Open **Usage > User Flows**, start from `CheckoutStarted`, and show where the session goes next. Then open **Monitoring > Logs** and run the three prepared KQL questions. Return to **Evidence-Based Debugging with GitHub Copilot**.
+> **RUNBOOK: Demo 5.** Open **Usage > User Flows**, start from `CheckoutStarted`, and show where the session goes next. Then open **Monitoring > Logs** and run the three prepared KQL questions.
 
 ## PART A - User Flow
 
@@ -391,9 +361,7 @@ Update the Business Telemetry slide to use actual names from the code.
 
 > "Technical telemetry tells us what failed. Business telemetry tells us what happened to the customer."
 
-### CLICK
-
-Azure Portal:
+### Azure Portal:
 
 **Application Insights > Usage > User Flows**
 
@@ -405,17 +373,30 @@ Then:
 4. Show the next customer actions/events.
 5. Keep this short.
 
-## PART B - KQL
+## PART B - KQL (Kusto Query Language)
 
-### CLICK
-
-Azure Portal:
+### Azure Portal:
 
 **Application Insights > Monitoring > Logs**
 
 Use the Application Insights resource scope.
 
+> **Two ways to ask, same evidence.** Logs now has an **Observability Agent**
+> (preview) chat panel — toggle **Agent** on in the top-right of the Logs
+> blade. For each question below, **Option 1** is the prompt to type into the
+> agent; **Option 2** is the raw KQL, as a reliable fallback if the agent
+> preview isn't enabled in the tenant you're demoing in, or if you want to show
+> what's actually running under the hood.
+
 ### Question 1 - Which operations are slowest?
+
+**Option 1 - Ask the Observability Agent**
+
+```text
+Show me the slowest operations in the last 24 hours. Include average and P95 duration, and sort by P95 descending.
+```
+
+**Option 2 - KQL**
 
 ```kusto
 requests
@@ -430,6 +411,14 @@ requests
 
 ### Question 2 - Which exceptions happen most often?
 
+**Option 1 - Ask the Observability Agent**
+
+```text
+Which exceptions happened most often in the last 24 hours? Group by exception type and message, sorted by count.
+```
+
+**Option 2 - KQL**
+
 ```kusto
 exceptions
 | where timestamp > ago(24h)
@@ -440,6 +429,14 @@ exceptions
 ### Question 3 - Which fulfillment method is selected most often?
 
 This replaces the current slide question **"Which fulfillment method fails most?"** because the branch does not emit an `OrderFailed` business event.
+
+**Option 1 - Ask the Observability Agent**
+
+```text
+In the last 24 hours, look at the DeliveryMethodSelected custom event and tell me which fulfillment method was selected most often.
+```
+
+**Option 2 - KQL**
 
 ```kusto
 customEvents
@@ -452,9 +449,9 @@ customEvents
 
 ## SAY
 
-> "I'm not teaching KQL syntax. I'm showing that a developer can ask a question nobody thought to build a dashboard for."
+> "I'm not teaching KQL syntax. I'm showing that a developer can ask a question nobody thought to build a dashboard for — in plain English to the Observability Agent, or in KQL directly. Same data, same answer, two ways in."
 
-## RETURN TO
+## RETURN TO NEXT SLIDE
 
 **Evidence-Based Debugging with GitHub Copilot**
 
@@ -513,7 +510,7 @@ Do not modify the code.
 
 > "Better evidence in, better explanation out."
 
-## RETURN TO
+## RETURN TO NEXT SLIDE
 
 **Detect It Before the Customer Does**
 
@@ -538,84 +535,6 @@ For **The Loop Every Team Lives In**:
 > Build -> Deploy -> Observe -> Diagnose -> Improve -> Validate -> Repeat
 
 For **What to Take Home**, read only 3 or 4 bullets.
-
----
-
-# 68-Minute Timing Plan
-
-| Section | Target |
-|---|---:|
-| Opening slides through Playwright concept | 8 min |
-| Demo 1 - Checkout + Playwright | 5 min |
-| Observability + signals + App Insights overview | 5 min |
-| Demo 2 - Live Metrics | 3 min |
-| Slow-request setup slides | 4 min |
-| Demo 3 - Slow request -> SQL | 8 min |
-| Transaction + failures concept slides | 4 min |
-| Demo 4 - API failure + browser exception | 6 min |
-| Correlation + business telemetry + three questions | 6 min |
-| Demo 5 - User Flow + KQL | 6 min |
-| Copilot concept slide | 2 min |
-| Demo 6 - Copilot root cause | 5 min |
-| Closing slides | 6 min |
-| **Planned total** | **68 min** |
-| **Buffer before hard 75-minute stop** | **7 min** |
-
----
-
-# What To Cut If Time Runs Long
-
-Cut in this order:
-
-1. One of the three KQL queries.
-2. Deep browser-exception details.
-3. Extra Live Metrics explanation.
-4. Manual checkout clicks - jump directly to Playwright.
-
-Do **not** cut:
-
-- Demo 3 slow dependency investigation
-- Demo 6 evidence-grounded Copilot story
-- final takeaway
-
----
-
-# No Reset Is Needed Between Fault Demos
-
-The safest presentation approach is to use only the `?fault=` URLs.
-
-Each URL activates one fault only for that page load.
-
-Do **not** use the optional `DEMO_FAULT` localStorage setting during the presentation.
-
-To return to normal, simply navigate back to:
-
-```text
-https://wonderful-coast-040cb1a10.7.azurestaticapps.net/
-```
-
-Because we are not storing a persistent fault flag, there is no PowerShell cleanup command and no reset script required.
-
----
-
-# Final Rehearsal Checklist
-
-- [ ] Slide 6 instrumentation wording matches the repo (see correction below)
-- [ ] Demo 3 slide/title acknowledges the controlled slow request
-- [ ] Demo 4 title says **API Failure and Browser Exception**
-- [ ] Business-event slide uses actual event names from the code
-- [ ] Third KQL question is fulfillment **mix**, not failures
-- [ ] `npm ci` completed
-- [ ] Playwright Chromium installed
-- [ ] Journey 1 runs headed
-- [ ] `/fault?fault=slow-sql` works
-- [ ] `/fault?fault=api-failure` works
-- [ ] `/fault?fault=browser-exception` works
-- [ ] Daily scheduled workflow ran successfully in the last 24h (Actions tab)
-- [ ] User Flows can start from `CheckoutStarted`
-- [ ] Three KQL queries return useful rows
-- [ ] Copilot prompt rehearsed
-- [ ] Full rehearsal finishes in 65-68 minutes
 
 ---
 

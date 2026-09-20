@@ -130,6 +130,39 @@ Orders support three fulfillment types, each priced by the API:
 - **Local delivery** - $4.99
 - **Continental U.S. shipping** - $9.99
 
+## Reference app: intentional fault injection for Application Insights demos
+
+This repo doubles as a teaching tool for Azure Application Insights and
+GitHub Copilot-assisted troubleshooting. On top of the real storefront, it
+ships a small set of **deterministic, feature-flagged faults** that a
+presenter can trigger on demand to generate realistic failure telemetry -
+without touching real order data.
+
+The faults are disabled unless explicitly selected, so normal customer
+journeys never hit them:
+
+| Fault | Trigger | What it does |
+|---|---|---|
+| `slow-sql` | `/fault?fault=slow-sql` | Runs a real `WAITFOR DELAY '00:00:03'` against Azure SQL - a genuine slow SQL dependency |
+| `sql-failure` | `/fault?fault=sql-failure` | Runs a deliberate `RAISERROR` - a genuine failed SQL dependency (red SQL node on the Application Map) |
+| `api-failure` | `/fault?fault=api-failure` | Returns HTTP 503 from the API - a failed server request |
+| `browser-exception` | `/fault?fault=browser-exception` | Throws an unhandled client-side error (`DemoBrowserException`) |
+
+Key implementation points:
+
+- Server logic lives in [`ginos-gelato/server/Controllers/DemoController.cs`](ginos-gelato/server/Controllers/DemoController.cs),
+  gated by the `DemoFaults:Enabled` config value (defaults to `true`; set to
+  `false` to hard-disable in an environment).
+- Client trigger logic lives in [`ginos-gelato/client/src/pages/FaultDemo.tsx`](ginos-gelato/client/src/pages/FaultDemo.tsx)
+  and [`ginos-gelato/client/src/utils/demoFaults.ts`](ginos-gelato/client/src/utils/demoFaults.ts).
+- [`e2e/journey-4-fault-demo.spec.ts`](e2e/journey-4-fault-demo.spec.ts) drives
+  all four faults through Playwright and runs automatically via the daily
+  scheduled `.github/workflows/playwright-testing.yml` workflow, so
+  Application Insights always has recent fault telemetry to investigate.
+- The full presenter walkthrough - what to click, what to say, and how to
+  read the resulting telemetry - is in
+  [`.github/trainer-guides/Ginos-Gelato-AppInsights-Demo-Runbook-75min.md`](.github/trainer-guides/Ginos-Gelato-AppInsights-Demo-Runbook-75min.md).
+
 ## Testing
 
 ### Unit tests (pricing & validation)
