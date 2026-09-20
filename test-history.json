@@ -773,5 +773,22 @@
     "passRate": 73,
     "branch": "feature/azure-modernization",
     "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-09-20-run-109"
+  },
+  {
+    "runId": "2026-09-20-run-110",
+    "timestamp": "2026-09-20T18:02:26.775Z",
+    "date": "2026-09-20",
+    "runNumber": "110",
+    "total": 37,
+    "passed": 27,
+    "failed": 10,
+    "regressionFailed": 2,
+    "chaosFailed": 8,
+    "flaky": 3,
+    "skipped": 0,
+    "duration": 426,
+    "passRate": 73,
+    "branch": "feature/azure-modernization",
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-09-20-run-110"
   }
 ]
