@@ -1,17 +1,17 @@
 {
-  "runId": "2026-09-21-run-111",
-  "timestamp": "2026-09-21T12:15:53.352Z",
+  "runId": "2026-09-21-run-112",
+  "timestamp": "2026-09-21T17:03:22.760Z",
   "date": "2026-09-21",
-  "runNumber": "111",
+  "runNumber": "112",
   "total": 37,
-  "passed": 30,
-  "failed": 7,
-  "regressionFailed": 1,
+  "passed": 28,
+  "failed": 9,
+  "regressionFailed": 3,
   "chaosFailed": 6,
-  "flaky": 1,
+  "flaky": 2,
   "skipped": 0,
-  "duration": 410,
-  "passRate": 81,
+  "duration": 427,
+  "passRate": 76,
   "branch": "feature/azure-modernization",
-  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-09-21-run-111"
+  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-09-21-run-112"
 }
