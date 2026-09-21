@@ -62,15 +62,19 @@ Open separate browser tabs for:
 
 ## Open VS Code tabs
 
-Open:
+Open, actually shown on screen:
 
-- `e2e/journey-1-happy-path-pickup.spec.ts`
-- `e2e/journey-4-fault-demo.spec.ts`
-- `ginos-gelato/client/src/pages/Checkout.tsx`
-- `ginos-gelato/server/Controllers/DemoController.cs`
-- `ginos-gelato/server/Services/OrderService.cs`
+- `e2e/journey-1-happy-path-pickup.spec.ts` (Demo 1)
+- `ginos-gelato/server/Controllers/DemoController.cs` (Demo 6)
+
+Open, backup reference only — not opened or shown live, staged in case of Q&A:
+
+- `e2e/journey-4-fault-demo.spec.ts` — automated coverage of the same faults triggered by URL in Demos 3-4
+- `ginos-gelato/client/src/pages/Checkout.tsx` — emits the `CheckoutStarted` / `DeliveryMethodSelected` / `OrderCompleted` events discussed in Demo 5
+- `ginos-gelato/server/Services/OrderService.cs` — emits the server-side `OrderCreated` event referenced in Demo 3 and BONUS DEMO C
 
 ---
+
 
 # DEMO 1 - Customer Checkout + Playwright Journey
 
