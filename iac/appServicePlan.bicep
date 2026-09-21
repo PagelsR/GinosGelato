@@ -7,7 +7,7 @@ param location string = 'eastus'
 @description('Name for the App Service Plan')
 param appServicePlanName string
 
-@description('SKU for the App Service Plan')
+@description('SKU for the App Service Plan (B1 = Basic, always-on, no cold starts)')
 param skuName string = 'B1'
 
 @description('SKU tier')
@@ -26,8 +26,6 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2025-03-01' = {
   sku: {
     name: skuName
     tier: skuTier
-    size: skuName
-    family: 'B'
     capacity: skuCapacity
   }
   kind: 'linux'

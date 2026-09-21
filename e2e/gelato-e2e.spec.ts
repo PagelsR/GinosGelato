@@ -73,7 +73,7 @@ test('Waffle Cone order with checkout', async ({ page }) => {
   } else {
     await expect(page.getByText('Order Confirmed!')).toBeVisible();
   }
-  await expect(page.getByText(/Order #GG\d+/)).toBeVisible(); // Order number pattern
+  await expect(page.getByText(/GG\d{6}-\d{5}/)).toBeVisible(); // GGyyMMdd-##### confirmation number
 });
 
 test('Bowl Cup order with checkout', async ({ page }) => {

@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Cart Operations', () => {
-  
+  // Extended timeout: runs against the live deployed app; must survive cold starts.
+  test.setTimeout(90_000);
+
   test('should show empty cart message when cart is empty', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('link', { name: '🛒 Cart' }).click();
@@ -17,7 +19,7 @@ test.describe('Cart Operations', () => {
     await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
     await page.getByRole('heading', { name: 'Bowl Cup' }).click();
     await page.getByText('🍓Strawberry', { exact: false }).click();
-    await page.waitForTimeout(500);
+    await expect(page.getByRole('button', { name: '🛒 Add to Cart' })).toBeEnabled();
     await page.getByRole('button', { name: '🛒 Add to Cart' }).click();
     await expect(page.getByText('Added to Cart!')).toBeVisible();
     

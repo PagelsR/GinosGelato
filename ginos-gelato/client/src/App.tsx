@@ -10,6 +10,7 @@ import AboutUs from './pages/AboutUs';
 import OurFlavors from './pages/OurFlavors';
 import Locations from './pages/Locations';
 import Catering from './pages/Catering';
+import FaultDemo from './pages/FaultDemo';
 import Header from './components/Layout/Header';
 import Footer from './components/Layout/Footer';
 import { CartProvider } from './contexts/CartContext';
@@ -31,6 +32,7 @@ const App: React.FC = () => {
                 <Route path="/flavors" element={<OurFlavors />} />
                 <Route path="/locations" element={<Locations />} />
                 <Route path="/catering" element={<Catering />} />
+                <Route path="/fault" element={<FaultDemo />} />
               </Routes>
             </main>
             <Footer />

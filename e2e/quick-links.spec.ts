@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test('Quick Links pages and content', async ({ page }) => {
-  await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+  // Extended timeout: runs against the live deployed app; must survive cold starts.
+  test.setTimeout(90_000);
+  await page.goto('/');
 
   const quickLinks = page.getByRole('contentinfo').getByRole('link', { name: /About Us|Our Flavors|Locations|Catering/ });
   await expect(quickLinks).toHaveCount(4);

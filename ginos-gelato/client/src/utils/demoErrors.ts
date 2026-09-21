@@ -8,9 +8,9 @@
  */
 
 export const isDemoMode = () => {
-  // Default to true unless explicitly set to 'false'
+  // Default to false so the happy-path is reliable. Opt in explicitly to demo errors.
   const setting = localStorage.getItem('DEMO_ERRORS');
-  return setting !== 'false'; // Returns true by default, false only if explicitly disabled
+  return setting === 'true';
 };
 
 export const shouldSimulateError = (errorRate: number = 0.05): boolean => {

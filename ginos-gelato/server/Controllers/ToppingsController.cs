@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using GinosGelato.Data;
 using GinosGelato.Models;
 
 namespace GinosGelato.Controllers
@@ -10,62 +9,29 @@ namespace GinosGelato.Controllers
     [ApiController]
     public class ToppingsController : ControllerBase
     {
-        private readonly List<Topping> _toppings = new List<Topping>
-        {
-            new Topping { Id = 1, Name = "Sprinkles" },
-            new Topping { Id = 2, Name = "Chocolate Sauce" },
-            new Topping { Id = 3, Name = "Nuts" },
-            new Topping { Id = 4, Name = "Whipped Cream" },
-            new Topping { Id = 5, Name = "Cherries" }
-        };
+        private readonly ApplicationDbContext _context;
 
-        [HttpGet]
-        public ActionResult<IEnumerable<Topping>> GetToppings()
+        public ToppingsController(ApplicationDbContext context)
         {
-            return Ok(_toppings);
+            _context = context;
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Topping> GetTopping(int id)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Topping>>> GetToppings(CancellationToken cancellationToken)
         {
-            var topping = _toppings.FirstOrDefault(t => t.Id == id);
+            var toppings = await _context.Toppings.AsNoTracking().OrderBy(t => t.Id).ToListAsync(cancellationToken);
+            return Ok(toppings);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Topping>> GetTopping(int id, CancellationToken cancellationToken)
+        {
+            var topping = await _context.Toppings.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
             if (topping == null)
             {
                 return NotFound();
             }
             return Ok(topping);
-        }
-
-        [HttpPost]
-        public ActionResult<Topping> CreateTopping([FromBody] Topping topping)
-        {
-            topping.Id = _toppings.Max(t => t.Id) + 1;
-            _toppings.Add(topping);
-            return CreatedAtAction(nameof(GetTopping), new { id = topping.Id }, topping);
-        }
-
-        [HttpPut("{id}")]
-        public ActionResult UpdateTopping(int id, [FromBody] Topping topping)
-        {
-            var existingTopping = _toppings.FirstOrDefault(t => t.Id == id);
-            if (existingTopping == null)
-            {
-                return NotFound();
-            }
-            existingTopping.Name = topping.Name;
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public ActionResult DeleteTopping(int id)
-        {
-            var topping = _toppings.FirstOrDefault(t => t.Id == id);
-            if (topping == null)
-            {
-                return NotFound();
-            }
-            _toppings.Remove(topping);
-            return NoContent();
         }
     }
 }

@@ -30,6 +30,21 @@ const appInsights = new ApplicationInsights({
 // Only initialize if connection string is available
 if (connectionString) {
   appInsights.loadAppInsights();
+
+  // Stamp every telemetry item with release/deployment context so browser
+  // telemetry can be correlated to a specific build (release correlation).
+  appInsights.addTelemetryInitializer((item) => {
+    const version = import.meta.env.VITE_APP_VERSION;
+    if (version) {
+      item.tags = item.tags || {};
+      // Populates the application_Version column, matching the API.
+      item.tags['ai.application.ver'] = version;
+    }
+    item.data = item.data || {};
+    item.data['gitCommitSha'] = import.meta.env.VITE_GIT_COMMIT_SHA ?? 'unknown';
+    item.data['environment'] = import.meta.env.VITE_ENVIRONMENT ?? 'unknown';
+  });
+
   appInsights.trackPageView(); // Track initial page view
   
   console.log('✅ Application Insights initialized');

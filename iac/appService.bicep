@@ -13,12 +13,6 @@ param appServicePlanId string
 @description('Static Web App URL for CORS')
 param staticWebAppUrl string = ''
 
-@description('Application Insights Connection String')
-param appInsightsConnectionString string = ''
-
-@description('Application Insights Instrumentation Key')
-param appInsightsInstrumentationKey string = ''
-
 @description('Resource tags')
 param defaultTags object
 
@@ -36,34 +30,17 @@ resource appService 'Microsoft.Web/sites@2025-03-01' = {
     httpsOnly: true
     siteConfig: {
       numberOfWorkers: 1
-      linuxFxVersion: 'DOTNETCORE|8.0'
-      alwaysOn: true
+      linuxFxVersion: 'DOTNETCORE|10.0'
+      alwaysOn: false // Free (F1) tier does not support Always On
       ftpsState: 'Disabled'
       minTlsVersion: '1.2'
-      healthCheckPath: '/api/flavors'
-      autoHealEnabled: true
+      // Platform health check requires Basic+; on Free we rely on the app's /health
+      // endpoint (verified by the pipeline). Re-add healthCheckPath on paid tiers.
+      autoHealEnabled: false // Auto Heal requires Basic+
       http20Enabled: false
       functionAppScaleLimit: 0
       minimumElasticInstanceCount: 0
-      appSettings: [
-        // Application Insights settings disabled
-        // {
-        //   name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
-        //   value: appInsightsConnectionString
-        // }
-        // {
-        //   name: 'ApplicationInsightsAgent_EXTENSION_VERSION'
-        //   value: '~3'
-        // }
-        // {
-        //   name: 'XDT_MicrosoftApplicationInsights_Mode'
-        //   value: 'recommended'
-        // }
-        // {
-        //   name: 'APPINSIGHTS_INSTRUMENTATIONKEY'
-        //   value: appInsightsInstrumentationKey
-        // }
-      ]
+      // App settings and connection strings are configured by configSettings.bicep.
       cors: {
         allowedOrigins: [
           'http://localhost:5173'

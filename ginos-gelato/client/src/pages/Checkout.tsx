@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Button from '../components/UI/Button';
 import { appInsights } from '../services/appInsights';
 import { shouldSimulateError, simulateApiError, isDemoMode } from '../utils/demoErrors';
+import { createOrder, CreateOrderRequest } from '../services/api';
 
 interface CustomerInfo {
     firstName: string;
@@ -13,9 +14,10 @@ interface CustomerInfo {
 }
 
 interface DeliveryInfo {
-    type: 'pickup' | 'delivery';
+    type: 'pickup' | 'delivery' | 'shipping';
     address: string;
     city: string;
+    state: string;
     zipCode: string;
     specialInstructions: string;
 }
@@ -71,6 +73,7 @@ const Checkout: React.FC = () => {
         type: 'pickup',
         address: '',
         city: '',
+        state: '',
         zipCode: '',
         specialInstructions: ''
     });
@@ -85,46 +88,67 @@ const Checkout: React.FC = () => {
     const subtotal = getCartTotal();
     const tax = subtotal * 0.085;
     const deliveryFee = deliveryInfo.type === 'delivery' ? 4.99 : 0;
-    const total = subtotal + tax + deliveryFee;
+    const shippingFee = deliveryInfo.type === 'shipping' ? 9.99 : 0;
+    const total = subtotal + tax + deliveryFee + shippingFee;
+
+    const fulfillmentType: CreateOrderRequest['fulfillmentType'] =
+        deliveryInfo.type === 'delivery' ? 'Delivery'
+        : deliveryInfo.type === 'shipping' ? 'Shipping'
+        : 'Pickup';
 
     const handleProcessOrder = async () => {
         setIsProcessing(true);
         
         try {
-            // Demo: Simulate payment processing errors 2% of the time (rare)
+            // Demo: Simulate payment processing errors (opt-in via demo mode).
             if (shouldSimulateError(0.02)) {
                 const paymentError = simulateApiError(503); // Service unavailable
                 paymentError.message = 'Payment gateway temporarily unavailable. Please try again.';
                 throw paymentError;
             }
-            
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            
-            // Generate fake order number
-            const orderNum = 'GG' + Date.now().toString().slice(-6);
-            setOrderNumber(orderNum);
+
+            // Build the order request. The API is authoritative for pricing and validation.
+            const orderRequest: CreateOrderRequest = {
+                customerName: `${customerInfo.firstName} ${customerInfo.lastName}`.trim(),
+                email: customerInfo.email,
+                phone: customerInfo.phone,
+                fulfillmentType,
+                address: deliveryInfo.address || undefined,
+                city: deliveryInfo.city || undefined,
+                state: deliveryInfo.state || undefined,
+                zipCode: deliveryInfo.zipCode || undefined,
+                specialInstructions: deliveryInfo.specialInstructions || undefined,
+                items: cartItems.map(item => ({
+                    container: item.container,
+                    flavors: item.flavors.map(f => f.name),
+                    toppings: item.toppings.map(t => t.name)
+                }))
+            };
+
+            const order = await createOrder(orderRequest);
+            setOrderNumber(order.confirmationNumber);
             setOrderComplete(true);
             
             // Track successful order completion
             appInsights.trackEvent(
                 { name: 'OrderCompleted' },
                 {
-                    orderNumber: orderNum,
-                    orderTotal: total,
+                    orderNumber: order.confirmationNumber,
+                    orderTotal: order.total,
                     itemCount: cartItems.length,
                     deliveryType: deliveryInfo.type,
-                    deliveryFee: deliveryFee,
-                    tax: tax,
-                    subtotal: subtotal,
+                    deliveryFee: order.deliveryFee,
+                    shippingFee: order.shippingFee,
+                    tax: order.tax,
+                    subtotal: order.subtotal,
                     demoMode: isDemoMode()
                 }
             );
             
             // Track as a metric for revenue
             appInsights.trackMetric(
-                { name: 'OrderRevenue', average: total },
-                { orderNumber: orderNum }
+                { name: 'OrderRevenue', average: order.total },
+                { orderNumber: order.confirmationNumber }
             );
             
             clearCart();
@@ -233,7 +257,7 @@ const Checkout: React.FC = () => {
             {/* Delivery Type Selection */}
             <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-3">Delivery Method</label>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div 
                         className={`selection-card p-4 text-center cursor-pointer ${deliveryInfo.type === 'pickup' ? 'selected' : ''}`}
                         onClick={() => {
@@ -254,15 +278,27 @@ const Checkout: React.FC = () => {
                         }}
                     >
                         <div className="text-3xl mb-2">🚚</div>
-                        <h3 className="font-semibold">Home Delivery</h3>
+                        <h3 className="font-semibold">Local Delivery</h3>
                         <p className="text-sm text-gray-600">30-45 minutes</p>
                         <p className="text-orange-600 font-medium">$4.99</p>
+                    </div>
+                    <div 
+                        className={`selection-card p-4 text-center cursor-pointer ${deliveryInfo.type === 'shipping' ? 'selected' : ''}`}
+                        onClick={() => {
+                            setDeliveryInfo({...deliveryInfo, type: 'shipping'});
+                            appInsights.trackEvent({ name: 'DeliveryMethodSelected' }, { method: 'shipping', fee: 9.99 });
+                        }}
+                    >
+                        <div className="text-3xl mb-2">📦</div>
+                        <h3 className="font-semibold">U.S. Shipping</h3>
+                        <p className="text-sm text-gray-600">Continental U.S., 2-5 days</p>
+                        <p className="text-blue-600 font-medium">$9.99</p>
                     </div>
                 </div>
             </div>
 
-            {/* Address Fields (only show for delivery) */}
-            {deliveryInfo.type === 'delivery' && (
+            {/* Address Fields (show for delivery and shipping) */}
+            {(deliveryInfo.type === 'delivery' || deliveryInfo.type === 'shipping') && (
                 <div className="space-y-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Address *</label>
@@ -275,7 +311,7 @@ const Checkout: React.FC = () => {
                             required
                         />
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">City *</label>
                             <input
@@ -284,6 +320,17 @@ const Checkout: React.FC = () => {
                                 onChange={(e) => setDeliveryInfo({...deliveryInfo, city: e.target.value})}
                                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
                                 placeholder="Your city"
+                                required
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                            <input
+                                type="text"
+                                value={deliveryInfo.state}
+                                onChange={(e) => setDeliveryInfo({...deliveryInfo, state: e.target.value})}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                                placeholder="MI"
                                 required
                             />
                         </div>
@@ -320,7 +367,7 @@ const Checkout: React.FC = () => {
                 </Button>
                 <Button 
                     onClick={() => setCurrentStep(3)}
-                    disabled={deliveryInfo.type === 'delivery' && (!deliveryInfo.address || !deliveryInfo.city || !deliveryInfo.zipCode)}
+                    disabled={(deliveryInfo.type === 'delivery' || deliveryInfo.type === 'shipping') && (!deliveryInfo.address || !deliveryInfo.city || !deliveryInfo.state || !deliveryInfo.zipCode)}
                 >
                     Continue to Payment →
                 </Button>
@@ -456,6 +503,12 @@ const Checkout: React.FC = () => {
                                 <span>${deliveryFee.toFixed(2)}</span>
                             </div>
                         )}
+                        {shippingFee > 0 && (
+                            <div className="flex justify-between">
+                                <span>Shipping:</span>
+                                <span>${shippingFee.toFixed(2)}</span>
+                            </div>
+                        )}
                         <hr className="border-gray-300" />
                         <div className="flex justify-between font-bold text-lg">
                             <span>Total:</span>
@@ -480,7 +533,9 @@ const Checkout: React.FC = () => {
                     Thank you for your order! We're preparing your delicious ice cream now. 
                     {deliveryInfo.type === 'pickup' ? 
                         ' Your order will be ready for pickup in 15 minutes.' : 
-                        ' Your order will be delivered in 30-45 minutes.'
+                    deliveryInfo.type === 'delivery' ?
+                        ' Your order will be delivered in 30-45 minutes.' :
+                        ' Your order will ship within 1 business day and arrive in 2-5 days.'
                     }
                 </p>
                 <div className="space-y-3">

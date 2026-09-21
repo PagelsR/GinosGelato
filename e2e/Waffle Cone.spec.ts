@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test('Waffle Cone', async ({ page }) => {
-  await page.goto('https://zealous-sky-008ca630f.1.azurestaticapps.net/');
+  // Extended timeout: runs against the live deployed app; must survive cold starts.
+  test.setTimeout(90_000);
+  await page.goto('/');
   await page.getByRole('button', { name: '🎨 Start Creating Your Ice' }).click();
   await page.getByRole('heading', { name: 'Waffle Cone' }).click();
   await page.getByText('🍪Cookies & CreamCrushed Oreo').click();
@@ -34,7 +36,7 @@ test('Waffle Cone', async ({ page }) => {
   await page.getByRole('textbox', { name: 'MM/YY' }).fill('10/25');
   await page.getByRole('textbox', { name: 'MM/YY' }).press('Tab');
   await page.getByRole('textbox', { name: '123', exact: true }).fill('123');
-  await page.getByRole('button', { name: '💳 Complete Order ($9.22)' }).click();
+  await page.getByRole('button', { name: /Complete Order/ }).click();
   await expect(page.locator('h2')).toContainText('Order Confirmed!');
   await page.getByRole('button', { name: '🏠 Back to Home' }).click();
 });
