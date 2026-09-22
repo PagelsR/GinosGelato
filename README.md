@@ -1,6 +1,7 @@
 # 🍨 Gino's Gelato
 
 [![Build and Deploy to Azure (main)](https://github.com/PagelsR/GinosGelato/actions/workflows/BuildDeploy.yml/badge.svg?branch=main)](https://github.com/PagelsR/GinosGelato/actions/workflows/BuildDeploy.yml)
+[![Playwright Testing - Daily Schedule](https://github.com/PagelsR/GinosGelato/actions/workflows/playwright-testing.yml/badge.svg)](https://github.com/PagelsR/GinosGelato/actions/workflows/playwright-testing.yml)
 
 A full-stack ice cream shop application for building custom gelato creations, managing a cart, and placing orders.
 
