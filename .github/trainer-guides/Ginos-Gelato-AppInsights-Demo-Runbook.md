@@ -52,13 +52,30 @@ In Azure Portal:
 
 Open separate browser tabs for:
 
-- **Investigate > Application map**
-- **Investigate > Live metrics**
-- **Investigate > Performance**
-- **Investigate > Failures**
-- **Investigate > Search**
-- **Usage > User Flows**
-- **Monitoring > Logs**
+- **Investigate > Application map** — Demo 3 Part A
+- **Investigate > Live metrics** — Demo 2
+- **Investigate > Performance** — Demo 3 Part B
+- **Investigate > Failures** — Demo 4
+- **Investigate > Search** — Demo 4 fallback, BONUS DEMO C
+- **Usage > Funnels** — Demo 5 Part A
+- **Usage > User Flows** — Demo 5 Part B
+- **Monitoring > Logs** — Demo 5 Part C
+
+Open these only if you expect to reach the bonus material:
+
+- **Investigate > Availability** — BONUS DEMO B
+- **Investigate > Smart Detection** — BONUS DEMO E
+- **Usage and estimated costs** — BONUS DEMO D (the cost question)
+
+## Pre-session portal checks (5 minutes, morning of)
+
+Three of the demos depend on data that may or may not be there. Check them
+before you present so you never discover an empty blade on stage:
+
+1. **Application map** renders an API node and an Azure SQL node. (Demo 3 Part A)
+2. **Funnels** — build and **save** the funnel described in Demo 5 Part A, so
+   live you only have to open it. Confirm it has non-trivial volume.
+3. **Smart Detection** has at least one entry. (BONUS DEMO E — skip silently if empty.)
 
 ## Open VS Code tabs
 
@@ -72,6 +89,9 @@ Open, backup reference only — not opened or shown live, staged in case of Q&A:
 - `e2e/journey-4-fault-demo.spec.ts` — automated coverage of the same faults triggered by URL in Demos 3-4
 - `ginos-gelato/client/src/pages/Checkout.tsx` — emits the `CheckoutStarted` / `DeliveryMethodSelected` / `OrderCompleted` events discussed in Demo 5
 - `ginos-gelato/server/Services/OrderService.cs` — emits the server-side `OrderCreated` event referenced in Demo 3 and BONUS DEMO C
+- `ginos-gelato/server/Program.cs` — the sampling reveal in BONUS DEMO D
+- `ginos-gelato/client/src/services/appInsights.ts` — the browser half of the sampling contrast in BONUS DEMO D
+- `iac/appInsights.bicep` — the Standard availability tests in BONUS DEMO B
 
 ---
 
@@ -181,22 +201,75 @@ Do not explain every chart.
 
 ---
 
-# DEMO 3 - Slow Request -> Transaction -> SQL Dependency
+# DEMO 3 - Application Map -> Slow Request -> Transaction -> SQL Dependency
 
-**Target:** 8 minutes  
+**Target:** 10 minutes (8 if you cut Part A)  
 **Demo slide:** currently "Slow Checkout, Transaction, and SQL Dependency"
+
+> **No new slide required.** Part A (Application Map) runs under the *existing*
+> Demo 3 slide as the establishing shot. The deck does not shift.
 
 > **Accuracy note:** the current branch reproduces the slow SQL symptom through a dedicated deterministic demo endpoint. The telemetry operation is the demo request, not the real checkout POST. For 100% accuracy, rename the Demo slide to **Slow Request, Transaction, and SQL Dependency** or say explicitly that you are reproducing the checkout symptom with a controlled demo request.
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 3.** Reproduce a deterministic 3-second Azure SQL delay with `/fault?fault=slow-sql`. In Application Insights go **Investigate > Performance**, open the slow server request, drill into a sample, open **End-to-end transaction details**, then select the SQL dependency.
+> **RUNBOOK: Demo 3.** Open **Investigate > Application map** first as the "where do I look" establishing shot. Then reproduce a deterministic 3-second Azure SQL delay with `/fault?fault=slow-sql`. In Application Insights go **Investigate > Performance**, open the slow server request, drill into a sample, open **End-to-end transaction details**, then select the SQL dependency.
 
-## SAY
+---
+
+## 🔥 PART A - Application Map (the establishing shot)
+
+**Target:** 2 minutes
+
+### SAY
+
+> "Before I drill into anything — what does this system actually look like in
+> production? Here's the thing: I never drew this diagram. Nobody on my team
+> maintains it. Application Insights built it from the telemetry."
+
+### Azure Portal:
+
+**Application Insights > Investigate > Application map**
+
+### DO
+
+1. Set the time range to the **last 24 hours**.
+2. Let the map finish rendering.
+3. Point at the API node, then at the **Azure SQL** dependency node.
+4. Hover the edge between them — read the call count and average duration aloud.
+5. Click the API node and open the right-hand flyout: failed request rate and
+   slowest dependencies.
+
+### SHOW
+
+- The topology was **discovered, not authored**.
+- Every edge carries numbers: call volume, average duration, failure percent.
+- The slow edge is already visible — before you have written a single query.
+
+### SAY
+
+> "This is the fastest 'where do I look' in the entire product. The map is
+> already telling me the time is on the SQL edge. Everything I do for the next
+> eight minutes is just confirming what this picture said in two seconds."
+
+> ⚠️ **Stage check (morning of):** the API role node and the Azure SQL dependency
+> node are reliable. A separate **browser** node only appears if the JavaScript
+> SDK telemetry carries a cloud role name — and
+> `ginos-gelato/client/src/services/appInsights.ts` does not set one. If there is
+> no browser node, do not improvise: tell the story as API → SQL and let Demo 4
+> Part B carry the browser half.
+
+---
+
+## PART B - Slow request, transaction, SQL dependency
+
+**Target:** 8 minutes
+
+### SAY
 
 > "The customer said checkout felt slow. To make the symptom deterministic on stage, I'm reproducing the database delay with a safe demo request."
 
-## TRIGGER
+### TRIGGER
 
 Open this browser URL:
 
@@ -210,7 +283,7 @@ The server runs a real Azure SQL command:
 
 `WAITFOR DELAY '00:00:03'`
 
-## Azure Portal:
+### Azure Portal:
 
 **Application Insights > Investigate > Performance**
 
@@ -227,7 +300,7 @@ Then:
 7. Open **End-to-end transaction details**.
 8. Select the long SQL dependency in the timeline.
 
-## SHOW
+### SHOW
 
 - overall request duration
 - the long SQL dependency
@@ -235,7 +308,7 @@ Then:
 - SQL command text, if displayed
 - most of the time is below the API in SQL
 
-## SAY
+### SAY
 
 > "Aggregate performance told us where to look. The transaction tells us what happened."
 
@@ -335,10 +408,14 @@ DemoBrowserException
 
 ---
 
-# DEMO 5 - Business Events + User Flow + KQL
+# DEMO 5 - Business Events + Funnel + User Flow + KQL
 
-**Target:** 6 minutes  
+**Target:** 8 minutes (6 if you cut Part B)  
 **Demo slide:** Business Events, User Flow, and KQL
+
+> **No new slide required.** The funnel in Part A runs under the *existing*
+> Demo 5 slide. If you want the slide to match exactly, retitle it
+> **Business Events, Funnel, and KQL**. The deck length does not change.
 
 ## Important event-name correction
 
@@ -357,13 +434,80 @@ The real useful events include:
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 5.** Open **Usage > User Flows**, start from `CheckoutStarted`, and show where the session goes next. Then open **Monitoring > Logs** and run the three prepared KQL questions.
+> **RUNBOOK: Demo 5.** Open **Usage > Funnels** and show the saved gelato conversion funnel and its biggest drop-off. Optionally open **Usage > User Flows** from `CheckoutStarted`. Then open **Monitoring > Logs** and run the prepared questions — prompt first, KQL as the fallback.
 
-## PART A - User Flow
+---
+
+## 🔥 PART A - Funnel (where we lose the customer)
+
+**Target:** 3 minutes
 
 ### SAY
 
-> "Technical telemetry tells us what failed. Business telemetry tells us what happened to the customer."
+> "Technical telemetry tells us what failed. Business telemetry tells us what
+> happened to the customer — and exactly where we lost them."
+
+### Azure Portal:
+
+**Application Insights > Usage > Funnels**
+
+### DO
+
+Open the funnel you **saved before the session**. If you are building it live,
+the steps are the events this branch actually emits:
+
+1. `BuilderPageVisit`
+2. `IceCreamCreated`
+3. `AddToCart`
+4. `CheckoutStarted`
+5. `OrderCompleted`
+
+Set the time range to the last 24 hours, or widen to 7 days if volume is thin.
+
+### SHOW
+
+- The percentage of customers surviving each step.
+- The single largest drop-off bar — name it out loud.
+
+### SAY
+
+> "Nobody filed a bug for this. There was no exception, no 500, no alert. The
+> funnel is telling me a specific percentage of customers built a gelato and
+> never ordered it. That isn't a stack trace — that's revenue."
+
+### FALLBACK - ask the agent instead
+
+If the funnel volume is too thin to be convincing, do not fight the UI. Switch
+to **Monitoring > Logs**, turn on **Agent**, and ask:
+
+```text
+Using customEvents in the last 7 days, build me a conversion funnel for the event sequence BuilderPageVisit, IceCreamCreated, AddToCart, CheckoutStarted, OrderCompleted. Show the count at each step and the percentage that survived from the previous step.
+```
+
+The KQL equivalent, if you want to show what runs underneath:
+
+```kusto
+let steps = dynamic(["BuilderPageVisit","IceCreamCreated","AddToCart","CheckoutStarted","OrderCompleted"]);
+customEvents
+| where timestamp > ago(7d)
+| where name in (steps)
+| summarize Users = dcount(session_Id) by name
+| extend StepOrder = array_index_of(steps, name)
+| order by StepOrder asc
+```
+
+> ⚠️ **Stage check (morning of):** funnels need enough distinct sessions, and the
+> telemetry here comes from a scheduled Playwright run that can collapse into a
+> small number of sessions. **Build and save this funnel before you present** so
+> live you are only opening it.
+
+---
+
+## PART B - User Flow (optional — cut this first if you are tight)
+
+### SAY
+
+> "The funnel told me *where* they left. User Flows tells me *what they did instead*."
 
 ### Azure Portal:
 
@@ -377,7 +521,7 @@ Then:
 4. Show the next customer actions/events.
 5. Keep this short.
 
-## PART B - KQL (Kusto Query Language)
+## PART C - KQL (Kusto Query Language)
 
 ### Azure Portal:
 
@@ -527,7 +671,7 @@ After Demo 6, stay in PowerPoint.
 For **Detect It Before the Customer Does**, the repo already provisions:
 
 - a response-time alert when average request duration exceeds 3 seconds
-- availability tests for:
+- three **Standard** availability tests (not the retiring Classic URL ping test) for:
   - frontend home page
   - Flavors API
   - Toppings API
@@ -600,6 +744,21 @@ with:
 
 The current branch emits `DeliveryMethodSelected` but does not emit `OrderFailed`.
 
+## Application Map and Funnel — no new slides
+
+Application Map (Demo 3 Part A) and Funnels (Demo 5 Part A) were folded into
+**existing** demos on purpose. **Do not add slides for them.** The deck length
+and slide order are unchanged. Two optional title tweaks if you want exact alignment:
+
+| Slide | Current | Optional |
+| --- | --- | --- |
+| Demo 3 | Slow Checkout, Transaction, and SQL Dependency | Application Map, Slow Request, and SQL Dependency |
+| Demo 5 | Business Events, User Flow, and KQL | Business Events, Funnel, and KQL |
+
+Smart Detection stayed in the bonus section (`BONUS DEMO E`) for a different
+reason: the blade can legitimately be empty on a healthy app, so it is not safe
+to commit a slide to it.
+
 ---
 
 # 🎁 BONUS DEMOS (only if time remains)
@@ -608,6 +767,26 @@ The current branch emits `DeliveryMethodSelected` but does not emit `OrderFailed
 > them if you land ahead of the 68-minute plan with real time to spare. Skip
 > silently otherwise; do not mention them if you're not doing them.
 
+## ❓ ASK-ME JUMP TABLE
+
+These are not time-fillers — they are answers. When the question lands
+mid-session, jump straight to the matching bonus and come back.
+
+| If someone asks… | Jump to | Search marker |
+| --- | --- | --- |
+| "What does all this telemetry **cost**?" | Sampling & cost | `BONUS DEMO D` |
+| "Aren't you drowning in data at scale?" | Sampling & cost | `BONUS DEMO D` |
+| "Did this break **when we deployed**?" | Release correlation | `BONUS DEMO A` |
+| "Who's watching this at 2 AM?" | Alerts & availability | `BONUS DEMO B` |
+| "Aren't URL ping tests going away?" | Alerts & availability | `BONUS DEMO B` |
+| "Where's the **AI** in this?" | Smart Detection | `BONUS DEMO E` |
+| "Can I find one specific event?" | Search | `BONUS DEMO C` |
+
+**Highest-value three if you have exactly 10 minutes:** `BONUS DEMO D`
+(sampling — the "wait, what?"), `BONUS DEMO E` (Smart Detection — the AI
+payoff), `BONUS DEMO B` (the retirement deadline nobody in the room knows about).
+
+---
 ## 🎁 BONUS DEMO A — Release Correlation ("did this start after the last deploy?")
 
 **Target:** 4 minutes  
@@ -684,6 +863,73 @@ Then Azure Portal → Application Insights → **Investigate > Availability**.
 - Show the three synthetic availability tests already running from multiple
   regions: frontend home page, Flavors API, Toppings API.
 - Point out the pass/fail history and multi-region map.
+- Toggle the graph from **Line** to **Scatter Plot**, then click a dot →
+  **End-to-end transaction details**. A synthetic probe produces the *same*
+  transaction view you drilled into in Demo 3.
+
+### 🔥 "Wait, what?" — Classic or Standard?
+
+This is the part the room does not expect. Ask it as a question first:
+
+> "Quick show of hands — who's running URL ping tests in production today?"
+
+Then deliver it:
+
+> "**Classic URL ping tests retire on September 30, 2026.** Existing ping tests
+> get removed from your resources. Multi-step web tests are already gone — they
+> retired in August 2024. If those hands are still up, you have a migration."
+
+Now open `iac/appInsights.bicep` in VS Code and show the three webtest resources:
+
+```bicep
+resource flavorsAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
+  kind: 'standard'
+  properties: {
+    Kind: 'standard'
+```
+
+### SHOW
+
+- All three tests are `kind: 'standard'` — this repo is already on the
+  non-deprecated path, in infrastructure as code, reviewable in a pull request.
+- Standard tests do things ping tests never could, and this file uses them:
+  - `SSLCheck` + `SSLCertRemainingLifetimeCheck: 7` — **proactive** TLS expiry
+    warning, seven days before the certificate kills your site
+  - `ContentMatch: 'Gino'` — a 200 that renders the wrong page still fails
+  - `HttpVerb` / custom headers / request body — real API probing, not just pings
+  - `RetryEnabled: true` — roughly 80% of failures vanish on retry
+
+### SAY
+
+> "The difference that matters isn't Classic versus Standard as a feature list.
+> It's that our uptime checks are a reviewed file in the repo. When someone asks
+> 'who decided to monitor that endpoint,' the answer is a commit — not a person
+> who clicked something in the portal eighteen months ago and then left."
+
+### If you want the KQL
+
+**Option 1 — Ask the Observability Agent** (Logs → toggle **Agent** on)
+
+```text
+Using availabilityResults over the last 24 hours, show me the success rate and average duration for each availability test, broken down by test location. Sort by success rate ascending.
+```
+
+**Option 2 — KQL**
+
+```kusto
+availabilityResults
+| where timestamp > ago(24h)
+| summarize
+    Runs = count(),
+    SuccessRate = round(100.0 * countif(success == true) / count(), 2),
+    AvgDurationMs = round(avg(duration), 0)
+    by name, location
+| order by SuccessRate asc
+```
+
+> 💡 **Trainer note on the date:** this runbook was written before the
+> September 30, 2026 retirement. If you are presenting after that date, change
+> the line from "retire on" to "were retired on" and ask the room who got caught.
 
 ### SAY
 
@@ -744,3 +990,247 @@ OrderCompleted
 ### RETURN TO
 
 **Evidence-Based Debugging with GitHub Copilot**
+
+---
+
+## 🎁 BONUS DEMO D — 🔥 "Wait, What?" — You Are Already Sampling
+
+**Target:** 5 minutes  
+**Search marker:** `BONUS DEMO D`  
+**Use when:** anyone asks what this costs. This is *the* answer to that question.
+
+### SAY
+
+> "Somebody always asks what this costs. Fair question. But before I answer it,
+> I want to show you something about this app that I did not know either, the
+> first time I went looking."
+
+### PART A — The reveal
+
+Open `ginos-gelato/server/Program.cs` in VS Code.
+
+> "Find me the sampling code."
+
+Let them look. Then scroll to the Application Insights registration:
+
+```csharp
+builder.Services.AddApplicationInsightsTelemetry();
+```
+
+> "That's it. That's the whole telemetry configuration. There is no sampling
+> code in this repository. **And this application is sampling right now.**"
+
+### SHOW
+
+- Adaptive sampling is **on by default** in the Application Insights ASP.NET and
+  ASP.NET Core SDKs, and in Azure Functions. Nobody opts in.
+- The default target is **5 telemetry items per second, per host**.
+- The SDK actually registers **two** adaptive sampling processors: one that
+  includes `Event` telemetry and one that excludes it. So custom events get
+  their own 5/sec budget, separate from the 5/sec shared by everything else.
+- It samples by **operation ID**, so a sampled-in failed request keeps its
+  exceptions, traces, and dependencies. You never get half a transaction.
+- On a low-traffic app it does nothing at all. It only engages above the rate limit.
+
+### PART B — 🔥 The second "wait, what?"
+
+Now open `ginos-gelato/client/src/services/appInsights.ts`.
+
+> "Here's the browser configuration for the *same* Application Insights resource."
+
+There is no `samplingPercentage` in that config — the JavaScript SDK defaults to
+**100%**, and the JS SDK does not support adaptive sampling at all.
+
+### SAY
+
+> "Same resource. Same product. The server is sampling and the browser is not.
+> Neither decision is written down anywhere in this codebase. That is the real
+> answer to 'what does it cost' — most teams have no idea what they're actually
+> keeping."
+
+### PART C — 🔥 KILLER QUERY: "Am I being sampled right now?"
+
+**Option 1 — Ask the Observability Agent** (Logs → toggle **Agent** on)
+
+```text
+For the last 24 hours, tell me whether my telemetry is being sampled. Union requests, dependencies, pageViews, browserTimings, exceptions and traces, and show me the retained percentage per telemetry type per hour, calculated as 100 divided by the average itemCount.
+```
+
+**Option 2 — KQL**
+
+```kusto
+union requests, dependencies, pageViews, browserTimings, exceptions, traces
+| where timestamp > ago(24h)
+| summarize RetainedPercentage = 100 / avg(itemCount) by bin(timestamp, 1h), itemType
+| render timechart
+```
+
+> Any `itemType` under 100 is being sampled. This is the query nobody knows
+> exists, and it answers a question every team has.
+
+### PART D — 🔥 KILLER QUERY: sampling does not lie to you
+
+The most common objection is "then my numbers are wrong." They are not — *if*
+you count correctly.
+
+**Option 1 — Ask the Observability Agent**
+
+```text
+For requests in the last 24 hours, show me the raw record count next to the sampling-corrected count using sum of itemCount, grouped by operation name. Highlight where the two numbers differ.
+```
+
+**Option 2 — KQL**
+
+```kusto
+requests
+| where timestamp > ago(24h)
+| summarize
+    RawRecords = count(),
+    ActualRequests = sum(itemCount)
+    by operation_Name
+| extend Multiplier = round(1.0 * ActualRequests / RawRecords, 2)
+| order by ActualRequests desc
+```
+
+### SAY
+
+> "`itemCount` is the multiplier the SDK stamped on every record it kept. Count
+> records and you undercount. `sum(itemCount)` and you get the real number.
+> This is the single most important thing to know about sampling, and it's one
+> word in a query."
+
+Two more facts worth saying out loud:
+
+- **Metrics are never sampled.** Custom metrics, performance counters, and
+  session telemetry are always kept, at full fidelity, in every sampling mode.
+  If a number has to be exact, make it a metric, not an event.
+- Sampling is applied **once**. Ingestion sampling in the portal is ignored
+  entirely when the SDK is already sampling.
+
+### PART E — The portal answer to the cost question
+
+Azure Portal → Application Insights → **Usage and estimated costs**.
+
+Walk the three levers, in the order you'd actually reach for them:
+
+| Lever | Where | Trade-off |
+| --- | --- | --- |
+| **SDK adaptive sampling** | `Program.cs` (on by default) | Best fidelity per byte; preserves whole transactions |
+| **SDK fixed-rate sampling** | `Program.cs` + browser config | Deterministic; synchronizes browser and server |
+| **Ingestion sampling** | This blade | No redeploy, but you already paid to send it |
+
+Also point at **Data retention** and the **Daily cap**.
+
+> ⚠️ **Stage safety: show, do not set.** A daily cap applied live silently drops
+> telemetry for the rest of the session — including demos you have not run yet.
+> Look at the blade and move on.
+
+### If someone asks "how would I change it?" (show, do not type live)
+
+```csharp
+// Turn adaptive sampling off entirely.
+builder.Services.AddApplicationInsightsTelemetry(
+    new ApplicationInsightsServiceOptions { EnableAdaptiveSampling = false });
+```
+
+```csharp
+// Or keep adaptive sampling, but retune it. Disabling the default is required —
+// otherwise you get two sampling chains and ingest more than you expect.
+builder.Services.Configure<TelemetryConfiguration>(config =>
+{
+    var chain = config.DefaultTelemetrySink.TelemetryProcessorChainBuilder;
+    chain.UseAdaptiveSampling(maxTelemetryItemsPerSecond: 5, excludedTypes: "Dependency");
+    chain.Build();
+});
+
+builder.Services.AddApplicationInsightsTelemetry(
+    new ApplicationInsightsServiceOptions { EnableAdaptiveSampling = false });
+```
+
+### SAY
+
+> "So the honest answer to 'what does it cost' is: less than you think, because
+> you're already sampling — and you have three dials, and the cheapest one is
+> the one you never knew was already turned on."
+
+### RETURN TO
+
+**What to Take Home**
+
+---
+
+## 🎁 BONUS DEMO E — 🔥 Smart Detection (the AI nobody configured)
+
+**Target:** 3 minutes  
+**Search marker:** `BONUS DEMO E`  
+**Why it earns its slot:** the session is titled *AI-Powered Observability*.
+This is the one feature where the AI ran without being asked.
+
+### SAY
+
+> "Everything I've shown you so far, a human started. I opened a blade, I ran a
+> query, I clicked a node. Let me show you the one thing in here that has been
+> analyzing this application the entire time I've been talking."
+
+### Azure Portal:
+
+**Application Insights > Investigate > Smart Detection**
+
+> If the menu item isn't where you expect it, type "Smart Detection" into the
+> resource menu filter box. The portal has moved it more than once.
+
+### DO
+
+1. Open the Smart Detection list.
+2. Open any detection.
+3. Read the **What happened** and **Why it's a problem** sections aloud.
+4. Point at the supporting evidence the detection links to — it deep-links into
+   the same Failures and Performance blades from Demos 3 and 4.
+
+### SHOW
+
+- Nobody wrote a rule. Nobody set a threshold. There is no KQL behind it.
+- It learned this application's normal and flagged the deviation.
+- It covers failure-rate anomalies, performance degradation, trace degradation,
+  memory leaks, and abnormal rises in exception volume.
+
+### SAY
+
+> "This is the difference between a threshold and a baseline. My alert in Bonus
+> B fires at three seconds because *I* picked three seconds. Smart Detection
+> never asked me for a number — it learned what this app does on a Tuesday, and
+> it tells me when Tuesday stops looking like Tuesday."
+
+> ⚠️ **Stage check (morning of):** this blade can legitimately be empty on a
+> healthy low-traffic app. **Check it before the session.** If it's empty, skip
+> this demo silently and use the KQL below instead — do not apologize on stage
+> for a feature working correctly.
+
+### 🔥 Fallback / encore — do the same thing yourself in one query
+
+**Option 1 — Ask the Observability Agent**
+
+```text
+Look at request failure rate per hour over the last 7 days and detect anomalies against the learned baseline. Show me which hours were statistically abnormal and how far off baseline they were.
+```
+
+**Option 2 — KQL**
+
+```kusto
+requests
+| where timestamp > ago(7d)
+| make-series FailRate = 100.0 * countif(success == false) / count()
+    default = 0 on timestamp step 1h
+| extend (Anomalies, Score, Baseline) = series_decompose_anomalies(FailRate, 2.0)
+| render anomalychart with(anomalycolumns = Anomalies)
+```
+
+### SAY
+
+> "Smart Detection does this for you, continuously, for free. But it's worth
+> seeing that it isn't magic — it's a baseline and a deviation, and you can run
+> the same analysis yourself in six lines."
+
+### RETURN TO
+
+**Detect It Before the Customer Does**
