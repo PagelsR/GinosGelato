@@ -171,6 +171,12 @@ const Checkout: React.FC = () => {
             );
             
             clearCart();
+
+            // Order confirmation is the last thing that happens, so automated runs
+            // tear down the browser before the SDK's batch timer fires. Playwright's
+            // context.close() also skips beforeunload, so the SDK's own unload flush
+            // never runs. isAsync=false forces the send now rather than scheduling it.
+            appInsights.flush(false);
         } catch (error) {
             // Track checkout errors
             appInsights.trackException(

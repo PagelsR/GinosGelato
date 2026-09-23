@@ -7,19 +7,6 @@
 **Azure resource group:** `rg-GinosGelato-Modernization`  
 **Deployed storefront configured in this branch:** `https://wonderful-coast-040cb1a10.7.azurestaticapps.net/`
 
----
-
-# Important
-
-For the presentation, use the **VS Code integrated terminal**. PowerShell is not required.
-
-Only one command is needed live for Playwright:
-
-```text
-npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --headed --workers=1
-```
-
-Everything else in the fault demos can be triggered with browser URLs.
 
 ---
 
@@ -77,6 +64,33 @@ before you present so you never discover an empty blade on stage:
    live you only have to open it. Confirm it has non-trivial volume.
 3. **Smart Detection** has at least one entry. (BONUS DEMO E — skip silently if empty.)
 
+### Verify the funnel will resolve before you build it
+
+Run this in **Monitoring > Logs**. It applies the same strict ordering the
+Funnels blade uses, so it predicts exactly what the funnel will show:
+
+```kusto
+customEvents
+| where timestamp > ago(3d)
+| where name in ('BuilderPageVisit','IceCreamCreated','CheckoutStarted','OrderCompleted')
+| summarize
+    B = minif(timestamp, name == 'BuilderPageVisit'),
+    I = minif(timestamp, name == 'IceCreamCreated'),
+    C = minif(timestamp, name == 'CheckoutStarted'),
+    O = minif(timestamp, name == 'OrderCompleted')
+    by user_Id
+| summarize
+    Step1_Builder   = countif(isnotnull(B)),
+    Step2_Created   = countif(isnotnull(B) and I > B),
+    Step3_Checkout  = countif(isnotnull(B) and I > B and C > I),
+    Step4_Completed = countif(isnotnull(B) and I > B and C > I and O > C)
+```
+
+All four numbers should be non-zero and decreasing. If `Step4_Completed` is
+near zero, the browser SDK is dropping the terminal event — confirm the
+`appInsights.flush(false)` call in `Checkout.tsx` is deployed, then narrow the
+time range to **after** that deployment.
+
 ## Open VS Code tabs
 
 Open, actually shown on screen:
@@ -87,8 +101,9 @@ Open, actually shown on screen:
 Open, backup reference only — not opened or shown live, staged in case of Q&A:
 
 - `e2e/journey-4-fault-demo.spec.ts` — automated coverage of the same faults triggered by URL in Demos 3-4
-- `ginos-gelato/client/src/pages/Checkout.tsx` — emits the `CheckoutStarted` / `DeliveryMethodSelected` / `OrderCompleted` events discussed in Demo 5
-- `ginos-gelato/server/Services/OrderService.cs` — emits the server-side `OrderCreated` event referenced in Demo 3 and BONUS DEMO C
+- `ginos-gelato/client/src/pages/Builder.tsx` — emits `BuilderPageVisit` / `IceCreamCreated`; **required for BONUS DEMO C**
+- `ginos-gelato/client/src/pages/Checkout.tsx` — emits the `CheckoutStarted` / `DeliveryMethodSelected` / `OrderCompleted` events discussed in Demo 5, plus the `OrderRevenue` metric; **required for BONUS DEMO C**
+- `ginos-gelato/server/Services/OrderService.cs` — emits the server-side `OrderCreated` event referenced in Demo 3 and **BONUS DEMO C**
 - `ginos-gelato/server/Program.cs` — the sampling reveal in BONUS DEMO D
 - `ginos-gelato/client/src/services/appInsights.ts` — the browser half of the sampling contrast in BONUS DEMO D
 - `iac/appInsights.bicep` — the Standard availability tests in BONUS DEMO B
@@ -467,15 +482,25 @@ The real useful events include:
 ### DO
 
 Open the funnel you **saved before the session**. If you are building it live,
-the steps are the events this branch actually emits:
+use exactly these four steps:
 
 1. `BuilderPageVisit`
 2. `IceCreamCreated`
-3. `AddToCart`
-4. `CheckoutStarted`
-5. `OrderCompleted`
+3. `CheckoutStarted`
+4. `OrderCompleted`
 
 Set the time range to the last 24 hours, or widen to 7 days if volume is thin.
+
+> ⚠️ **Do NOT add `AddToCart` as a step.** It is emitted from `addToCart()` inside
+> `Builder.tsx`'s click handler, which runs *before* the `IceCreamCreated` call on
+> the same line of execution — measured at 0-2 ms apart. Azure funnels are
+> strictly sequential, so a step that never occurs *after* the previous one
+> resolves to 0% and silently zeroes every step below it.
+>
+> **Do NOT use `OrderCreated` as the last step.** That is the *server-side* event
+> from `OrderService.cs` (`cloud_RoleName = app-...`). Server telemetry carries no
+> browser `user_Id`, and funnels count users — so it is always 0%. The client-side
+> event is `OrderCompleted`.
 
 ### SHOW
 
@@ -494,20 +519,29 @@ If the funnel volume is too thin to be convincing, do not fight the UI. Switch
 to **Monitoring > Logs**, turn on **Agent**, and ask:
 
 ```text
-Using customEvents in the last 7 days, build me a conversion funnel for the event sequence BuilderPageVisit, IceCreamCreated, AddToCart, CheckoutStarted, OrderCompleted. Show the count at each step and the percentage that survived from the previous step.
+Using customEvents in the last 7 days, build me a conversion funnel for the event sequence BuilderPageVisit, IceCreamCreated, CheckoutStarted, OrderCompleted. Show the distinct user count at each step and the percentage that survived from the previous step.
 ```
 
 The KQL equivalent, if you want to show what runs underneath:
 
 ```kusto
-let steps = dynamic(["BuilderPageVisit","IceCreamCreated","AddToCart","CheckoutStarted","OrderCompleted"]);
+let steps = dynamic(["BuilderPageVisit","IceCreamCreated","CheckoutStarted","OrderCompleted"]);
 customEvents
 | where timestamp > ago(7d)
 | where name in (steps)
-| summarize Users = dcount(session_Id) by name
+| summarize Users = dcount(user_Id) by name
 | extend StepOrder = array_index_of(steps, name)
 | order by StepOrder asc
+| extend SurvivedPct = round(100.0 * Users / toscalar(
+    customEvents
+    | where timestamp > ago(7d) and name == "BuilderPageVisit"
+    | summarize dcount(user_Id)), 1)
 ```
+
+> 💡 Unlike the Funnels blade, this query does **not** enforce ordering — it just
+> counts users per event. That makes it a useful sanity check: if the portal
+> funnel shows 0% for a step but this query shows users, the problem is step
+> *order*, not missing data.
 
 > ⚠️ **Stage check (morning of):** funnels need enough distinct sessions, and the
 > telemetry here comes from a scheduled Playwright run that can collapse into a
@@ -990,6 +1024,70 @@ OrderCompleted
 - Click **related items** on an `OrderCompleted` result to jump to the
   server-side `OrderCreated` event (`OrderService.cs`) sharing the same
   operation ID — the browser marker and the server marker are the same order.
+
+### THEN SHOW THE CODE (this is the payoff)
+
+Switch to VS Code and show the three lines that produced what they just saw.
+Go in this order — it walks the same path as the telemetry.
+
+**1. `ginos-gelato/client/src/pages/Builder.tsx` — find `IceCreamCreated`**
+
+```tsx
+appInsights.trackEvent(
+    { name: 'IceCreamCreated' },
+    {
+        container: selectedContainer,
+        flavorCount: selectedFlavors.length,
+        toppingCount: selectedToppings.length,
+        price: calculatePrice()
+    }
+);
+```
+
+> "Four lines of business vocabulary. Not a log message — a queryable fact."
+
+**2. `ginos-gelato/client/src/pages/Checkout.tsx` — find `OrderCompleted`**
+
+The same shape, with the full order on it: `orderNumber`, `orderTotal`,
+`deliveryType`, `deliveryFee`, `shippingFee`, `tax`, `subtotal`.
+
+While you are in this file, scroll a few lines down to the revenue metric — it
+sets up BONUS DEMO D:
+
+```tsx
+appInsights.trackMetric(
+    { name: 'OrderRevenue', average: order.total },
+    { orderNumber: order.confirmationNumber }
+);
+```
+
+> "Note this one is a *metric*, not an event. Metrics are never sampled. If a
+> number has to be exact, that's the call you make."
+
+**3. `ginos-gelato/server/Services/OrderService.cs` — find `OrderCreated`**
+
+This is the most interesting one on the slide-free tour — three things at once:
+
+```csharp
+_telemetry?.TrackEvent(
+    "OrderCreated",
+    new Dictionary<string, string> { ... },   // dimensions you filter by
+    new Dictionary<string, double> { ... });  // measurements you aggregate
+```
+
+Point out all three:
+
+- **Two dictionaries.** Strings are dimensions you group and filter by;
+  doubles are measurements you average and sum. The browser SDK flattens both
+  into `customDimensions` — the .NET SDK makes you choose deliberately.
+- **The `?` on `_telemetry`.** Look at the constructor: `TelemetryClient?` is an
+  *optional* parameter. If someone challenges you, open
+  `ginos-gelato/server.Tests/OrderServiceValidationTests.cs` and show
+  `CreateService` \u2014 it builds `OrderService` with three arguments and simply
+  omits telemetry. Business logic is not coupled to Azure.
+- **No correlation code.** Nobody passed an operation ID. The SDK picks up the
+  ambient request context — which is exactly why "related items" in the portal
+  could link the browser event to this one.
 
 ### SAY
 
