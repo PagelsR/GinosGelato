@@ -111,15 +111,28 @@ Open, backup reference only — not opened or shown live, staged in case of Q&A:
 
 ## Manual customer journey
 
+> ⌨️ **No typing required.** The checkout form ships prefilled with a demo
+> customer, so this entire journey is click-only. Do not type on stage.
+
 In the deployed storefront:
 
 1. Browse.
 2. Customize one gelato.
 3. Add to cart.
 4. Checkout.
-5. Choose pickup.
-6. Complete the order.
-7. Show the confirmation.
+5. **Continue to Delivery** — customer fields are already filled in.
+6. Choose pickup, then **Continue to Payment** — special instructions already filled in.
+7. **Complete Order** — card details already filled in.
+8. Show the confirmation.
+
+### What the audience will see prefilled
+
+| Field | Value |
+| --- | --- |
+| Name / email / phone | Sofia Romano, `sofia.romano@example.com`, (555) 123-4567 |
+| Special instructions | "Extra napkins, please. Ring the bell twice." |
+| Card | `4111 1111 1111 1111`, CVV 123, expiry auto-rolls two years out |
+| Address | **Not prefilled — by design** |
 
 ## Playwright
 
