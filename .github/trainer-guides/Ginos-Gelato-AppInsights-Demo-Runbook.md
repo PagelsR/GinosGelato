@@ -69,6 +69,14 @@ before you present so you never discover an empty blade on stage:
 Run this in **Monitoring > Logs**. It applies the same strict ordering the
 Funnels blade uses, so it predicts exactly what the funnel will show:
 
+**Option 1 — Ask the Observability Agent**
+
+```text
+Using customEvents over the last 3 days, for each user_Id find the earliest timestamp of BuilderPageVisit, IceCreamCreated, CheckoutStarted and OrderCompleted. Then count how many users performed each event strictly after the previous one in that exact order, and show me the four counts.
+```
+
+**Option 2 — KQL (authoritative for this check)**
+
 ```kusto
 customEvents
 | where timestamp > ago(3d)
@@ -90,6 +98,12 @@ All four numbers should be non-zero and decreasing. If `Step4_Completed` is
 near zero, the browser SDK is dropping the terminal event — confirm the
 `appInsights.flush(false)` call in `Checkout.tsx` is deployed, then narrow the
 time range to **after** that deployment.
+
+> ⚠️ **Trust Option 2 here.** This check exists specifically to reproduce the
+> Funnels blade's *strict ordering* semantics. An agent may reasonably
+> paraphrase that as "users who did both events," which is a different question
+> and will happily report healthy numbers for a funnel that renders 0%. Use the
+> prompt to explore; use the KQL to decide.
 
 ## Open VS Code tabs
 
@@ -550,7 +564,7 @@ customEvents
 
 ---
 
-## PART B - User Flow (optional — cut this first if you are tight)
+## PART B - User Flow
 
 ### SAY
 
@@ -733,82 +747,7 @@ For **What to Take Home**, read only 3 or 4 bullets.
 
 ---
 
-# Slide Accuracy Corrections Before Final
-
-## How the Telemetry Gets In
-
-The current slide says:
-
-`Azure Monitor OpenTelemetry Distro instruments the ASP.NET Core API`
-
-The uploaded branch currently uses:
-
-`Microsoft.ApplicationInsights.AspNetCore`
-
-and in `Program.cs`:
-
-`builder.Services.AddApplicationInsightsTelemetry();`
-
-For exact alignment with the repo, change the slide to:
-
-**Application Insights ASP.NET Core SDK instruments the API**
-
-Suggested speaker note:
-
-> "The API currently uses the Application Insights ASP.NET Core SDK for requests, dependencies, logs, exceptions, and distributed tracing. The browser uses the Application Insights JavaScript SDK. Both send to the same Application Insights resource."
-
-## Business Telemetry
-
-Replace the illustrative event names that do not exist with actual repo events:
-
-**IceCreamCreated -> AddToCart -> CheckoutStarted -> DeliveryMethodSelected -> OrderCompleted**
-
-Optionally show the API-side companion event:
-
-**OrderCreated**
-
-## API and Browser Exceptions
-
-Rename:
-
-**API and Browser Exceptions**
-
-to:
-
-**API Failure and Browser Exception**
-
-The current API demo returns HTTP 503; it does not throw a server-side exception.
-
-## Three Questions, Three Queries
-
-Replace:
-
-**Which fulfillment method fails most?**
-
-with:
-
-**Which fulfillment method is selected most often?**
-
-The current branch emits `DeliveryMethodSelected` but does not emit `OrderFailed`.
-
-## Application Map and Funnel — no new slides
-
-Application Map (Demo 3 Part A) and Funnels (Demo 5 Part A) were folded into
-**existing** demos on purpose. **Do not add slides for them.** The deck length
-and slide order are unchanged. Two optional title tweaks if you want exact alignment:
-
-| Slide | Current | Optional |
-| --- | --- | --- |
-| Demo 3 | Slow Checkout, Transaction, and SQL Dependency | Application Map, Slow Request, and SQL Dependency |
-| Demo 5 | Business Events, User Flow, and KQL | Business Events, Funnel, and KQL |
-
-Smart Detection stayed in the bonus section (`BONUS DEMO E`) for a different
-reason: the blade can legitimately be empty on a healthy app, so it is not safe
-to commit a slide to it.
-
----
-
-# 🎁 BONUS DEMOS (only if time remains)
+# BONUS DEMOS (only if time remains)
 
 > Search for `BONUS DEMO` to jump straight here. These are optional — only run
 > them if you land ahead of the 68-minute plan with real time to spare. Skip
@@ -834,7 +773,7 @@ mid-session, jump straight to the matching bonus and come back.
 payoff), `BONUS DEMO B` (the retirement deadline nobody in the room knows about).
 
 ---
-## 🎁 BONUS DEMO A — Release Correlation ("did this start after the last deploy?")
+## BONUS DEMO A — Release Correlation ("did this start after the last deploy?")
 
 **Target:** 4 minutes  
 **Search marker:** `BONUS DEMO A`
@@ -859,19 +798,44 @@ stamps **every** piece of server telemetry with release context, populated by
 
 Azure Portal → Application Insights → **Monitoring > Logs**.
 
+**Option 1 — Ask the Observability Agent** (toggle **Agent** on, top-right)
+
+```text
+For the last 3 days, group requests by application_Version and the gitCommitSha custom dimension. For each release show the request count using sum of itemCount, the failure rate as a percentage, and the P95 duration in milliseconds. Sort by version descending so I can compare consecutive releases.
+```
+
+**Option 2 — KQL**
+
 ```kusto
 requests
-| where timestamp > ago(24h)
-| summarize Count = count(), AvgDuration = avg(duration)
-    by application_Version, tostring(customDimensions.gitCommitSha)
-| order by Count desc
+| where timestamp > ago(3d)
+| summarize
+    Requests = sum(itemCount),
+    FailureRate = round(100.0 * sumif(itemCount, success == false) / sum(itemCount), 2),
+    P95Ms = round(percentile(duration, 95), 0)
+    by application_Version, GitCommitSha = tostring(customDimensions.gitCommitSha)
+| order by application_Version desc
 ```
+
+> 💡 Note `sum(itemCount)` rather than `count()` — same lesson as BONUS DEMO D.
+> Get in the habit and the number stays right if sampling ever engages.
 
 ### SHOW
 
 - Every row is tagged with the exact commit SHA that shipped it.
+- Walk **down** the `P95Ms` column. Releases are not equal — on a recent run
+  this returned eight versions ranging from **43 ms** to **5,843 ms** P95, and
+  failure rates from **0.44%** to **8.33%**. Point at the worst row and say
+  "that release was a bad day, and we can name the commit."
 - If you redeploy mid-conference, you can immediately filter to just the new
-  version and compare error rate / duration against the previous one.
+  version and compare failure rate and duration against the previous one.
+
+> ⚠️ **Be ready for the `1.0.0.0` row.** You will likely see one version literally
+> named `1.0.0.0` with `gitCommitSha = "unknown"` and an ugly failure rate. That
+> is the assembly default — telemetry emitted when the release environment
+> variables were not present. Do not let it look like a mystery: say "that's the
+> fallback bucket for anything that started before the deploy stamped it, which
+> is itself useful to be able to see."
 
 ### SAY
 
