@@ -885,8 +885,7 @@ Then Azure Portal → Application Insights → **Investigate > Availability**.
 ### 🔥🔥 "Wait, What?" — Classic or Standard? (THE TODAY MOMENT)
 
 > 🎤 **This talk is scheduled for September 30, 2026 — which is the exact day
-> URL ping tests retire.** That is not a coincidence you should waste. Promote
-> this from a bonus to a *must-run* if the calendar still says Sept 30.
+> URL ping tests retire.**
 
 Ask it as a question first, and wait for the hands:
 
@@ -899,41 +898,7 @@ Let the hands stay up. Then check your watch.
 > Retired. Microsoft's words are: *existing URL ping tests are removed from your
 > resources.* Multi-step web tests already went in August 2024."
 
-> "So for those of you with your hands still up: you don't have a migration on
-> your roadmap. You have one on your calendar. Today."
-
 Now open `iac/appInsights.bicep` in VS Code and show the three webtest resources:
-
-```bicep
-resource flavorsAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
-  kind: 'standard'
-  properties: {
-    Kind: 'standard'
-```
-
-> "And this repo? Already Standard. Not because I'm clairvoyant — because it's
-> in a Bicep file somebody had to review."
-
-**Sources, if anyone challenges you from the audience** (have these ready, do
-not go hunting live):
-
-- `learn.microsoft.com/azure/azure-monitor/app/availability` — "On September 30,
-  2026, URL ping tests in Application Insights will be retired. Existing URL
-  ping tests are removed from your resources."
-- The archived ping-test page carries the same banner.
-
-> ⚠️ **One honest hedge.** Azure retirements roll out over hours or days, not at
-> the stroke of midnight UTC. If an audience member says "mine still works,"
-> agree with them: *"It might, today. The date on the page is today, and the
-> stated behavior is removal. I'd not bet a production alerting path on the
-> rollout being slow."* Don't claim tests are being deleted live on stage.
-
-### If you're presenting this deck on any other date
-
-- **Before Sept 30, 2026:** "Classic URL ping tests retire on September 30, 2026
-  — that's *N* days away."
-- **After Sept 30, 2026:** "Classic URL ping tests **were retired** on September
-  30, 2026. Who got caught?" — then ask for the show of hands.
 
 ### SHOW
 
@@ -953,7 +918,7 @@ not go hunting live):
 > 'who decided to monitor that endpoint,' the answer is a commit — not a person
 > who clicked something in the portal eighteen months ago and then left."
 
-### 📝 NOTE — "Why Standard?" and "What do they cost?"
+### NOTE — "Why Standard?" and "What do they cost?"
 
 Expect both questions. Have these answers loaded.
 
