@@ -928,8 +928,8 @@ Expect both questions. Have these answers loaded.
 
 **Q: What do they cost?**
 
-Standard tests bill **per test execution**. **Standard tests are not free**. They’re billed per test execution. Pricing varies by region and agreement, but it’s roughly **$0.0004 per execution**.
-- As an example, one test running every five minutes from five locations is roughly **$16–$20 per month**. So for a few tests, the cost is pretty small, but at enterprise scale, it’s definitely something you want to plan for.
+Standard tests bill **per test execution**. **Standard tests are not free**. They’re billed per test execution. Pricing varies by region and agreement, but it’s roughly **$0.0005 per execution**.
+- As an example, one test running every five minutes from five locations is roughly **$20–$25 per month**. So for a few tests, the cost is pretty small, but at enterprise scale, it’s definitely something you want to plan for.
 
 ### If you want the KQL
 
@@ -964,7 +964,7 @@ availabilityResults
 
 ---
 
-## 🎁 BONUS DEMO C — Find Custom Markers with Search
+## BONUS DEMO C — Find Custom Markers with Search
 
 **Target:** 4 minutes  
 **Search marker:** `BONUS DEMO C`
@@ -1006,18 +1006,6 @@ Go in this order — it walks the same path as the telemetry.
 
 **1. `ginos-gelato/client/src/pages/Builder.tsx` — find `IceCreamCreated`**
 
-```tsx
-appInsights.trackEvent(
-    { name: 'IceCreamCreated' },
-    {
-        container: selectedContainer,
-        flavorCount: selectedFlavors.length,
-        toppingCount: selectedToppings.length,
-        price: calculatePrice()
-    }
-);
-```
-
 > "Four lines of business vocabulary. Not a log message — a queryable fact."
 
 **2. `ginos-gelato/client/src/pages/Checkout.tsx` — find `OrderCompleted`**
@@ -1025,29 +1013,9 @@ appInsights.trackEvent(
 The same shape, with the full order on it: `orderNumber`, `orderTotal`,
 `deliveryType`, `deliveryFee`, `shippingFee`, `tax`, `subtotal`.
 
-While you are in this file, scroll a few lines down to the revenue metric — it
-sets up BONUS DEMO D:
-
-```tsx
-appInsights.trackMetric(
-    { name: 'OrderRevenue', average: order.total },
-    { orderNumber: order.confirmationNumber }
-);
-```
-
-> "Note this one is a *metric*, not an event. Metrics are never sampled. If a
-> number has to be exact, that's the call you make."
-
 **3. `ginos-gelato/server/Services/OrderService.cs` — find `OrderCreated`**
 
 This is the most interesting one on the slide-free tour — three things at once:
-
-```csharp
-_telemetry?.TrackEvent(
-    "OrderCreated",
-    new Dictionary<string, string> { ... },   // dimensions you filter by
-    new Dictionary<string, double> { ... });  // measurements you aggregate
-```
 
 Point out all three:
 
@@ -1078,7 +1046,7 @@ Point out all three:
 
 ---
 
-## 🎁 BONUS DEMO D — 🔥 "Wait, What?" — You Are Already Sampling
+## BONUS DEMO D — 🔥 "Wait, What?" — You Are Already Sampling
 
 **Target:** 5 minutes  
 **Search marker:** `BONUS DEMO D`  
