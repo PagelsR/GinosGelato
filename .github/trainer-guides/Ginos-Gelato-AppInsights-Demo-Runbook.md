@@ -7,19 +7,6 @@
 **Azure resource group:** `rg-GinosGelato-Modernization`  
 **Deployed storefront configured in this branch:** `https://wonderful-coast-040cb1a10.7.azurestaticapps.net/`
 
----
-
-# Important
-
-For the presentation, use the **VS Code integrated terminal**. PowerShell is not required.
-
-Only one command is needed live for Playwright:
-
-```text
-npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --headed --workers=1
-```
-
-Everything else in the fault demos can be triggered with browser URLs.
 
 ---
 
@@ -77,6 +64,47 @@ before you present so you never discover an empty blade on stage:
    live you only have to open it. Confirm it has non-trivial volume.
 3. **Smart Detection** has at least one entry. (BONUS DEMO E — skip silently if empty.)
 
+### Verify the funnel will resolve before you build it
+
+Run this in **Monitoring > Logs**. It applies the same strict ordering the
+Funnels blade uses, so it predicts exactly what the funnel will show:
+
+**Option 1 — Ask the Observability Agent**
+
+```text
+Using customEvents over the last 3 days, for each user_Id find the earliest timestamp of BuilderPageVisit, IceCreamCreated, CheckoutStarted and OrderCompleted. Then count how many users performed each event strictly after the previous one in that exact order, and show me the four counts.
+```
+
+**Option 2 — KQL (authoritative for this check)**
+
+```kusto
+customEvents
+| where timestamp > ago(3d)
+| where name in ('BuilderPageVisit','IceCreamCreated','CheckoutStarted','OrderCompleted')
+| summarize
+    B = minif(timestamp, name == 'BuilderPageVisit'),
+    I = minif(timestamp, name == 'IceCreamCreated'),
+    C = minif(timestamp, name == 'CheckoutStarted'),
+    O = minif(timestamp, name == 'OrderCompleted')
+    by user_Id
+| summarize
+    Step1_Builder   = countif(isnotnull(B)),
+    Step2_Created   = countif(isnotnull(B) and I > B),
+    Step3_Checkout  = countif(isnotnull(B) and I > B and C > I),
+    Step4_Completed = countif(isnotnull(B) and I > B and C > I and O > C)
+```
+
+All four numbers should be non-zero and decreasing. If `Step4_Completed` is
+near zero, the browser SDK is dropping the terminal event — confirm the
+`appInsights.flush(false)` call in `Checkout.tsx` is deployed, then narrow the
+time range to **after** that deployment.
+
+> ⚠️ **Trust Option 2 here.** This check exists specifically to reproduce the
+> Funnels blade's *strict ordering* semantics. An agent may reasonably
+> paraphrase that as "users who did both events," which is a different question
+> and will happily report healthy numbers for a funnel that renders 0%. Use the
+> prompt to explore; use the KQL to decide.
+
 ## Open VS Code tabs
 
 Open, actually shown on screen:
@@ -87,8 +115,9 @@ Open, actually shown on screen:
 Open, backup reference only — not opened or shown live, staged in case of Q&A:
 
 - `e2e/journey-4-fault-demo.spec.ts` — automated coverage of the same faults triggered by URL in Demos 3-4
-- `ginos-gelato/client/src/pages/Checkout.tsx` — emits the `CheckoutStarted` / `DeliveryMethodSelected` / `OrderCompleted` events discussed in Demo 5
-- `ginos-gelato/server/Services/OrderService.cs` — emits the server-side `OrderCreated` event referenced in Demo 3 and BONUS DEMO C
+- `ginos-gelato/client/src/pages/Builder.tsx` — emits `BuilderPageVisit` / `IceCreamCreated`; **required for BONUS DEMO C**
+- `ginos-gelato/client/src/pages/Checkout.tsx` — emits the `CheckoutStarted` / `DeliveryMethodSelected` / `OrderCompleted` events discussed in Demo 5, plus the `OrderRevenue` metric; **required for BONUS DEMO C**
+- `ginos-gelato/server/Services/OrderService.cs` — emits the server-side `OrderCreated` event referenced in Demo 3 and **BONUS DEMO C**
 - `ginos-gelato/server/Program.cs` — the sampling reveal in BONUS DEMO D
 - `ginos-gelato/client/src/services/appInsights.ts` — the browser half of the sampling contrast in BONUS DEMO D
 - `iac/appInsights.bicep` — the Standard availability tests in BONUS DEMO B
@@ -111,15 +140,28 @@ Open, backup reference only — not opened or shown live, staged in case of Q&A:
 
 ## Manual customer journey
 
+> ⌨️ **No typing required.** The checkout form ships prefilled with a demo
+> customer, so this entire journey is click-only. Do not type on stage.
+
 In the deployed storefront:
 
 1. Browse.
 2. Customize one gelato.
 3. Add to cart.
 4. Checkout.
-5. Choose pickup.
-6. Complete the order.
-7. Show the confirmation.
+5. **Continue to Delivery** — customer fields are already filled in.
+6. Choose pickup, then **Continue to Payment** — special instructions already filled in.
+7. **Complete Order** — card details already filled in.
+8. Show the confirmation.
+
+### What the audience will see prefilled
+
+| Field | Value |
+| --- | --- |
+| Name / email / phone | Sofia Romano, `sofia.romano@example.com`, (555) 123-4567 |
+| Special instructions | "Extra napkins, please. Ring the bell twice." |
+| Card | `4111 1111 1111 1111`, CVV 123, expiry auto-rolls two years out |
+| Address | **Not prefilled — by design** |
 
 ## Playwright
 
@@ -454,15 +496,25 @@ The real useful events include:
 ### DO
 
 Open the funnel you **saved before the session**. If you are building it live,
-the steps are the events this branch actually emits:
+use exactly these four steps:
 
 1. `BuilderPageVisit`
 2. `IceCreamCreated`
-3. `AddToCart`
-4. `CheckoutStarted`
-5. `OrderCompleted`
+3. `CheckoutStarted`
+4. `OrderCompleted`
 
 Set the time range to the last 24 hours, or widen to 7 days if volume is thin.
+
+> ⚠️ **Do NOT add `AddToCart` as a step.** It is emitted from `addToCart()` inside
+> `Builder.tsx`'s click handler, which runs *before* the `IceCreamCreated` call on
+> the same line of execution — measured at 0-2 ms apart. Azure funnels are
+> strictly sequential, so a step that never occurs *after* the previous one
+> resolves to 0% and silently zeroes every step below it.
+>
+> **Do NOT use `OrderCreated` as the last step.** That is the *server-side* event
+> from `OrderService.cs` (`cloud_RoleName = app-...`). Server telemetry carries no
+> browser `user_Id`, and funnels count users — so it is always 0%. The client-side
+> event is `OrderCompleted`.
 
 ### SHOW
 
@@ -481,20 +533,29 @@ If the funnel volume is too thin to be convincing, do not fight the UI. Switch
 to **Monitoring > Logs**, turn on **Agent**, and ask:
 
 ```text
-Using customEvents in the last 7 days, build me a conversion funnel for the event sequence BuilderPageVisit, IceCreamCreated, AddToCart, CheckoutStarted, OrderCompleted. Show the count at each step and the percentage that survived from the previous step.
+Using customEvents in the last 7 days, build me a conversion funnel for the event sequence BuilderPageVisit, IceCreamCreated, CheckoutStarted, OrderCompleted. Show the distinct user count at each step and the percentage that survived from the previous step.
 ```
 
 The KQL equivalent, if you want to show what runs underneath:
 
 ```kusto
-let steps = dynamic(["BuilderPageVisit","IceCreamCreated","AddToCart","CheckoutStarted","OrderCompleted"]);
+let steps = dynamic(["BuilderPageVisit","IceCreamCreated","CheckoutStarted","OrderCompleted"]);
 customEvents
 | where timestamp > ago(7d)
 | where name in (steps)
-| summarize Users = dcount(session_Id) by name
+| summarize Users = dcount(user_Id) by name
 | extend StepOrder = array_index_of(steps, name)
 | order by StepOrder asc
+| extend SurvivedPct = round(100.0 * Users / toscalar(
+    customEvents
+    | where timestamp > ago(7d) and name == "BuilderPageVisit"
+    | summarize dcount(user_Id)), 1)
 ```
+
+> 💡 Unlike the Funnels blade, this query does **not** enforce ordering — it just
+> counts users per event. That makes it a useful sanity check: if the portal
+> funnel shows 0% for a step but this query shows users, the problem is step
+> *order*, not missing data.
 
 > ⚠️ **Stage check (morning of):** funnels need enough distinct sessions, and the
 > telemetry here comes from a scheduled Playwright run that can collapse into a
@@ -503,7 +564,7 @@ customEvents
 
 ---
 
-## PART B - User Flow (optional — cut this first if you are tight)
+## PART B - User Flow
 
 ### SAY
 
@@ -686,82 +747,7 @@ For **What to Take Home**, read only 3 or 4 bullets.
 
 ---
 
-# Slide Accuracy Corrections Before Final
-
-## How the Telemetry Gets In
-
-The current slide says:
-
-`Azure Monitor OpenTelemetry Distro instruments the ASP.NET Core API`
-
-The uploaded branch currently uses:
-
-`Microsoft.ApplicationInsights.AspNetCore`
-
-and in `Program.cs`:
-
-`builder.Services.AddApplicationInsightsTelemetry();`
-
-For exact alignment with the repo, change the slide to:
-
-**Application Insights ASP.NET Core SDK instruments the API**
-
-Suggested speaker note:
-
-> "The API currently uses the Application Insights ASP.NET Core SDK for requests, dependencies, logs, exceptions, and distributed tracing. The browser uses the Application Insights JavaScript SDK. Both send to the same Application Insights resource."
-
-## Business Telemetry
-
-Replace the illustrative event names that do not exist with actual repo events:
-
-**IceCreamCreated -> AddToCart -> CheckoutStarted -> DeliveryMethodSelected -> OrderCompleted**
-
-Optionally show the API-side companion event:
-
-**OrderCreated**
-
-## API and Browser Exceptions
-
-Rename:
-
-**API and Browser Exceptions**
-
-to:
-
-**API Failure and Browser Exception**
-
-The current API demo returns HTTP 503; it does not throw a server-side exception.
-
-## Three Questions, Three Queries
-
-Replace:
-
-**Which fulfillment method fails most?**
-
-with:
-
-**Which fulfillment method is selected most often?**
-
-The current branch emits `DeliveryMethodSelected` but does not emit `OrderFailed`.
-
-## Application Map and Funnel — no new slides
-
-Application Map (Demo 3 Part A) and Funnels (Demo 5 Part A) were folded into
-**existing** demos on purpose. **Do not add slides for them.** The deck length
-and slide order are unchanged. Two optional title tweaks if you want exact alignment:
-
-| Slide | Current | Optional |
-| --- | --- | --- |
-| Demo 3 | Slow Checkout, Transaction, and SQL Dependency | Application Map, Slow Request, and SQL Dependency |
-| Demo 5 | Business Events, User Flow, and KQL | Business Events, Funnel, and KQL |
-
-Smart Detection stayed in the bonus section (`BONUS DEMO E`) for a different
-reason: the blade can legitimately be empty on a healthy app, so it is not safe
-to commit a slide to it.
-
----
-
-# 🎁 BONUS DEMOS (only if time remains)
+# BONUS DEMOS (only if time remains)
 
 > Search for `BONUS DEMO` to jump straight here. These are optional — only run
 > them if you land ahead of the 68-minute plan with real time to spare. Skip
@@ -786,8 +772,12 @@ mid-session, jump straight to the matching bonus and come back.
 (sampling — the "wait, what?"), `BONUS DEMO E` (Smart Detection — the AI
 payoff), `BONUS DEMO B` (the retirement deadline nobody in the room knows about).
 
+> 🎂 **If today is September 30, 2026 — run `BONUS DEMO B` no matter what.**
+> That is the exact day Classic URL ping tests retire. Cut something else if you
+> have to; you will not get this alignment again.
+
 ---
-## 🎁 BONUS DEMO A — Release Correlation ("did this start after the last deploy?")
+## BONUS DEMO A — Release Correlation ("did this start after the last deploy?")
 
 **Target:** 4 minutes  
 **Search marker:** `BONUS DEMO A`
@@ -812,19 +802,44 @@ stamps **every** piece of server telemetry with release context, populated by
 
 Azure Portal → Application Insights → **Monitoring > Logs**.
 
+**Option 1 — Ask the Observability Agent** (toggle **Agent** on, top-right)
+
+```text
+For the last 3 days, group requests by application_Version and the gitCommitSha custom dimension. For each release show the request count using sum of itemCount, the failure rate as a percentage, and the P95 duration in milliseconds. Sort by version descending so I can compare consecutive releases.
+```
+
+**Option 2 — KQL**
+
 ```kusto
 requests
-| where timestamp > ago(24h)
-| summarize Count = count(), AvgDuration = avg(duration)
-    by application_Version, tostring(customDimensions.gitCommitSha)
-| order by Count desc
+| where timestamp > ago(3d)
+| summarize
+    Requests = sum(itemCount),
+    FailureRate = round(100.0 * sumif(itemCount, success == false) / sum(itemCount), 2),
+    P95Ms = round(percentile(duration, 95), 0)
+    by application_Version, GitCommitSha = tostring(customDimensions.gitCommitSha)
+| order by application_Version desc
 ```
+
+> 💡 Note `sum(itemCount)` rather than `count()` — same lesson as BONUS DEMO D.
+> Get in the habit and the number stays right if sampling ever engages.
 
 ### SHOW
 
 - Every row is tagged with the exact commit SHA that shipped it.
+- Walk **down** the `P95Ms` column. Releases are not equal — on a recent run
+  this returned eight versions ranging from **43 ms** to **5,843 ms** P95, and
+  failure rates from **0.44%** to **8.33%**. Point at the worst row and say
+  "that release was a bad day, and we can name the commit."
 - If you redeploy mid-conference, you can immediately filter to just the new
-  version and compare error rate / duration against the previous one.
+  version and compare failure rate and duration against the previous one.
+
+> ⚠️ **Be ready for the `1.0.0.0` row.** You will likely see one version literally
+> named `1.0.0.0` with `gitCommitSha = "unknown"` and an ugly failure rate. That
+> is the assembly default — telemetry emitted when the release environment
+> variables were not present. Do not let it look like a mystery: say "that's the
+> fallback bucket for anything that started before the deploy stamped it, which
+> is itself useful to be able to see."
 
 ### SAY
 
@@ -838,7 +853,7 @@ requests
 
 ---
 
-## 🎁 BONUS DEMO B — Alerts and Availability Tests (proactive monitoring)
+## BONUS DEMO B — Alerts and Availability Tests (proactive monitoring)
 
 **Target:** 4 minutes  
 **Search marker:** `BONUS DEMO B`
@@ -867,26 +882,23 @@ Then Azure Portal → Application Insights → **Investigate > Availability**.
   **End-to-end transaction details**. A synthetic probe produces the *same*
   transaction view you drilled into in Demo 3.
 
-### 🔥 "Wait, what?" — Classic or Standard?
+### 🔥🔥 "Wait, What?" — Classic or Standard? (THE TODAY MOMENT)
 
-This is the part the room does not expect. Ask it as a question first:
+> 🎤 **This talk is scheduled for September 30, 2026 — which is the exact day
+> URL ping tests retire.**
+
+Ask it as a question first, and wait for the hands:
 
 > "Quick show of hands — who's running URL ping tests in production today?"
 
-Then deliver it:
+Let the hands stay up. Then check your watch.
 
-> "**Classic URL ping tests retire on September 30, 2026.** Existing ping tests
-> get removed from your resources. Multi-step web tests are already gone — they
-> retired in August 2024. If those hands are still up, you have a migration."
+> "I want you to know what today is. **Today — September 30th, 2026 — is the day
+> Classic URL ping tests retire in Application Insights.** Not deprecated.
+> Retired. Microsoft's words are: *existing URL ping tests are removed from your
+> resources.* Multi-step web tests already went in August 2024."
 
 Now open `iac/appInsights.bicep` in VS Code and show the three webtest resources:
-
-```bicep
-resource flavorsAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
-  kind: 'standard'
-  properties: {
-    Kind: 'standard'
-```
 
 ### SHOW
 
@@ -905,6 +917,19 @@ resource flavorsAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
 > It's that our uptime checks are a reviewed file in the repo. When someone asks
 > 'who decided to monitor that endpoint,' the answer is a commit — not a person
 > who clicked something in the portal eighteen months ago and then left."
+
+### NOTE — "Why Standard?" and "What do they cost?"
+
+Expect both questions. Have these answers loaded.
+
+**Q: Why Standard?**
+
+**So why Standard tests?** They can validate SSL certificates, response codes, content, headers, and even POST requests, and they can run from multiple locations around the world.
+
+**Q: What do they cost?**
+
+Standard tests bill **per test execution**. **Standard tests are not free**. They’re billed per test execution. Pricing varies by region and agreement, but it’s roughly **$0.0005 per execution**.
+- As an example, one test running every five minutes from five locations is roughly **$20–$25 per month**. So for a few tests, the cost is pretty small, but at enterprise scale, it’s definitely something you want to plan for.
 
 ### If you want the KQL
 
@@ -927,10 +952,6 @@ availabilityResults
 | order by SuccessRate asc
 ```
 
-> 💡 **Trainer note on the date:** this runbook was written before the
-> September 30, 2026 retirement. If you are presenting after that date, change
-> the line from "retire on" to "were retired on" and ask the room who got caught.
-
 ### SAY
 
 > "This is the difference between finding a problem and being told about a
@@ -943,7 +964,7 @@ availabilityResults
 
 ---
 
-## 🎁 BONUS DEMO C — Find Custom Markers with Search
+## BONUS DEMO C — Find Custom Markers with Search
 
 **Target:** 4 minutes  
 **Search marker:** `BONUS DEMO C`
@@ -978,6 +999,38 @@ OrderCompleted
   server-side `OrderCreated` event (`OrderService.cs`) sharing the same
   operation ID — the browser marker and the server marker are the same order.
 
+### THEN SHOW THE CODE (this is the payoff)
+
+Switch to VS Code and show the three lines that produced what they just saw.
+Go in this order — it walks the same path as the telemetry.
+
+**1. `ginos-gelato/client/src/pages/Builder.tsx` — find `IceCreamCreated`**
+
+> "Four lines of business vocabulary. Not a log message — a queryable fact."
+
+**2. `ginos-gelato/client/src/pages/Checkout.tsx` — find `OrderCompleted`**
+
+The same shape, with the full order on it: `orderNumber`, `orderTotal`,
+`deliveryType`, `deliveryFee`, `shippingFee`, `tax`, `subtotal`.
+
+**3. `ginos-gelato/server/Services/OrderService.cs` — find `OrderCreated`**
+
+This is the most interesting one on the slide-free tour — three things at once:
+
+Point out all three:
+
+- **Two dictionaries.** Strings are dimensions you group and filter by;
+  doubles are measurements you average and sum. The browser SDK flattens both
+  into `customDimensions` — the .NET SDK makes you choose deliberately.
+- **The `?` on `_telemetry`.** Look at the constructor: `TelemetryClient?` is an
+  *optional* parameter. If someone challenges you, open
+  `ginos-gelato/server.Tests/OrderServiceValidationTests.cs` and show
+  `CreateService` \u2014 it builds `OrderService` with three arguments and simply
+  omits telemetry. Business logic is not coupled to Azure.
+- **No correlation code.** Nobody passed an operation ID. The SDK picks up the
+  ambient request context — which is exactly why "related items" in the portal
+  could link the browser event to this one.
+
 ### SAY
 
 > "These aren't synthetic demo events — they're the same markers that would be
@@ -993,7 +1046,7 @@ OrderCompleted
 
 ---
 
-## 🎁 BONUS DEMO D — 🔥 "Wait, What?" — You Are Already Sampling
+## BONUS DEMO D — 🔥 "Wait, What?" — You Are Already Sampling
 
 **Target:** 5 minutes  
 **Search marker:** `BONUS DEMO D`  

@@ -29,6 +29,42 @@ interface PaymentInfo {
     nameOnCard: string;
 }
 
+// Keeps the demo card from showing an expired date as the years pass.
+const demoExpiry = (): string => {
+    const now = new Date();
+    return `${String(now.getMonth() + 1).padStart(2, '0')}/${String((now.getFullYear() + 2) % 100)}`;
+};
+
+// Prefilled so the checkout can be driven click-only during a live demo.
+// All values are deliberately non-routable: example.com is reserved by RFC 2606,
+// 555-01xx is the reserved fictional US range, and the card is the well-known
+// Visa test PAN. Payment fields are never sent to the API - see handleProcessOrder.
+const DEMO_CUSTOMER: CustomerInfo = {
+    firstName: 'Sofia',
+    lastName: 'Romano',
+    email: 'sofia.romano@example.com',
+    phone: '(555) 123-4567'
+};
+
+// Address is intentionally left blank: journey-5 asserts that an incomplete
+// shipping address disables "Continue to Payment". Demo 1 uses pickup, which
+// never shows these fields.
+const DEMO_DELIVERY: DeliveryInfo = {
+    type: 'pickup',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    specialInstructions: 'Extra napkins, please. Ring the bell twice.'
+};
+
+const DEMO_PAYMENT: PaymentInfo = {
+    cardNumber: '4111 1111 1111 1111',
+    expiryDate: demoExpiry(),
+    cvv: '123',
+    nameOnCard: 'Sofia Romano'
+};
+
 const Checkout: React.FC = () => {
     const { cartItems, getCartTotal, clearCart } = useCart();
     const navigate = useNavigate();
@@ -62,28 +98,11 @@ const Checkout: React.FC = () => {
         }
     }, [currentStep]);
     
-    const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: ''
-    });
-    
-    const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({
-        type: 'pickup',
-        address: '',
-        city: '',
-        state: '',
-        zipCode: '',
-        specialInstructions: ''
-    });
-    
-    const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-        nameOnCard: ''
-    });
+    const [customerInfo, setCustomerInfo] = useState<CustomerInfo>({ ...DEMO_CUSTOMER });
+
+    const [deliveryInfo, setDeliveryInfo] = useState<DeliveryInfo>({ ...DEMO_DELIVERY });
+
+    const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>({ ...DEMO_PAYMENT });
 
     const subtotal = getCartTotal();
     const tax = subtotal * 0.085;
@@ -152,6 +171,12 @@ const Checkout: React.FC = () => {
             );
             
             clearCart();
+
+            // Order confirmation is the last thing that happens, so automated runs
+            // tear down the browser before the SDK's batch timer fires. Playwright's
+            // context.close() also skips beforeunload, so the SDK's own unload flush
+            // never runs. isAsync=false forces the send now rather than scheduling it.
+            appInsights.flush(false);
         } catch (error) {
             // Track checkout errors
             appInsights.trackException(
