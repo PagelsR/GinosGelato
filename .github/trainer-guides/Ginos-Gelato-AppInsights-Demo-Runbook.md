@@ -772,6 +772,10 @@ mid-session, jump straight to the matching bonus and come back.
 (sampling — the "wait, what?"), `BONUS DEMO E` (Smart Detection — the AI
 payoff), `BONUS DEMO B` (the retirement deadline nobody in the room knows about).
 
+> 🎂 **If today is September 30, 2026 — run `BONUS DEMO B` no matter what.**
+> That is the exact day Classic URL ping tests retire. Cut something else if you
+> have to; you will not get this alignment again.
+
 ---
 ## BONUS DEMO A — Release Correlation ("did this start after the last deploy?")
 
@@ -849,7 +853,7 @@ requests
 
 ---
 
-## 🎁 BONUS DEMO B — Alerts and Availability Tests (proactive monitoring)
+## BONUS DEMO B — Alerts and Availability Tests (proactive monitoring)
 
 **Target:** 4 minutes  
 **Search marker:** `BONUS DEMO B`
@@ -878,17 +882,25 @@ Then Azure Portal → Application Insights → **Investigate > Availability**.
   **End-to-end transaction details**. A synthetic probe produces the *same*
   transaction view you drilled into in Demo 3.
 
-### 🔥 "Wait, what?" — Classic or Standard?
+### 🔥🔥 "Wait, What?" — Classic or Standard? (THE TODAY MOMENT)
 
-This is the part the room does not expect. Ask it as a question first:
+> 🎤 **This talk is scheduled for September 30, 2026 — which is the exact day
+> URL ping tests retire.** That is not a coincidence you should waste. Promote
+> this from a bonus to a *must-run* if the calendar still says Sept 30.
+
+Ask it as a question first, and wait for the hands:
 
 > "Quick show of hands — who's running URL ping tests in production today?"
 
-Then deliver it:
+Let the hands stay up. Then check your watch.
 
-> "**Classic URL ping tests retire on September 30, 2026.** Existing ping tests
-> get removed from your resources. Multi-step web tests are already gone — they
-> retired in August 2024. If those hands are still up, you have a migration."
+> "I want you to know what today is. **Today — September 30th, 2026 — is the day
+> Classic URL ping tests retire in Application Insights.** Not deprecated.
+> Retired. Microsoft's words are: *existing URL ping tests are removed from your
+> resources.* Multi-step web tests already went in August 2024."
+
+> "So for those of you with your hands still up: you don't have a migration on
+> your roadmap. You have one on your calendar. Today."
 
 Now open `iac/appInsights.bicep` in VS Code and show the three webtest resources:
 
@@ -898,6 +910,30 @@ resource flavorsAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
   properties: {
     Kind: 'standard'
 ```
+
+> "And this repo? Already Standard. Not because I'm clairvoyant — because it's
+> in a Bicep file somebody had to review."
+
+**Sources, if anyone challenges you from the audience** (have these ready, do
+not go hunting live):
+
+- `learn.microsoft.com/azure/azure-monitor/app/availability` — "On September 30,
+  2026, URL ping tests in Application Insights will be retired. Existing URL
+  ping tests are removed from your resources."
+- The archived ping-test page carries the same banner.
+
+> ⚠️ **One honest hedge.** Azure retirements roll out over hours or days, not at
+> the stroke of midnight UTC. If an audience member says "mine still works,"
+> agree with them: *"It might, today. The date on the page is today, and the
+> stated behavior is removal. I'd not bet a production alerting path on the
+> rollout being slow."* Don't claim tests are being deleted live on stage.
+
+### If you're presenting this deck on any other date
+
+- **Before Sept 30, 2026:** "Classic URL ping tests retire on September 30, 2026
+  — that's *N* days away."
+- **After Sept 30, 2026:** "Classic URL ping tests **were retired** on September
+  30, 2026. Who got caught?" — then ask for the show of hands.
 
 ### SHOW
 
@@ -916,6 +952,64 @@ resource flavorsAvailabilityTest 'Microsoft.Insights/webtests@2022-06-15' = {
 > It's that our uptime checks are a reviewed file in the repo. When someone asks
 > 'who decided to monitor that endpoint,' the answer is a commit — not a person
 > who clicked something in the portal eighteen months ago and then left."
+
+### 📝 NOTE — "Why Standard?" and "What do they cost?"
+
+Expect both questions. Have these answers loaded.
+
+**Q: Why Standard?**
+
+Two honest halves — lead with the second one, it's more respectful:
+
+1. **You no longer have a choice.** Classic URL ping tests retire September 30,
+   2026. Multi-step web tests are already gone (August 2024). Standard is the
+   only supported single-request availability test.
+2. **You'd want it anyway.** Standard does things ping tests never could, and
+   this repo uses all of them: proactive TLS expiry checks, content matching,
+   HTTP verbs, custom headers, and request bodies. A ping test can only tell you
+   the socket answered.
+
+**Q: What do they cost?**
+
+Standard tests bill **per test execution**. Verified from the Azure Retail
+Prices API — meter `Standard Web Test Execution`:
+
+| Region | Price per execution |
+| --- | --- |
+| East US / East US 2 / West US 2 / West US 3 | **$0.0005** |
+| Central US / West US / Canada / South Central US | $0.00056 |
+| West Europe / UK West / Switzerland / most of EMEA | $0.000645 |
+| Australia East / Japan East | $0.0007 – $0.000725 |
+
+Do the math out loud — it's more convincing than a rate:
+
+| Configuration | Executions / month | Cost / month (East US) |
+| --- | --- | --- |
+| **This repo** — 3 tests × 3 locations × every 5 min | ~78,840 | **~$39** |
+| Microsoft's recommended 5 locations, every 5 min | ~131,400 | ~$66 |
+| Same 3 tests, but every 15 min | ~26,280 | ~$13 |
+| One test × 5 locations × every 5 min | ~43,800 | ~$22 |
+
+**The point to make:**
+
+> "Note what the cost dials actually are: **number of tests × number of
+> locations × frequency.** Nobody's first instinct is that test *frequency* is
+> a line item, but it's linear. Going from every 5 minutes to every 15 cuts this
+> bill by two-thirds — and for most services, a 15-minute detection window is
+> still far better than waiting for a customer to call."
+
+⚠️ **The honest part, if someone is annoyed:** URL ping tests had **no
+per-execution meter** — you only paid to ingest the results. Standard Web Test
+Execution is the only availability meter in the current Azure retail price list.
+So for a team running ping tests today, this migration is not cost-neutral. Say
+that plainly rather than pretending it's free; the room will trust everything
+else you said more.
+
+
+> [NOTE!] **So why Standard tests?** They can validate SSL certificates, response codes, content, headers, and even POST requests, and they can run from multiple locations around the world.
+
+The tradeoff is that **Standard tests are not free**. They’re billed per test execution. Pricing varies by region and agreement, but it’s roughly **$0.0004 per execution**. As an example, one test running every five minutes from five locations is roughly **$16–$20 per month**. So for a few tests, the cost is pretty small, but at enterprise scale, it’s definitely something you want to plan for.
+
 
 ### If you want the KQL
 
@@ -937,10 +1031,6 @@ availabilityResults
     by name, location
 | order by SuccessRate asc
 ```
-
-> 💡 **Trainer note on the date:** this runbook was written before the
-> September 30, 2026 retirement. If you are presenting after that date, change
-> the line from "retire on" to "were retired on" and ask the room who got caught.
 
 ### SAY
 
