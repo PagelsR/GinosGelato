@@ -924,57 +924,12 @@ Expect both questions. Have these answers loaded.
 
 **Q: Why Standard?**
 
-Two honest halves — lead with the second one, it's more respectful:
-
-1. **You no longer have a choice.** Classic URL ping tests retire September 30,
-   2026. Multi-step web tests are already gone (August 2024). Standard is the
-   only supported single-request availability test.
-2. **You'd want it anyway.** Standard does things ping tests never could, and
-   this repo uses all of them: proactive TLS expiry checks, content matching,
-   HTTP verbs, custom headers, and request bodies. A ping test can only tell you
-   the socket answered.
+**So why Standard tests?** They can validate SSL certificates, response codes, content, headers, and even POST requests, and they can run from multiple locations around the world.
 
 **Q: What do they cost?**
 
-Standard tests bill **per test execution**. Verified from the Azure Retail
-Prices API — meter `Standard Web Test Execution`:
-
-| Region | Price per execution |
-| --- | --- |
-| East US / East US 2 / West US 2 / West US 3 | **$0.0005** |
-| Central US / West US / Canada / South Central US | $0.00056 |
-| West Europe / UK West / Switzerland / most of EMEA | $0.000645 |
-| Australia East / Japan East | $0.0007 – $0.000725 |
-
-Do the math out loud — it's more convincing than a rate:
-
-| Configuration | Executions / month | Cost / month (East US) |
-| --- | --- | --- |
-| **This repo** — 3 tests × 3 locations × every 5 min | ~78,840 | **~$39** |
-| Microsoft's recommended 5 locations, every 5 min | ~131,400 | ~$66 |
-| Same 3 tests, but every 15 min | ~26,280 | ~$13 |
-| One test × 5 locations × every 5 min | ~43,800 | ~$22 |
-
-**The point to make:**
-
-> "Note what the cost dials actually are: **number of tests × number of
-> locations × frequency.** Nobody's first instinct is that test *frequency* is
-> a line item, but it's linear. Going from every 5 minutes to every 15 cuts this
-> bill by two-thirds — and for most services, a 15-minute detection window is
-> still far better than waiting for a customer to call."
-
-⚠️ **The honest part, if someone is annoyed:** URL ping tests had **no
-per-execution meter** — you only paid to ingest the results. Standard Web Test
-Execution is the only availability meter in the current Azure retail price list.
-So for a team running ping tests today, this migration is not cost-neutral. Say
-that plainly rather than pretending it's free; the room will trust everything
-else you said more.
-
-
-> [NOTE!] **So why Standard tests?** They can validate SSL certificates, response codes, content, headers, and even POST requests, and they can run from multiple locations around the world.
-
-The tradeoff is that **Standard tests are not free**. They’re billed per test execution. Pricing varies by region and agreement, but it’s roughly **$0.0004 per execution**. As an example, one test running every five minutes from five locations is roughly **$16–$20 per month**. So for a few tests, the cost is pretty small, but at enterprise scale, it’s definitely something you want to plan for.
-
+Standard tests bill **per test execution**. **Standard tests are not free**. They’re billed per test execution. Pricing varies by region and agreement, but it’s roughly **$0.0004 per execution**.
+- As an example, one test running every five minutes from five locations is roughly **$16–$20 per month**. So for a few tests, the cost is pretty small, but at enterprise scale, it’s definitely something you want to plan for.
 
 ### If you want the KQL
 
