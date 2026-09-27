@@ -1181,5 +1181,22 @@
     "passRate": 76,
     "branch": "main",
     "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-09-26-run-126"
+  },
+  {
+    "runId": "2026-09-27-run-127",
+    "timestamp": "2026-09-27T15:43:15.842Z",
+    "date": "2026-09-27",
+    "runNumber": "127",
+    "total": 37,
+    "passed": 30,
+    "failed": 7,
+    "regressionFailed": 1,
+    "chaosFailed": 6,
+    "flaky": 1,
+    "skipped": 0,
+    "duration": 404,
+    "passRate": 81,
+    "branch": "main",
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-09-27-run-127"
   }
 ]
