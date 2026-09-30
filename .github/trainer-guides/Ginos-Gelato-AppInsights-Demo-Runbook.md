@@ -805,7 +805,7 @@ Azure Portal → Application Insights → **Monitoring > Logs**.
 **Option 1 — Ask the Observability Agent** (toggle **Agent** on, top-right)
 
 ```text
-For the last 3 days, group requests by application_Version and the gitCommitSha custom dimension. For each release show the request count using sum of itemCount, the failure rate as a percentage, and the P95 duration in milliseconds. Sort by version descending so I can compare consecutive releases.
+Compare the last two application versions in this Application Insights resource. For each release show the request count using sum of itemCount, the failure rate as a percentage, and the P95 duration in milliseconds. Sort by version descending so I can compare consecutive releases. For each release show the request count using sum of itemCount, the failure rate as a percentage, and the P95 duration in milliseconds. Sort by version descending so I can compare consecutive releases.
 ```
 
 **Option 2 — KQL**
