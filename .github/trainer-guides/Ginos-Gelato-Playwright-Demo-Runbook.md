@@ -69,11 +69,9 @@ The cloud-test plumbing is now **in the repo**, not just recommended:
    `package.json`.
 3. ✅ `playwright.service.config.ts` exists at the repo root.
 4. ✅ **No third workflow file.** The cloud-scale run is integrated directly
-   into the two existing workflows:
-   - `.github/workflows/playwright-testing.yml` → new
-     `run-playwright-tests-at-scale` job (runs alongside the daily local run).
-   - `.github/workflows/BuildDeploy.yml` → new `validate-at-scale` job
-     (post-deploy smoke test, non-blocking).
+   into `.github/workflows/playwright-testing.yml` as a new, independent job:
+   `run-playwright-tests-at-scale` (runs after the daily local job, same
+   workflow run).
 5. ✅ **No manual copy-paste needed for `PLAYWRIGHT_SERVICE_URL`.**
    `iac/playwrightWorkspace.bicep` outputs `playwrightWorkspaceServiceUrl` -
    the exact `wss://...` browser endpoint, computed from the workspace's
@@ -86,6 +84,12 @@ The cloud-test plumbing is now **in the repo**, not just recommended:
    Administrator, not the Contributor role CI principals should have. Grant
    access with the `az role assignment create` command in step 4 of "One-Time
    Setup" below.
+7. ✅ **One combined dashboard, not two disconnected ones.** The existing
+   GitHub Pages dashboard (`https://pagelsr.github.io/GinosGelato/`) now shows
+   both the daily local run and the cloud-scale run on the same timeline and
+   table, tagged with a **Mode** badge (`🖥️ CI Runner ×1` vs `☁️ Cloud Scale
+   ×20`) so the parallelism story is visible at a glance, not in two separate
+   places.
 
 That keeps the telemetry talk and the Playwright talk isolated while both use the same application and tests.
 
@@ -206,40 +210,29 @@ For local testing, sign in with Azure CLI using an account that has the same rol
 az login
 ```
 
-## 5. Cloud-scale jobs (done — integrated into the two existing workflows)
+## 5. Cloud-scale job (done — integrated into the existing daily/push workflow)
 
-No dedicated third workflow file. Instead:
+No dedicated third workflow file. `.github/workflows/playwright-testing.yml`'s
+daily/push job (`run-playwright-tests`, local Chromium, 1 worker) is joined by
+a second, independent job that runs right after it:
 
-- **`.github/workflows/playwright-testing.yml`** — the daily/push job
-  (`run-playwright-tests`, local Chromium) is joined by a second,
-  independent job:
+```text
+run-playwright-tests-at-scale
+```
 
-  ```text
-  run-playwright-tests-at-scale
-  ```
-
-  It runs the stable suite (`--grep-invert "FLAKY|Flaky Test Examples"`) via
-  `playwright.service.config.ts --workers=20`, authenticating with the same
-  `AZURE_CREDENTIALS` secret the rest of the pipeline already uses.
-
-- **`.github/workflows/BuildDeploy.yml`** — after the frontend/backend
-  deploy, a new job runs once per deployment:
-
-  ```text
-  validate-at-scale
-  ```
-
-  It smoke-tests `e2e/journey-*.spec.ts` against the just-deployed Static Web
-  App on cloud browsers (`--workers=10`), `continue-on-error: true` (reports,
-  never blocks the deploy).
-
-Both jobs write a job summary linking the two reporting dashboards — see
-**Testing at Scale: Reporting Dashboards** below.
+It runs the stable suite (`--grep-invert "FLAKY|Flaky Test Examples"`) via
+`playwright.service.config.ts --workers=20`, authenticating with the same
+`AZURE_CREDENTIALS` secret the rest of the pipeline already uses. It's
+sequenced to run *after* the local job completes (not in parallel), so both
+jobs never race to update the same GitHub Pages history at once - each writes
+its own tagged entry (`ci-runner` / `cloud-scale`) into the **same**
+`test-history.json`, blended into one dashboard. See **Testing at Scale:
+Reporting Dashboards** below.
 
 ## 6. Pre-run the cloud demo
 
-Before the session, manually dispatch `playwright-testing.yml` (or push to
-`main` to trigger `BuildDeploy.yml`) once so a completed cloud run exists.
+Before the session, manually dispatch `playwright-testing.yml` once so a
+completed cloud run exists.
 
 Have these open as backup:
 
@@ -272,7 +265,7 @@ Open:
 - `playwright.service.config.ts`
 - `iac/playwrightWorkspace.bicep`
 - `.github/workflows/playwright-testing.yml` (see `run-playwright-tests-at-scale`)
-- `.github/workflows/BuildDeploy.yml` (see `validate-at-scale`)
+- `.github/pages/dashboard.html` (see the Mode badge / blended dashboard logic)
 
 ## Terminal
 
@@ -558,9 +551,8 @@ npx playwright test --config=playwright.service.config.ts --workers=20 --grep-in
 Either:
 
 - GitHub -> Actions -> **Playwright Testing - Daily Schedule** -> Run workflow
-  (triggers `run-playwright-tests-at-scale` alongside the local run), or
-- GitHub -> Actions -> **Build and Deploy to Azure** -> Run workflow
-  (triggers `validate-at-scale` once the deploy finishes), or
+  (runs `run-playwright-tests` then `run-playwright-tests-at-scale` right
+  after it), or
 - Run the command locally after `az login` and setting `PLAYWRIGHT_SERVICE_URL`.
 
 Do not wait on stage.
@@ -610,9 +602,12 @@ core 60 minutes (see the updated timing guide below).
 
 ## WHY THIS DEMO
 
-Gino's Gelato already has one reporting surface (the GitHub Pages dashboard).
-Adding Playwright Workspaces adds a second, complementary one. The point isn't
-"which dashboard is better" — it's that they answer different questions.
+Gino's Gelato's GitHub Pages dashboard now blends **both** run types - the
+daily local run and the Azure cloud-scale run - into one timeline and table,
+tagged with a Mode badge. The point isn't "which view is better" - it's that
+the blended dashboard answers "is this trending up or down," and the Azure
+Portal still answers "why did this exact run fail," and together they cover
+the whole lifecycle of a test failure.
 
 ## SAY
 
@@ -620,7 +615,7 @@ Adding Playwright Workspaces adds a second, complementary one. The point isn't
 > able to answer two different questions fast: is this getting better or
 > worse over time, and why did this exact run fail."
 
-## DASHBOARD A - Trend history (GitHub Pages)
+## PART A - The blended dashboard (GitHub Pages)
 
 Open:
 
@@ -630,17 +625,23 @@ https://pagelsr.github.io/GinosGelato/
 
 ## SHOW
 
-- Pass/fail trend chart across the last ~20 runs.
-- Duration trend chart.
+- The **Mode** column in the runs table: `🖥️ CI Runner ×1` next to
+  `☁️ Cloud Scale ×20` - same suite, same timeline, wildly different worker
+  counts, side by side.
+- The trend chart legend: circle markers are CI Runner runs, diamond markers
+  are Cloud Scale runs - point out a cloud-scale run's marker and its much
+  shorter duration for the same (or larger) test count.
 - The recent runs table, each linking to its own archived HTML report.
 
 ## SAY
 
-> "This answers: across every run we've had, is quality trending up or down?
-> It's built entirely from our own Playwright JSON reports — no extra Azure
-> resource required."
+> "This isn't two separate systems bolted together. It's one dashboard, one
+> URL, and now you can see at a glance which runs used twenty cloud browsers
+> instead of one - and how much faster that made the same suite. It's built
+> entirely from our own Playwright JSON reports, tagged by which job produced
+> them - no extra Azure resource required for this view."
 
-## DASHBOARD B - Azure-native scale reporting (Playwright Workspace)
+## PART B - Azure-native scale reporting (Playwright Workspace)
 
 There's no separate dashboard link to open - test run reports live inside
 Azure Portal navigation. Open:
@@ -659,15 +660,15 @@ Test runs
 
 ## SAY
 
-> "This answers: for this exact run, on this exact cloud browser, what
-> actually happened? Trend history tells us there's a problem. This tells us
-> what the problem is."
+> "The blended dashboard told us there's a cloud-scale run and roughly how
+> fast it was. This tells us exactly what happened, test by test, browser by
+> browser."
 
 ## KEY LINE
 
-> "One dashboard shows the trend. The other shows the evidence. Together they
-> cover the whole lifecycle of a test failure — from 'something's wrong' to
-> 'here's the fix.'"
+> "One dashboard shows the trend, blended across every pipeline job. The
+> other shows the evidence for one exact run. Together they cover the whole
+> lifecycle of a test failure — from 'something's wrong' to 'here's the fix.'"
 
 ## RETURN TO
 

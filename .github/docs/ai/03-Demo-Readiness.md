@@ -120,13 +120,12 @@ exception telemetry appear daily without any manual step.
 Alongside the local run, `playwright-testing.yml` also runs
 `run-playwright-tests-at-scale` — the same stable suite executed in parallel
 on managed cloud browsers via Azure App Testing → Playwright Workspaces
-(`iac/playwrightWorkspace.bicep`, `playwright.service.config.ts`). A matching
-`validate-at-scale` job in `BuildDeploy.yml` smoke-tests the customer journeys
-against each fresh deployment, non-blocking. Both jobs link two complementary
-dashboards in their job summaries: the GitHub Pages trend-history dashboard
-below, and the Playwright Workspace's own dashboard (traces, screenshots,
-recordings, Live View, per run). See the Playwright Demo Runbook's "BONUS -
-Testing at Scale: Reporting Dashboards" section for the demo flow.
+(`iac/playwrightWorkspace.bicep`, `playwright.service.config.ts`), sequenced
+to run right after the local job so both jobs never race updating the same
+GitHub Pages history. Both runs are tagged (`ci-runner` / `cloud-scale`) and
+blended into the **same** dashboard - one timeline, one table, a Mode badge
+distinguishing them. See the Playwright Demo Runbook's "BONUS - Testing at
+Scale: Reporting Dashboards" section for the demo flow.
 
 ## Suggested Demo Flow
 
@@ -136,9 +135,10 @@ Testing at Scale: Reporting Dashboards" section for the demo flow.
    telemetry breadth.
 3. Trigger each fault (`/fault?fault=...`) and show the slow dependency, failed
    request, and exception appear in Application Insights.
-4. Open the GitHub Pages trend dashboard to show the daily pass/fail/flaky mix,
-   then open the Playwright Workspace dashboard to show the same suite's
-   cloud-scale run (traces, screenshots, recordings).
+4. Open the GitHub Pages trend dashboard to show the daily pass/fail/flaky mix
+   — note the Mode badge distinguishing the CI Runner run from the Cloud
+   Scale run — then open Azure Portal's Playwright Workspace Test Runs view
+   for that same cloud-scale run's traces, screenshots, and recordings.
 
 ## Exit Criteria (met)
 
