@@ -14,6 +14,12 @@ const historyPath = process.argv[3] || './test-history.json';
 const runNumber = process.argv[4] || Date.now();
 const runUrl = process.argv[5] || '';
 const branch = process.argv[6] || 'unknown';
+// Which automated pipeline job produced this run. Every value here only ever
+// comes from a GitHub Actions workflow - never a developer's local machine.
+//   'ci-runner'   - standard GitHub Actions runner, local Chromium, 1 worker
+//   'cloud-scale' - Azure Playwright Workspaces, managed cloud browsers, N workers
+const runType = process.argv[7] || 'ci-runner';
+const workers = parseInt(process.argv[8], 10) || 1;
 
 console.log(`Reading test results from: ${resultsPath}`);
 
@@ -79,8 +85,12 @@ const chaosFailed = notPassed.filter(t => t.isChaos).length;
 const regressionFailed = notPassed.filter(t => !t.isChaos).length;
 
 // Create summary object
+// runType suffix keeps ci-runner IDs unchanged (so existing historical links
+// stay valid) while giving cloud-scale its own distinct ID/report folder,
+// since both jobs can share the same github.run_number within one workflow run.
+const runIdSuffix = runType === 'ci-runner' ? '' : `-${runType}`;
 const summary = {
-  runId: `${new Date().toISOString().split('T')[0]}-run-${runNumber}`,
+  runId: `${new Date().toISOString().split('T')[0]}-run-${runNumber}${runIdSuffix}`,
   timestamp: new Date().toISOString(),
   date: new Date().toISOString().split('T')[0],
   runNumber: runNumber,
@@ -94,7 +104,9 @@ const summary = {
   duration: Math.round(duration / 1000), // convert to seconds
   passRate: total > 0 ? Math.round((effectivePassed / total) * 100) : 0,
   branch: branch,
-  reportUrl: runUrl
+  reportUrl: runUrl,
+  runType: runType,
+  workers: workers
 };
 
 console.log('Test Summary:', JSON.stringify(summary, null, 2));
