@@ -596,7 +596,7 @@ The current repo keeps the live demo on Chromium for simplicity. Playwright Work
 
 # BONUS - Testing at Scale: Reporting Dashboards
 
-**Target (if time permits):** 5 minutes
+**Target (if time permits):** 7 minutes
 **Use this if:** Demo 4 lands early, or during Q&A — not inserted into the
 core 60 minutes (see the updated timing guide below).
 
@@ -605,9 +605,9 @@ core 60 minutes (see the updated timing guide below).
 Gino's Gelato's GitHub Pages dashboard now blends **both** run types - the
 daily local run and the Azure cloud-scale run - into one timeline and table,
 tagged with a Mode badge. The point isn't "which view is better" - it's that
-the blended dashboard answers "is this trending up or down," and the Azure
-Portal still answers "why did this exact run fail," and together they cover
-the whole lifecycle of a test failure.
+the blended dashboard answers "is this trending up or down," the Azure
+Portal answers "why did this exact run fail," and the GitHub Actions pipeline
+graph itself answers "was it actually worth it" - no narration required.
 
 ## SAY
 
@@ -664,11 +664,51 @@ Test runs
 > fast it was. This tells us exactly what happened, test by test, browser by
 > browser."
 
+## PART C - The Fan-Out / Fan-In Graph (Build and Deploy to Azure)
+
+This one needs zero narration - the GitHub Actions graph proves the point by
+itself. Open:
+
+```text
+GitHub -> Actions -> Build and Deploy to Azure -> a completed run -> graph view
+```
+
+## SHOW
+
+Point at the box between **Build & Deploy Frontend** and
+**Post-Deployment Verification**. It fans out into two parallel jobs and fans
+back in:
+
+- `Run Playwright Tests` (GitHub-hosted runner, 1 worker) - its duration label.
+- `Validate at Scale (Azure Playwright Workspaces)` (cloud browsers,
+  10 workers) - its duration label, printed right next to the first one.
+
+Say nothing yet. Let the audience read both numbers - e.g. `10m 17s` next to
+`1m 10s`. Same deployment, same starting instant, two branches, one answer.
+
+## SAY
+
+> "Both of these boxes started at the exact same moment, in the exact same
+> pipeline run. One number is nine times smaller than the other, and that's
+> not a chart I built - that's the native GitHub Actions graph, doing the
+> explaining for us."
+
+## NOTE
+
+`Validate at Scale` is deliberately **not** part of the blended dashboard
+above - it's a quick, non-blocking post-deploy smoke check (`e2e/journey-*`
+subset only) that exists in this specific pipeline (`BuildDeploy.yml`)
+primarily for this visual and a fast sanity check after each deploy. The
+daily/scheduled cloud-scale numbers that feed the dashboard trend come from
+the separate `playwright-testing.yml` workflow.
+
 ## KEY LINE
 
 > "One dashboard shows the trend, blended across every pipeline job. The
-> other shows the evidence for one exact run. Together they cover the whole
-> lifecycle of a test failure — from 'something's wrong' to 'here's the fix.'"
+> other shows the evidence for one exact run. And the pipeline graph itself
+> shows the payoff, in plain daylight, with no explanation required. Together
+> they cover the whole lifecycle of a test failure — from 'something's wrong'
+> to 'here's the fix' to 'here's why it's worth running at scale.'"
 
 ## RETURN TO
 
@@ -727,7 +767,7 @@ Secure it -> Test it -> Ship with confidence
 **Total:** 60 minutes
 
 **Optional, time-permitting:** BONUS - Testing at Scale: Reporting Dashboards
-(~5 min). Not part of the 60-minute core — use only if Demo 4 lands early or
+(~7 min). Not part of the 60-minute core — use only if Demo 4 lands early or
 during Q&A.
 
 ---
