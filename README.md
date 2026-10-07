@@ -204,20 +204,40 @@ reconciles the resources. Configure these repository secrets:
 - `SQL_ADMIN_PASSWORD` - Azure SQL administrator password (never committed)
 - `AZURE_DEPLOY_SP_OBJECT_ID` *(optional)* - object ID of the deployment service
   principal, if the pipeline itself needs to read secrets
+- `PLAYWRIGHT_SERVICE_URL` *(optional)* - the Playwright Workspace's regional
+  browser endpoint, needed for the "testing at scale" jobs below. It isn't an
+  ARM output - copy it once from the workspace's **Get Started** page in the
+  Azure Portal after the first deploy.
 
 Your Key Vault admin access (full read/edit/delete on secrets) is set via the
 `adminObjectId` default in [iac/main.bicep](iac/main.bicep) - AAD object IDs are
-identifiers, not secrets, so they are safe to commit.
+identifiers, not secrets, so they are safe to commit. The same object ID (plus
+the optional deployment service principal) is granted the **Playwright
+Workspace Contributor** role in [iac/playwrightWorkspace.bicep](iac/playwrightWorkspace.bicep).
 
-The pipeline provisions the App Service, Static Web App, Azure SQL, and Key Vault,
-writes the SQL connection string secret, wires it to the App Service as a Key Vault
-reference resolved by the managed identity, deploys the API and frontend, and
-verifies the `/health` endpoint.
+The pipeline provisions the App Service, Static Web App, Azure SQL, Key Vault,
+and a Playwright Workspace (Azure App Testing), writes the SQL connection
+string secret, wires it to the App Service as a Key Vault reference resolved
+by the managed identity, deploys the API and frontend, and verifies the
+`/health` endpoint.
+
+### Testing at scale (Azure App Testing - Playwright Workspaces)
+
+Both `.github/workflows/playwright-testing.yml` and
+`.github/workflows/BuildDeploy.yml` run the `/e2e/` suite on managed cloud
+browsers via Playwright Workspaces (`playwright.service.config.ts`), in
+addition to the regular local/CI run. Results are reported in two
+complementary dashboards:
+
+- **Trend history** - https://pagelsr.github.io/GinosGelato/ - pass/fail and
+  duration trends across every run over time.
+- **Playwright Workspace dashboard** - printed in the relevant job summary -
+  per-run parallel workers, traces, screenshots, recordings, and Live View.
 
 ## Project Structure
 
 ```
-iac/                 # Bicep infrastructure (App Service, SWA, SQL, Key Vault, configSettings)
+iac/                 # Bicep infrastructure (App Service, SWA, SQL, Key Vault, configSettings, Playwright Workspace)
 ginos-gelato/
   client/            # React + Vite frontend
   server/            # .NET 10 Web API backend

@@ -14,6 +14,9 @@ env:
   #RESOURCE_GROUP: 'rg-GinosGelato'
   RESOURCE_GROUP: 'rg-GinosGelato-Modernization'
   LOCATION: 'centralus'
+  # Azure App Testing - Playwright Workspaces isn't available in every region
+  # (centralus isn't supported), so it's provisioned independently here.
+  PLAYWRIGHT_WORKSPACE_LOCATION: 'eastus'
   DOTNET_VERSION: '10.0.x'
   NODE_VERSION: '20.x'
 
@@ -33,6 +36,13 @@ jobs:
   # Optional:
   #   AZURE_DEPLOY_SP_OBJECT_ID - Object ID of the AZURE_CREDENTIALS service principal,
   #                               if the pipeline itself needs to read Key Vault secrets.
+  #                               Also grants the pipeline's SP "Playwright Workspace
+  #                               Contributor" on the Playwright Workspace (see below).
+  #   PLAYWRIGHT_SERVICE_URL    - The Playwright Workspace's regional browser endpoint,
+  #                               used for the "Testing at Scale" job. Not an ARM output -
+  #                               copy it once from Azure Portal → the workspace →
+  #                               Get Started, after the first infra deploy. See the
+  #                               Playwright Demo Runbook for details.
   # ============================================================================
 
   build-and-test:
@@ -108,6 +118,8 @@ jobs:
       staticWebAppName: ${{ steps.deploy.outputs.staticWebAppName }}
       staticWebAppUrl: ${{ steps.deploy.outputs.staticWebAppUrl }}
       appInsightsConnectionString: ${{ steps.deploy.outputs.appInsightsConnectionString }}
+      playwrightWorkspaceName: ${{ steps.deploy.outputs.playwrightWorkspaceName }}
+      playwrightWorkspaceDashboardUri: ${{ steps.deploy.outputs.playwrightWorkspaceDashboardUri }}
       # loadTestingName: ${{ steps.deploy.outputs.loadTestingName }}
     
     steps:
@@ -138,6 +150,7 @@ jobs:
           template: ./iac/main.bicep
           parameters: >
             location=${{ env.LOCATION }}
+            playwrightWorkspaceLocation=${{ env.PLAYWRIGHT_WORKSPACE_LOCATION }}
             sqlAdminPassword=${{ secrets.SQL_ADMIN_PASSWORD }}
             deploymentPrincipalObjectId=${{ secrets.AZURE_DEPLOY_SP_OBJECT_ID }}
           deploymentName: 'ginosgelato-infra-${{ github.run_number }}'
@@ -154,6 +167,8 @@ jobs:
           echo "| App Service URL | ${{ steps.deploy.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Static Web App | ${{ steps.deploy.outputs.staticWebAppName }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Location | ${{ env.LOCATION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Playwright Workspace | ${{ steps.deploy.outputs.playwrightWorkspaceName }} (${{ env.PLAYWRIGHT_WORKSPACE_LOCATION }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Playwright Workspace Dashboard | ${{ steps.deploy.outputs.playwrightWorkspaceDashboardUri }} |" >> $GITHUB_STEP_SUMMARY
           # echo "| Load Testing | ${{ steps.deploy.outputs.loadTestingName }} |" >> $GITHUB_STEP_SUMMARY
 
   build-and-deploy-backend:
@@ -439,6 +454,64 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy test report for run #${{ github.run_number }}'
 
+  validate-at-scale:
+    name: 5️⃣ Validate at Scale (Azure Playwright Workspaces)
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    needs: [provision-infrastructure, build-and-deploy-frontend]
+    env:
+      CI: true
+      BASE_URL: ${{ needs.provision-infrastructure.outputs.staticWebAppUrl }}
+      PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing npm packages..."
+          npm ci
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run post-deploy smoke journeys on Azure cloud browsers
+        run: |
+          echo "Validating the freshly deployed Static Web App against the customer journeys, in parallel on managed cloud browsers..."
+          npx playwright test e2e/journey-*.spec.ts --config=playwright.service.config.ts --workers=10
+        # Non-blocking: this is a reporting/diagnostic signal, not a deploy gate.
+        continue-on-error: true
+
+      - name: Upload Cloud Smoke Report Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-cloud-smoke-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Validate at Scale Summary
+        if: always()
+        run: |
+          echo "### ☁️ Post-Deploy Validation at Scale (Azure Playwright Workspaces)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Customer journeys executed against the just-deployed Static Web App, in parallel on Azure-managed cloud browsers. Non-blocking - results are reported here, not used as a deploy gate." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Dashboard | Purpose |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| [Trend history](https://pagelsr.github.io/GinosGelato/) | Pass/fail and duration trends across every run over time |" >> $GITHUB_STEP_SUMMARY
+          echo "| [Playwright Workspace](${{ needs.provision-infrastructure.outputs.playwrightWorkspaceDashboardUri }}) | This run's parallel workers, traces, screenshots, recordings, Live View |" >> $GITHUB_STEP_SUMMARY
+
   # run-load-tests: (disabled - Azure Load Testing resource not provisioned)
   # run-load-tests:
   #   name: 5️⃣ Run Azure Load Tests
@@ -493,7 +566,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: 6️⃣ Post-Deployment Verification
     runs-on: ubuntu-latest
-    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests]
+    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests, validate-at-scale]
     
     steps:
       - name: Azure Login
@@ -528,6 +601,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Backend API**: ${{ needs.provision-infrastructure.outputs.appServiceUrl }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Flavors API**: ${{ needs.provision-infrastructure.outputs.appServiceUrl }}/api/flavors" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Testing at Scale" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trend history dashboard**: https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Playwright Workspace dashboard**: ${{ needs.provision-infrastructure.outputs.playwrightWorkspaceDashboardUri }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Security" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

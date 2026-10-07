@@ -8,6 +8,13 @@ targetScope = 'resourceGroup'
 @description('Azure region for all resources')
 param location string = 'eastus'
 
+// Playwright Workspaces is only available in a short list of regions (for
+// example East US, West US 3, East Asia, West Europe, Australia East, Japan
+// East, Switzerland North). Kept independent of 'location' so the rest of
+// the stack can deploy to a region (e.g. centralus) that doesn't support it.
+@description('Azure region for the Playwright Workspace (Azure App Testing). Must be a region that supports Playwright Workspaces.')
+param playwrightWorkspaceLocation string = 'eastus'
+
 @description('Created by')
 param createdBy string = 'Randy Pagels'
 
@@ -41,6 +48,8 @@ var databaseName = 'GinosGelatoDb'
 var appInsightsName = 'appi-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appInsightsWorkspaceName = 'log-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appInsightsAlertName = 'alert-responsetime-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+// Playwright Workspace resource names must be letters/digits only (no hyphens).
+var playwrightWorkspaceName = 'pww${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
 // Tags
 var defaultTags = {
@@ -123,6 +132,19 @@ module appInsights 'appInsights.bicep' = {
   }
 }
 
+// Deploy Playwright Workspace (Azure App Testing) used to run the existing
+// /e2e/ Playwright suite on managed cloud browsers at scale.
+module playwrightWorkspace 'playwrightWorkspace.bicep' = {
+  name: 'playwrightWorkspaceDeployment'
+  params: {
+    location: playwrightWorkspaceLocation
+    playwrightWorkspaceName: playwrightWorkspaceName
+    adminObjectId: adminObjectId
+    deploymentPrincipalObjectId: deploymentPrincipalObjectId
+    defaultTags: defaultTags
+  }
+}
+
 // Write secrets and wire App Service settings/connection strings (reference style)
 module configSettings 'configSettings.bicep' = {
   name: 'configSettingsDeployment'
@@ -150,6 +172,8 @@ output sqlServerFqdn string = sqlDatabase.outputs.sqlServerFqdn
 output databaseName string = sqlDatabase.outputs.databaseName
 output keyVaultName string = keyVault.outputs.keyVaultName
 output appInsightsName string = appInsights.outputs.appInsightsName
+output playwrightWorkspaceName string = playwrightWorkspace.outputs.playwrightWorkspaceName
+output playwrightWorkspaceDashboardUri string = playwrightWorkspace.outputs.playwrightWorkspaceDashboardUri
 
 // Client build consumes this as VITE_APPINSIGHTS_CONNECTION_STRING so browser
 // telemetry lands in the same Application Insights resource as the API.

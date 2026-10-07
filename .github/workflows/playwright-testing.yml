@@ -130,3 +130,57 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Dashboard:** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
           echo "- **This Run:** https://pagelsr.github.io/GinosGelato/reports/$(date +%Y-%m-%d)-run-${{ github.run_number }}/" >> $GITHUB_STEP_SUMMARY
+
+  run-playwright-tests-at-scale:
+    name: Run Playwright Tests at Scale (Azure Playwright Workspaces)
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+      PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing npm packages..."
+          npm ci
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run stable suite on Azure cloud browsers (Playwright Workspaces)
+        run: |
+          echo "Running the stable suite (journeys only, FLAKY specs excluded) in parallel on managed cloud browsers..."
+          npx playwright test --config=playwright.service.config.ts --workers=20 --grep-invert "FLAKY|Flaky Test Examples"
+        continue-on-error: true
+
+      - name: Upload Cloud Playwright Report Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-cloud-report-${{ github.run_number }}
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Testing at Scale Summary
+        if: always()
+        run: |
+          echo "## ☁️ Playwright Testing at Scale (Azure Playwright Workspaces)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Same /e2e/ suite as the scheduled run above, executed in parallel on Azure-managed cloud browsers." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📊 Two complementary dashboards" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trend history (GitHub Pages):** https://pagelsr.github.io/GinosGelato/ — pass/fail and duration trends across every run over time." >> $GITHUB_STEP_SUMMARY
+          echo "- **Azure-native scale reporting (Playwright Workspace):** Azure Portal → Azure App Testing → Playwright Workspaces → this workspace's Test runs — parallel workers, per-test traces/screenshots/recordings, and Live View for this exact run." >> $GITHUB_STEP_SUMMARY
