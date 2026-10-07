@@ -457,6 +457,69 @@ jobs:
           user_email: 'github-actions[bot]@users.noreply.github.com'
           commit_message: 'Deploy test report for run #${{ github.run_number }}'
 
+  validate-at-scale:
+    name: 5️⃣ Validate at Scale (Azure Playwright Workspaces)
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    # Deliberately parallel with run-playwright-tests (same needs:, no
+    # dependency on each other) - fans out from build-and-deploy-frontend and
+    # fans back in at post-deployment-verification. This job is a quick
+    # post-deploy smoke check on cloud browsers, kept separate from the daily
+    # cloud-scale job in playwright-testing.yml: its results are NOT published
+    # to the GitHub Pages dashboard (which intentionally only blends
+    # ci-runner + cloud-scale entries) - view this job's results via its own
+    # artifact or Azure Portal's Playwright Workspace Test Runs.
+    needs: [provision-infrastructure, build-and-deploy-frontend]
+    env:
+      CI: true
+      BASE_URL: ${{ needs.provision-infrastructure.outputs.staticWebAppUrl }}
+      PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: './package-lock.json'
+
+      - name: Install dependencies
+        run: |
+          echo "Installing npm packages..."
+          npm ci
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Run post-deploy smoke journeys on Azure cloud browsers
+        run: |
+          echo "Validating the freshly deployed Static Web App against the customer journeys, in parallel on managed cloud browsers..."
+          npx playwright test e2e/journey-*.spec.ts --config=playwright.service.config.ts --workers=10
+        # Non-blocking: this is a reporting/diagnostic signal, not a deploy gate.
+        continue-on-error: true
+
+      - name: Upload Cloud Smoke Report Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-cloud-smoke-report
+          path: playwright-report/
+          retention-days: 30
+
+      - name: Validate at Scale Summary
+        if: always()
+        run: |
+          echo "### ☁️ Post-Deploy Validation at Scale (Azure Playwright Workspaces)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Customer journeys executed against the just-deployed Static Web App, in parallel on Azure-managed cloud browsers. Non-blocking - results are reported here, not used as a deploy gate, and not published to the GitHub Pages dashboard." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "View this run's traces/screenshots/recordings: Azure Portal -> Azure App Testing -> Playwright Workspaces -> this workspace -> Test runs." >> $GITHUB_STEP_SUMMARY
+
   # run-load-tests: (disabled - Azure Load Testing resource not provisioned)
   # run-load-tests:
   #   name: 5️⃣ Run Azure Load Tests
@@ -511,7 +574,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     name: 6️⃣ Post-Deployment Verification
     runs-on: ubuntu-latest
-    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests]
+    needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests, validate-at-scale]
     
     steps:
       - name: Azure Login
