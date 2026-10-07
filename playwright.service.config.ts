@@ -18,5 +18,23 @@ export default defineConfig(
     os: ServiceOS.LINUX,
     credential: new DefaultAzureCredential(),
     runName: "Ginos Gelato - Testing at Scale",
-  })
+  }),
+  {
+    // Playwright's defineConfig() REPLACES (not merges) the base config's
+    // reporter array whenever a later argument declares its own 'reporter' -
+    // so every reporter the pipeline needs must be re-listed here, not just
+    // the new one. 'json' (test-results.json) feeds this repo's own
+    // extract-test-metrics.js / GitHub Pages dashboard. 'html' must precede
+    // the Azure Workspaces reporter (its own requirement). The Workspaces
+    // reporter uploads traces/screenshots/recordings so Azure Portal's Test
+    // Report view (and Live View) have artifacts to show - without it, the
+    // Portal returns "HTTP 404: The specified container does not exist" for
+    // any cloud run, since nothing was ever uploaded.
+    reporter: [
+      ['list'],
+      ['json', { outputFile: 'test-results.json' }],
+      ['html', { open: 'never' }],
+      ['@azure/playwright/reporter'],
+    ],
+  }
 );
