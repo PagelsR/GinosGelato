@@ -20,6 +20,17 @@ param adminObjectId string = ''
 @description('AAD object ID for the GitHub Actions / deployment service principal. Grants Playwright Workspace Contributor so CI can authenticate with DefaultAzureCredential. Empty to skip.')
 param deploymentPrincipalObjectId string = ''
 
+// Assigning roles requires Microsoft.Authorization/roleAssignments/write,
+// which comes with Owner or User Access Administrator - not Contributor.
+// Most CI service principals are (correctly, least-privilege) Contributor
+// only, so this defaults to false to avoid failing the deployment. Set to
+// true only if the identity running this deployment has been granted one of
+// those elevated roles; otherwise grant access manually (see
+// iac/playwrightWorkspace.bicep comments / the Playwright Demo Runbook) with:
+//   az role assignment create --assignee <objectId> --role "Playwright Workspace Contributor" --scope <workspaceResourceId>
+@description('Whether to have this deployment assign Playwright Workspace Contributor roles. Requires the deploying identity to have Owner or User Access Administrator. Defaults to false (assign access manually instead).')
+param assignWorkspaceRoles bool = false
+
 @description('Resource tags')
 param defaultTags object
 
@@ -42,7 +53,7 @@ resource playwrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-12-
 }
 
 // Optional admin (your email) access for local `az login` demo prep.
-resource adminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(adminObjectId)) {
+resource adminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(adminObjectId) && assignWorkspaceRoles) {
   name: guid(playwrightWorkspace.id, adminObjectId, playwrightWorkspaceContributorRoleId)
   scope: playwrightWorkspace
   properties: {
@@ -54,7 +65,7 @@ resource adminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01
 
 // Optional deployment/CI service principal access so GitHub Actions can run
 // tests against the workspace without a manually issued access token.
-resource deploymentRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(deploymentPrincipalObjectId)) {
+resource deploymentRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(deploymentPrincipalObjectId) && assignWorkspaceRoles) {
   name: guid(playwrightWorkspace.id, deploymentPrincipalObjectId, playwrightWorkspaceContributorRoleId)
   scope: playwrightWorkspace
   properties: {

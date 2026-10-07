@@ -132,16 +132,36 @@ After you manually trigger the deploy for the first time:
 PLAYWRIGHT_SERVICE_URL
 ```
 
-## 4. Access (done via Bicep)
+## 4. Access (role assignment is opt-in — manual step required by default)
 
-`iac/playwrightWorkspace.bicep` already grants the built-in
-**Playwright Workspace Contributor** role to:
+`iac/playwrightWorkspace.bicep` can grant the built-in
+**Playwright Workspace Contributor** role to the deployment service principal
+and the `adminObjectId` admin user, but that requires
+`Microsoft.Authorization/roleAssignments/write` — which comes with **Owner**
+or **User Access Administrator**, not **Contributor**. Most CI service
+principals are (correctly, least-privilege) Contributor only, so this is
+**off by default** (`assignPlaywrightWorkspaceRoles = false` in
+`iac/main.bicep`) to avoid failing the whole deployment.
 
-- the deployment service principal (`AZURE_DEPLOY_SP_OBJECT_ID`, if that
-  secret is set — the same principal `AZURE_CREDENTIALS` logs in as), and
-- the `adminObjectId` admin user (RPagels), for local `az login` demo prep.
+After the workspace is deployed, grant access manually (one-time, requires an
+account with Owner/User Access Administrator on the resource group):
 
-No manual portal RBAC step is required. For local testing, sign in with Azure CLI using an account that has the same role:
+```powershell
+$workspaceId = az resource show --resource-group rg-GinosGelato-Modernization `
+  --resource-type Microsoft.AzurePlaywrightService/accounts `
+  --name <playwrightWorkspaceName-from-deploy-output> --query id -o tsv
+
+az role assignment create --assignee <objectId> `
+  --role "Playwright Workspace Contributor" --scope $workspaceId
+```
+
+Repeat for both the deployment service principal's object ID and your own
+admin object ID, as needed. If you'd rather have Bicep assign the roles
+automatically, temporarily grant the deploying identity **User Access
+Administrator** on the resource group, redeploy with
+`assignPlaywrightWorkspaceRoles=true`, then revoke the elevated role.
+
+For local testing, sign in with Azure CLI using an account that has the same role:
 
 ```text
 az login

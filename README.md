@@ -211,9 +211,16 @@ reconciles the resources. Configure these repository secrets:
 
 Your Key Vault admin access (full read/edit/delete on secrets) is set via the
 `adminObjectId` default in [iac/main.bicep](iac/main.bicep) - AAD object IDs are
-identifiers, not secrets, so they are safe to commit. The same object ID (plus
-the optional deployment service principal) is granted the **Playwright
-Workspace Contributor** role in [iac/playwrightWorkspace.bicep](iac/playwrightWorkspace.bicep).
+identifiers, not secrets, so they are safe to commit. [iac/playwrightWorkspace.bicep](iac/playwrightWorkspace.bicep)
+can *also* grant that object ID (plus the optional deployment service
+principal) the **Playwright Workspace Contributor** role, but this is
+**off by default** (`assignPlaywrightWorkspaceRoles = false`) because role
+assignment requires Owner/User Access Administrator, not the Contributor role
+CI principals should have. Grant it manually once instead:
+
+```powershell
+az role assignment create --assignee <objectId> --role "Playwright Workspace Contributor" --scope <playwrightWorkspaceResourceId>
+```
 
 The pipeline provisions the App Service, Static Web App, Azure SQL, Key Vault,
 and a Playwright Workspace (Azure App Testing), writes the SQL connection

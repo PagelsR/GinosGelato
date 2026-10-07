@@ -37,6 +37,15 @@ param adminObjectId string = '0aa95253-9e37-4af9-a63a-3b35ed78e98b'
 @description('AAD object ID for the deployment service principal. Optional Key Vault secret access. Empty to skip.')
 param deploymentPrincipalObjectId string = ''
 
+// Role assignment (for the Playwright Workspace) requires
+// Microsoft.Authorization/roleAssignments/write, which needs Owner or User
+// Access Administrator - not the Contributor role most CI principals should
+// have. Defaults to false; grant access manually instead (see
+// iac/playwrightWorkspace.bicep) unless the deploying identity has been
+// granted one of those elevated roles.
+@description('Whether to have this deployment assign Playwright Workspace Contributor roles. Requires the deploying identity to have Owner or User Access Administrator.')
+param assignPlaywrightWorkspaceRoles bool = false
+
 // Variables - Centralized resource naming
 // Recommended abbreviations: https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
 var appServicePlanName = 'plan-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
@@ -141,6 +150,7 @@ module playwrightWorkspace 'playwrightWorkspace.bicep' = {
     playwrightWorkspaceName: playwrightWorkspaceName
     adminObjectId: adminObjectId
     deploymentPrincipalObjectId: deploymentPrincipalObjectId
+    assignWorkspaceRoles: assignPlaywrightWorkspaceRoles
     defaultTags: defaultTags
   }
 }
