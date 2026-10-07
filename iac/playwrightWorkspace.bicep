@@ -119,14 +119,17 @@ resource deploymentRoleAssignmentExisting 'Microsoft.Authorization/roleAssignmen
 }
 
 output playwrightWorkspaceName string = playwrightWorkspaceName
-output playwrightWorkspaceId string = createPlaywrightWorkspace ? newPlaywrightWorkspace.id : existingPlaywrightWorkspace.id
+output playwrightWorkspaceId string = createPlaywrightWorkspace ? newPlaywrightWorkspace!.id : existingPlaywrightWorkspace!.id
 
 // GUID-format workspace ID (distinct from the ARM resource ID/name above) -
 // used below to construct the browser (PLAYWRIGHT_SERVICE_URL) endpoint.
-var workspaceGuid = createPlaywrightWorkspace ? newPlaywrightWorkspace.properties.workspaceId : existingPlaywrightWorkspace.properties.workspaceId
+// The `!` null-forgiving operator is safe here: each ternary branch only
+// evaluates when that resource's own `if` condition is true, so it is never
+// actually null at that point - Bicep just can't prove that statically.
+var workspaceGuid = createPlaywrightWorkspace ? newPlaywrightWorkspace!.properties.workspaceId : existingPlaywrightWorkspace!.properties.workspaceId
 
 @description('The workspace data-plane service API URI (informational - view test runs via Azure Portal, not a separate dashboard link).')
-output playwrightWorkspaceDataplaneUri string = createPlaywrightWorkspace ? newPlaywrightWorkspace.properties.dataplaneUri : existingPlaywrightWorkspace.properties.dataplaneUri
+output playwrightWorkspaceDataplaneUri string = createPlaywrightWorkspace ? newPlaywrightWorkspace!.properties.dataplaneUri : existingPlaywrightWorkspace!.properties.dataplaneUri
 
 @description('Ready-to-use PLAYWRIGHT_SERVICE_URL value for the GitHub Actions secret - the region browser endpoint, matching the format shown on the workspace Get Started page.')
 output playwrightWorkspaceServiceUrl string = 'wss://${location}.api.playwright.microsoft.com/playwrightworkspaces/${workspaceGuid}/browsers'
