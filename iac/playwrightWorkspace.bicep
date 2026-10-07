@@ -14,6 +14,15 @@ param location string
 @description('Name for the Playwright Workspace account')
 param playwrightWorkspaceName string
 
+// Some subscription types (e.g. MSDN/Visual Studio Enterprise) reject ARM/
+// Bicep "write" operations on this resource type with a
+// "DisallowedResourceOperation" error, even though interactive Portal
+// creation succeeds. Defaults to false: assume the workspace was created
+// manually (Portal) and only read its outputs. Set to true for subscriptions
+// where Bicep is allowed to create/manage this resource.
+@description('Whether this deployment creates the Playwright Workspace. If false (default), it is referenced as an already-existing resource instead.')
+param createPlaywrightWorkspace bool = false
+
 @description('AAD object ID for the admin user (your email account). Grants Playwright Workspace Contributor. Empty to skip.')
 param adminObjectId string = ''
 
@@ -38,7 +47,7 @@ param defaultTags object
 // run Playwright tests against the workspace (no RBAC assignment rights).
 var playwrightWorkspaceContributorRoleId = '78cf819f-0969-4ebe-8759-015c6efcd5bf'
 
-resource playwrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-12-01' = {
+resource newPlaywrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-12-01' = if (createPlaywrightWorkspace) {
   name: playwrightWorkspaceName
   location: location
   tags: defaultTags
@@ -52,10 +61,31 @@ resource playwrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-12-
   }
 }
 
+// Reference-only: used when the workspace was created outside this template
+// (e.g. manually in the Portal, to work around the subscription restriction
+// described above).
+resource existingPlaywrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-12-01' existing = if (!createPlaywrightWorkspace) {
+  name: playwrightWorkspaceName
+}
+
+// Role assignment's `scope:` must resolve to a single symbolic resource at
+// compile time (a ternary between the two conditional resources above is not
+// allowed - BCP420), so each principal needs one assignment per branch.
+
 // Optional admin (your email) access for local `az login` demo prep.
-resource adminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(adminObjectId) && assignWorkspaceRoles) {
-  name: guid(playwrightWorkspace.id, adminObjectId, playwrightWorkspaceContributorRoleId)
-  scope: playwrightWorkspace
+resource adminRoleAssignmentNew 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (createPlaywrightWorkspace && !empty(adminObjectId) && assignWorkspaceRoles) {
+  name: guid(playwrightWorkspaceName, adminObjectId, playwrightWorkspaceContributorRoleId)
+  scope: newPlaywrightWorkspace
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', playwrightWorkspaceContributorRoleId)
+    principalId: adminObjectId
+    principalType: 'User'
+  }
+}
+
+resource adminRoleAssignmentExisting 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!createPlaywrightWorkspace && !empty(adminObjectId) && assignWorkspaceRoles) {
+  name: guid(playwrightWorkspaceName, adminObjectId, playwrightWorkspaceContributorRoleId)
+  scope: existingPlaywrightWorkspace
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', playwrightWorkspaceContributorRoleId)
     principalId: adminObjectId
@@ -65,9 +95,9 @@ resource adminRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01
 
 // Optional deployment/CI service principal access so GitHub Actions can run
 // tests against the workspace without a manually issued access token.
-resource deploymentRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!empty(deploymentPrincipalObjectId) && assignWorkspaceRoles) {
-  name: guid(playwrightWorkspace.id, deploymentPrincipalObjectId, playwrightWorkspaceContributorRoleId)
-  scope: playwrightWorkspace
+resource deploymentRoleAssignmentNew 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (createPlaywrightWorkspace && !empty(deploymentPrincipalObjectId) && assignWorkspaceRoles) {
+  name: guid(playwrightWorkspaceName, deploymentPrincipalObjectId, playwrightWorkspaceContributorRoleId)
+  scope: newPlaywrightWorkspace
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', playwrightWorkspaceContributorRoleId)
     principalId: deploymentPrincipalObjectId
@@ -75,6 +105,16 @@ resource deploymentRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-
   }
 }
 
-output playwrightWorkspaceName string = playwrightWorkspace.name
-output playwrightWorkspaceId string = playwrightWorkspace.id
-output playwrightWorkspaceDashboardUri string = playwrightWorkspace.properties.dashboardUri
+resource deploymentRoleAssignmentExisting 'Microsoft.Authorization/roleAssignments@2022-04-01' = if (!createPlaywrightWorkspace && !empty(deploymentPrincipalObjectId) && assignWorkspaceRoles) {
+  name: guid(playwrightWorkspaceName, deploymentPrincipalObjectId, playwrightWorkspaceContributorRoleId)
+  scope: existingPlaywrightWorkspace
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', playwrightWorkspaceContributorRoleId)
+    principalId: deploymentPrincipalObjectId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+output playwrightWorkspaceName string = playwrightWorkspaceName
+output playwrightWorkspaceId string = createPlaywrightWorkspace ? newPlaywrightWorkspace.id : existingPlaywrightWorkspace.id
+output playwrightWorkspaceDashboardUri string = createPlaywrightWorkspace ? newPlaywrightWorkspace.properties.dashboardUri : existingPlaywrightWorkspace.properties.dashboardUri

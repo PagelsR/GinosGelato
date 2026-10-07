@@ -46,6 +46,16 @@ param deploymentPrincipalObjectId string = ''
 @description('Whether to have this deployment assign Playwright Workspace Contributor roles. Requires the deploying identity to have Owner or User Access Administrator.')
 param assignPlaywrightWorkspaceRoles bool = false
 
+// Some subscription types (e.g. MSDN/Visual Studio Enterprise) reject ARM/
+// Bicep "write" operations on Microsoft.AzurePlaywrightService/accounts with
+// a "DisallowedResourceOperation" error, even though interactive Portal
+// creation succeeds. Defaults to false: the workspace is assumed to already
+// exist (created manually in the Portal, named 'pww${uniqueString(...)}' to
+// match this template's naming) and is only read for its outputs. Set to
+// true for subscriptions where Bicep is allowed to create/manage it.
+@description('Whether this deployment creates the Playwright Workspace. If false (default), it is referenced as an already-existing resource instead.')
+param createPlaywrightWorkspace bool = false
+
 // Variables - Centralized resource naming
 // Recommended abbreviations: https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
 var appServicePlanName = 'plan-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
@@ -148,6 +158,7 @@ module playwrightWorkspace 'playwrightWorkspace.bicep' = {
   params: {
     location: playwrightWorkspaceLocation
     playwrightWorkspaceName: playwrightWorkspaceName
+    createPlaywrightWorkspace: createPlaywrightWorkspace
     adminObjectId: adminObjectId
     deploymentPrincipalObjectId: deploymentPrincipalObjectId
     assignWorkspaceRoles: assignPlaywrightWorkspaceRoles
