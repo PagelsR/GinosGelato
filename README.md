@@ -216,10 +216,27 @@ can *also* grant that object ID (plus the optional deployment service
 principal) the **Playwright Workspace Contributor** role, but this is
 **off by default** (`assignPlaywrightWorkspaceRoles = false`) because role
 assignment requires Owner/User Access Administrator, not the Contributor role
-CI principals should have. Grant it manually once instead:
+CI principals should have. Grant it manually once instead, after the first
+deploy (requires an account with Owner/User Access Administrator):
 
 ```powershell
-az role assignment create --assignee <objectId> --role "Playwright Workspace Contributor" --scope <playwrightWorkspaceResourceId>
+# Resource ID of the deployed Playwright Workspace (main.bicep now outputs
+# playwrightWorkspaceId directly; this works even without the deployment name)
+$workspaceId = az resource list --resource-group rg-GinosGelato-Modernization `
+  --resource-type Microsoft.AzurePlaywrightService/accounts --query "[0].id" -o tsv
+
+# Your own object ID (the signed-in az CLI account) - or use the adminObjectId
+# default already in iac/main.bicep (0aa95253-9e37-4af9-a63a-3b35ed78e98b / RPagels)
+$myObjectId = az ad signed-in-user show --query id -o tsv
+
+az role assignment create --assignee $myObjectId `
+  --role "Playwright Workspace Contributor" --scope $workspaceId
+
+# Optional: also grant the deployment service principal (object ID behind
+# AZURE_DEPLOY_SP_OBJECT_ID, if that secret is set) so CI can run cloud tests:
+# az ad sp show --id <AZURE_CREDENTIALS clientId> --query id -o tsv
+az role assignment create --assignee <deploymentSpObjectId> `
+  --role "Playwright Workspace Contributor" --scope $workspaceId
 ```
 
 The pipeline provisions the App Service, Static Web App, Azure SQL, Key Vault,

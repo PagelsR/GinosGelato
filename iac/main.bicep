@@ -183,6 +183,7 @@ output databaseName string = sqlDatabase.outputs.databaseName
 output keyVaultName string = keyVault.outputs.keyVaultName
 output appInsightsName string = appInsights.outputs.appInsightsName
 output playwrightWorkspaceName string = playwrightWorkspace.outputs.playwrightWorkspaceName
+output playwrightWorkspaceId string = playwrightWorkspace.outputs.playwrightWorkspaceId
 output playwrightWorkspaceDashboardUri string = playwrightWorkspace.outputs.playwrightWorkspaceDashboardUri
 
 // Client build consumes this as VITE_APPINSIGHTS_CONNECTION_STRING so browser

@@ -147,16 +147,24 @@ After the workspace is deployed, grant access manually (one-time, requires an
 account with Owner/User Access Administrator on the resource group):
 
 ```powershell
-$workspaceId = az resource show --resource-group rg-GinosGelato-Modernization `
-  --resource-type Microsoft.AzurePlaywrightService/accounts `
-  --name <playwrightWorkspaceName-from-deploy-output> --query id -o tsv
+# Resource ID of the deployed Playwright Workspace (works without knowing the
+# generated name or the deployment name - main.bicep also outputs
+# playwrightWorkspaceId directly if you have the deployment name handy)
+$workspaceId = az resource list --resource-group rg-GinosGelato-Modernization `
+  --resource-type Microsoft.AzurePlaywrightService/accounts --query "[0].id" -o tsv
 
-az role assignment create --assignee <objectId> `
+# Your own object ID (the signed-in az CLI account) - or use the adminObjectId
+# default already in iac/main.bicep (0aa95253-9e37-4af9-a63a-3b35ed78e98b / RPagels)
+$myObjectId = az ad signed-in-user show --query id -o tsv
+
+az role assignment create --assignee $myObjectId `
   --role "Playwright Workspace Contributor" --scope $workspaceId
 ```
 
-Repeat for both the deployment service principal's object ID and your own
-admin object ID, as needed. If you'd rather have Bicep assign the roles
+Repeat for the deployment service principal's object ID (the one behind
+`AZURE_DEPLOY_SP_OBJECT_ID`, if that secret is set - find it with
+`az ad sp show --id <AZURE_CREDENTIALS clientId> --query id -o tsv`) so CI can
+run cloud tests too. If you'd rather have Bicep assign the roles
 automatically, temporarily grant the deploying identity **User Access
 Administrator** on the resource group, redeploy with
 `assignPlaywrightWorkspaceRoles=true`, then revoke the elevated role.
