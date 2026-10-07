@@ -1,8 +1,8 @@
 {
-  "runId": "2026-10-07-run-138",
-  "timestamp": "2026-10-07T17:51:33.943Z",
+  "runId": "2026-10-07-run-123",
+  "timestamp": "2026-10-07T20:38:46.014Z",
   "date": "2026-10-07",
-  "runNumber": "138",
+  "runNumber": "123",
   "total": 37,
   "passed": 29,
   "failed": 8,
@@ -10,8 +10,10 @@
   "chaosFailed": 7,
   "flaky": 2,
   "skipped": 0,
-  "duration": 407,
+  "duration": 400,
   "passRate": 78,
-  "branch": "main",
-  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-10-07-run-138"
+  "branch": "unknown",
+  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-10-07-run-123",
+  "runType": "ci-runner",
+  "workers": 1
 }
