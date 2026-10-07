@@ -45,10 +45,26 @@ workflow is unchanged.
 The cloud-test plumbing is now **in the repo**, not just recommended:
 
 1. ✅ **Playwright Workspace is IaC** — `iac/playwrightWorkspace.bicep`
-   (`Microsoft.AzurePlaywrightService/accounts`), wired into `iac/main.bicep`.
-   It deploys to its own region (`eastus` by default, via the
-   `playwrightWorkspaceLocation` param) because Playwright Workspaces isn't
-   available in every region, and the rest of the stack may deploy elsewhere.
+   (`Microsoft.LoadTestService/playwrightWorkspaces`), wired into
+   `iac/main.bicep`. It deploys to its own region (`eastus` by default, via
+   the `playwrightWorkspaceLocation` param) because Playwright Workspaces
+   isn't available in every region, and the rest of the stack may deploy
+   elsewhere.
+
+   **Real-world note:** Playwright Workspaces moved to the
+   `Microsoft.LoadTestService` resource provider (alongside Azure Load
+   Testing). The older `Microsoft.AzurePlaywrightService/accounts` type is
+   retired and rejects writes outright — that's a hard failure, not a
+   permissions issue, regardless of RBAC role. If you hit
+   `DisallowedResourceOperation` on `accounts`, that's the tell. Also: the
+   deploying identity typically has Contributor only, which can't do
+   `Microsoft.Authorization/roleAssignments/write` (needs Owner/User Access
+   Administrator) — so this repo's module defaults to referencing an
+   **already-existing** workspace (`createPlaywrightWorkspace = false` in
+   `iac/main.bicep`) rather than creating one, to keep the pipeline
+   deterministic. Create the workspace once, manually, in the Portal (name it
+   to match the Bicep naming convention — see step 3 below), then let Bicep
+   read its outputs.
 2. ✅ `@azure/playwright` and `@azure/identity` are dev dependencies in
    `package.json`.
 3. ✅ `playwright.service.config.ts` exists at the repo root.
@@ -58,15 +74,18 @@ The cloud-test plumbing is now **in the repo**, not just recommended:
      `run-playwright-tests-at-scale` job (runs alongside the daily local run).
    - `.github/workflows/BuildDeploy.yml` → new `validate-at-scale` job
      (post-deploy smoke test, non-blocking).
-5. ⏳ **One manual step remains**: `PLAYWRIGHT_SERVICE_URL` isn't an ARM
-   output — the regional browser endpoint is only visible on the workspace's
-   **Get Started** page in the Azure Portal after the Bicep deployment
-   finishes. Copy it once and store it as a GitHub Actions secret named
-   `PLAYWRIGHT_SERVICE_URL`.
-6. ✅ The Bicep module grants the **Playwright Workspace Contributor** role to
-   the existing `deploymentPrincipalObjectId` (the `AZURE_DEPLOY_SP_OBJECT_ID`
-   secret, if set) and `adminObjectId` (RPagels) — no manual portal RBAC step
-   needed.
+5. ✅ **No manual copy-paste needed for `PLAYWRIGHT_SERVICE_URL`.**
+   `iac/playwrightWorkspace.bicep` outputs `playwrightWorkspaceServiceUrl` -
+   the exact `wss://...` browser endpoint, computed from the workspace's
+   `workspaceId` property and region, matching what the Portal's **Get
+   Started** page shows. Copy that value from the `provision-infrastructure`
+   job's **Infrastructure Deployment Summary** and store it as the GitHub
+   Actions secret `PLAYWRIGHT_SERVICE_URL`.
+6. ⏳ **RBAC is still a manual one-time step** (`assignPlaywrightWorkspaceRoles
+   = false` by default) because role assignment needs Owner/User Access
+   Administrator, not the Contributor role CI principals should have. Grant
+   access with the `az role assignment create` command in step 4 of "One-Time
+   Setup" below.
 
 That keeps the telemetry talk and the Playwright talk isolated while both use the same application and tests.
 
@@ -114,19 +133,31 @@ export default defineConfig(
 
 The repo's normal `playwright.config.ts` stays unchanged.
 
-## 3. Playwright Workspace (IaC — deploy once)
+## 3. Playwright Workspace (manual one-time creation + IaC reference)
 
-The workspace is now provisioned by `iac/playwrightWorkspace.bicep` as part of
-the normal `BuildDeploy.yml` infra step — no manual portal creation needed.
-After you manually trigger the deploy for the first time:
+`iac/playwrightWorkspace.bicep` can create the workspace via Bicep
+(`createPlaywrightWorkspace = true`), but this environment's subscription
+rejects ARM writes to the live resource type for this preview-era service, so
+the default is to create it **once, manually**, and have Bicep reference it
+as `existing` from then on (`createPlaywrightWorkspace = false`, the
+default):
 
-1. Open **Azure Portal → Azure App Testing → Playwright Workspaces**.
-2. Open the workspace (its name is in the `provision-infrastructure` job's
-   **Infrastructure Deployment Summary**).
-3. Open the **Get Started** page.
-4. Copy the region endpoint (this is *not* an ARM output, so it has to be
-   captured manually once).
-5. Store it in GitHub Actions as a repository secret:
+1. Azure Portal → search **Playwright Workspaces** → **Create**.
+2. **Resource group:** `rg-GinosGelato-Modernization`.
+3. **Name:** match the Bicep naming convention exactly -
+   `pww${uniqueString(subscription().subscriptionId, resourceGroup().id)}`.
+   For this repo's subscription/RG that resolves to `pwwuxryfogy5mzkc` - find
+   the current expected value by checking the name of any other deployed
+   resource in the group (e.g. `app<suffix>`, `sql<suffix>`) and swapping the
+   `pww` prefix in.
+4. **Region:** `East US` (matches `playwrightWorkspaceLocation` default).
+5. Leave **Reporting** enabled; don't enable local auth/access tokens (the
+   repo authenticates via Entra ID / `DefaultAzureCredential` only).
+6. After creation, the `provision-infrastructure` job's **Infrastructure
+   Deployment Summary** will show `playwrightWorkspaceServiceUrl` - the
+   ready-to-use `wss://...` browser endpoint, computed directly from the
+   workspace's `workspaceId` property (no manual Portal copy needed). Store
+   that value as a GitHub Actions secret named:
 
 ```text
 PLAYWRIGHT_SERVICE_URL
@@ -151,7 +182,7 @@ account with Owner/User Access Administrator on the resource group):
 # generated name or the deployment name - main.bicep also outputs
 # playwrightWorkspaceId directly if you have the deployment name handy)
 $workspaceId = az resource list --resource-group rg-GinosGelato-Modernization `
-  --resource-type Microsoft.AzurePlaywrightService/accounts --query "[0].id" -o tsv
+  --resource-type Microsoft.LoadTestService/playwrightWorkspaces --query "[0].id" -o tsv
 
 # Your own object ID (the signed-in az CLI account) - or use the adminObjectId
 # default already in iac/main.bicep (0aa95253-9e37-4af9-a63a-3b35ed78e98b / RPagels)
@@ -611,14 +642,14 @@ https://pagelsr.github.io/GinosGelato/
 
 ## DASHBOARD B - Azure-native scale reporting (Playwright Workspace)
 
-Open the workspace's dashboard link — it's in:
+There's no separate dashboard link to open - test run reports live inside
+Azure Portal navigation. Open:
 
-- The `provision-infrastructure` job's **Infrastructure Deployment Summary**
-  (`playwrightWorkspaceDashboardUri` output), or
-- Either cloud-scale job's summary (`run-playwright-tests-at-scale` or
-  `validate-at-scale`), or
-- Azure Portal -> Azure App Testing -> Playwright Workspaces -> \<workspace\> ->
-  Test runs.
+```text
+Azure Portal -> Azure App Testing -> Playwright Workspaces -> <workspace name,
+from the provision-infrastructure job's Infrastructure Deployment Summary> ->
+Test runs
+```
 
 ## SHOW
 

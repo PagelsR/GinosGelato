@@ -46,13 +46,15 @@ param deploymentPrincipalObjectId string = ''
 @description('Whether to have this deployment assign Playwright Workspace Contributor roles. Requires the deploying identity to have Owner or User Access Administrator.')
 param assignPlaywrightWorkspaceRoles bool = false
 
-// Some subscription types (e.g. MSDN/Visual Studio Enterprise) reject ARM/
-// Bicep "write" operations on Microsoft.AzurePlaywrightService/accounts with
-// a "DisallowedResourceOperation" error, even though interactive Portal
-// creation succeeds. Defaults to false: the workspace is assumed to already
-// exist (created manually in the Portal, named 'pww${uniqueString(...)}' to
-// match this template's naming) and is only read for its outputs. Set to
-// true for subscriptions where Bicep is allowed to create/manage it.
+// Playwright Workspaces moved to the Microsoft.LoadTestService resource
+// provider; the older Microsoft.AzurePlaywrightService/accounts type is
+// retired and rejects writes with a "DisallowedResourceOperation" error
+// regardless of RBAC role. Separately, role assignment also needs Owner/User
+// Access Administrator, which most CI principals correctly lack. Defaults to
+// false: the workspace is assumed to already exist (created manually in the
+// Portal, named 'pww${uniqueString(...)}' to match this template's naming)
+// and is only read for its outputs. Set to true once the create path has
+// been verified for a given subscription.
 @description('Whether this deployment creates the Playwright Workspace. If false (default), it is referenced as an already-existing resource instead.')
 param createPlaywrightWorkspace bool = false
 
@@ -195,7 +197,10 @@ output keyVaultName string = keyVault.outputs.keyVaultName
 output appInsightsName string = appInsights.outputs.appInsightsName
 output playwrightWorkspaceName string = playwrightWorkspace.outputs.playwrightWorkspaceName
 output playwrightWorkspaceId string = playwrightWorkspace.outputs.playwrightWorkspaceId
-output playwrightWorkspaceDashboardUri string = playwrightWorkspace.outputs.playwrightWorkspaceDashboardUri
+output playwrightWorkspaceDataplaneUri string = playwrightWorkspace.outputs.playwrightWorkspaceDataplaneUri
+
+@description('Ready-to-use PLAYWRIGHT_SERVICE_URL value for the GitHub Actions secret.')
+output playwrightWorkspaceServiceUrl string = playwrightWorkspace.outputs.playwrightWorkspaceServiceUrl
 
 // Client build consumes this as VITE_APPINSIGHTS_CONNECTION_STRING so browser
 // telemetry lands in the same Application Insights resource as the API.

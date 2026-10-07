@@ -1,7 +1,13 @@
 // Azure App Testing - Playwright Workspace for Gino's Gelato
-// Provisions a Playwright Workspace (Microsoft.AzurePlaywrightService/accounts)
+// Provisions a Playwright Workspace (Microsoft.LoadTestService/playwrightWorkspaces)
 // used to run the existing /e2e/ Playwright suite on managed cloud browsers at
 // scale, with built-in reporting (traces, screenshots, recordings, Live View).
+//
+// NOTE: Playwright Workspaces moved to the Microsoft.LoadTestService resource
+// provider (alongside Azure Load Testing, under the Azure App Testing
+// umbrella). The older Microsoft.AzurePlaywrightService/accounts type is
+// retired - writes to it are rejected regardless of RBAC role, which is what
+// originally looked like a subscription restriction but wasn't.
 //
 // Regional availability is limited (e.g. East US, West US 3, East Asia, West
 // Europe, Australia East, Japan East, Switzerland North). This module is
@@ -14,12 +20,11 @@ param location string
 @description('Name for the Playwright Workspace account')
 param playwrightWorkspaceName string
 
-// Some subscription types (e.g. MSDN/Visual Studio Enterprise) reject ARM/
-// Bicep "write" operations on this resource type with a
-// "DisallowedResourceOperation" error, even though interactive Portal
-// creation succeeds. Defaults to false: assume the workspace was created
-// manually (Portal) and only read its outputs. Set to true for subscriptions
-// where Bicep is allowed to create/manage this resource.
+// Kept as an opt-in switch (rather than always creating) because this was
+// only just corrected from the wrong/retired resource type - default to
+// referencing the already-existing, manually created workspace until the
+// create path has been verified end-to-end. Set to true to have Bicep create
+// and manage the workspace going forward.
 @description('Whether this deployment creates the Playwright Workspace. If false (default), it is referenced as an already-existing resource instead.')
 param createPlaywrightWorkspace bool = false
 
@@ -47,7 +52,7 @@ param defaultTags object
 // run Playwright tests against the workspace (no RBAC assignment rights).
 var playwrightWorkspaceContributorRoleId = '78cf819f-0969-4ebe-8759-015c6efcd5bf'
 
-resource newPlaywrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-12-01' = if (createPlaywrightWorkspace) {
+resource newPlaywrightWorkspace 'Microsoft.LoadTestService/playwrightWorkspaces@2025-09-01' = if (createPlaywrightWorkspace) {
   name: playwrightWorkspaceName
   location: location
   tags: defaultTags
@@ -56,15 +61,13 @@ resource newPlaywrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-
     // authenticate via Entra ID / DefaultAzureCredential instead.
     localAuth: 'Disabled'
     regionalAffinity: 'Enabled'
-    reporting: 'Enabled'
-    scalableExecution: 'Enabled'
   }
 }
 
 // Reference-only: used when the workspace was created outside this template
-// (e.g. manually in the Portal, to work around the subscription restriction
+// (e.g. manually in the Portal, to work around the resource-type issue
 // described above).
-resource existingPlaywrightWorkspace 'Microsoft.AzurePlaywrightService/accounts@2024-12-01' existing = if (!createPlaywrightWorkspace) {
+resource existingPlaywrightWorkspace 'Microsoft.LoadTestService/playwrightWorkspaces@2025-09-01' existing = if (!createPlaywrightWorkspace) {
   name: playwrightWorkspaceName
 }
 
@@ -117,4 +120,13 @@ resource deploymentRoleAssignmentExisting 'Microsoft.Authorization/roleAssignmen
 
 output playwrightWorkspaceName string = playwrightWorkspaceName
 output playwrightWorkspaceId string = createPlaywrightWorkspace ? newPlaywrightWorkspace.id : existingPlaywrightWorkspace.id
-output playwrightWorkspaceDashboardUri string = createPlaywrightWorkspace ? newPlaywrightWorkspace.properties.dashboardUri : existingPlaywrightWorkspace.properties.dashboardUri
+
+// GUID-format workspace ID (distinct from the ARM resource ID/name above) -
+// used below to construct the browser (PLAYWRIGHT_SERVICE_URL) endpoint.
+var workspaceGuid = createPlaywrightWorkspace ? newPlaywrightWorkspace.properties.workspaceId : existingPlaywrightWorkspace.properties.workspaceId
+
+@description('The workspace data-plane service API URI (informational - view test runs via Azure Portal, not a separate dashboard link).')
+output playwrightWorkspaceDataplaneUri string = createPlaywrightWorkspace ? newPlaywrightWorkspace.properties.dataplaneUri : existingPlaywrightWorkspace.properties.dataplaneUri
+
+@description('Ready-to-use PLAYWRIGHT_SERVICE_URL value for the GitHub Actions secret - the region browser endpoint, matching the format shown on the workspace Get Started page.')
+output playwrightWorkspaceServiceUrl string = 'wss://${location}.api.playwright.microsoft.com/playwrightworkspaces/${workspaceGuid}/browsers'

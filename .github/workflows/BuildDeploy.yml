@@ -119,7 +119,8 @@ jobs:
       staticWebAppUrl: ${{ steps.deploy.outputs.staticWebAppUrl }}
       appInsightsConnectionString: ${{ steps.deploy.outputs.appInsightsConnectionString }}
       playwrightWorkspaceName: ${{ steps.deploy.outputs.playwrightWorkspaceName }}
-      playwrightWorkspaceDashboardUri: ${{ steps.deploy.outputs.playwrightWorkspaceDashboardUri }}
+      playwrightWorkspaceDataplaneUri: ${{ steps.deploy.outputs.playwrightWorkspaceDataplaneUri }}
+      playwrightWorkspaceServiceUrl: ${{ steps.deploy.outputs.playwrightWorkspaceServiceUrl }}
       # loadTestingName: ${{ steps.deploy.outputs.loadTestingName }}
     
     steps:
@@ -168,7 +169,7 @@ jobs:
           echo "| Static Web App | ${{ steps.deploy.outputs.staticWebAppName }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Location | ${{ env.LOCATION }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Playwright Workspace | ${{ steps.deploy.outputs.playwrightWorkspaceName }} (${{ env.PLAYWRIGHT_WORKSPACE_LOCATION }}) |" >> $GITHUB_STEP_SUMMARY
-          echo "| Playwright Workspace Dashboard | ${{ steps.deploy.outputs.playwrightWorkspaceDashboardUri }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Playwright Workspace Service URL (for PLAYWRIGHT_SERVICE_URL secret) | ${{ steps.deploy.outputs.playwrightWorkspaceServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
           # echo "| Load Testing | ${{ steps.deploy.outputs.loadTestingName }} |" >> $GITHUB_STEP_SUMMARY
 
   build-and-deploy-backend:
@@ -510,7 +511,7 @@ jobs:
           echo "| Dashboard | Purpose |" >> $GITHUB_STEP_SUMMARY
           echo "|-----------|---------|" >> $GITHUB_STEP_SUMMARY
           echo "| [Trend history](https://pagelsr.github.io/GinosGelato/) | Pass/fail and duration trends across every run over time |" >> $GITHUB_STEP_SUMMARY
-          echo "| [Playwright Workspace](${{ needs.provision-infrastructure.outputs.playwrightWorkspaceDashboardUri }}) | This run's parallel workers, traces, screenshots, recordings, Live View |" >> $GITHUB_STEP_SUMMARY
+          echo "| Playwright Workspace (${{ needs.provision-infrastructure.outputs.playwrightWorkspaceName }}) | Azure Portal -> Azure App Testing -> Playwright Workspaces -> this workspace -> Test runs: parallel workers, traces, screenshots, recordings, Live View |" >> $GITHUB_STEP_SUMMARY
 
   # run-load-tests: (disabled - Azure Load Testing resource not provisioned)
   # run-load-tests:
@@ -605,7 +606,7 @@ jobs:
           echo "### Testing at Scale" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Trend history dashboard**: https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
-          echo "- **Playwright Workspace dashboard**: ${{ needs.provision-infrastructure.outputs.playwrightWorkspaceDashboardUri }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Playwright Workspace** (${{ needs.provision-infrastructure.outputs.playwrightWorkspaceName }}): view runs via Azure Portal -> Azure App Testing -> Playwright Workspaces" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Security" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY

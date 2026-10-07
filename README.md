@@ -205,9 +205,10 @@ reconciles the resources. Configure these repository secrets:
 - `AZURE_DEPLOY_SP_OBJECT_ID` *(optional)* - object ID of the deployment service
   principal, if the pipeline itself needs to read secrets
 - `PLAYWRIGHT_SERVICE_URL` *(optional)* - the Playwright Workspace's regional
-  browser endpoint, needed for the "testing at scale" jobs below. It isn't an
-  ARM output - copy it once from the workspace's **Get Started** page in the
-  Azure Portal after the first deploy.
+  browser endpoint, needed for the "testing at scale" jobs below. `iac/playwrightWorkspace.bicep`
+  computes this as the `playwrightWorkspaceServiceUrl` output - copy it from
+  the `provision-infrastructure` job's **Infrastructure Deployment Summary**
+  after the first deploy (no manual Portal lookup needed).
 
 Your Key Vault admin access (full read/edit/delete on secrets) is set via the
 `adminObjectId` default in [iac/main.bicep](iac/main.bicep) - AAD object IDs are
@@ -223,7 +224,7 @@ deploy (requires an account with Owner/User Access Administrator):
 # Resource ID of the deployed Playwright Workspace (main.bicep now outputs
 # playwrightWorkspaceId directly; this works even without the deployment name)
 $workspaceId = az resource list --resource-group rg-GinosGelato-Modernization `
-  --resource-type Microsoft.AzurePlaywrightService/accounts --query "[0].id" -o tsv
+  --resource-type Microsoft.LoadTestService/playwrightWorkspaces --query "[0].id" -o tsv
 
 # Your own object ID (the signed-in az CLI account) - or use the adminObjectId
 # default already in iac/main.bicep (0aa95253-9e37-4af9-a63a-3b35ed78e98b / RPagels)
@@ -238,6 +239,15 @@ az role assignment create --assignee $myObjectId `
 az role assignment create --assignee <deploymentSpObjectId> `
   --role "Playwright Workspace Contributor" --scope $workspaceId
 ```
+
+**Note:** `iac/playwrightWorkspace.bicep` defaults to *referencing* an
+already-existing workspace (`createPlaywrightWorkspace = false`) rather than
+creating one - some subscriptions reject ARM writes to this resource type
+outright. Create the workspace once manually in the Portal (resource group
+`rg-GinosGelato-Modernization`, name matching the `pww${uniqueString(...)}`
+convention, region `East US`), then Bicep reads its outputs from there. See
+the Playwright Demo Runbook's "Playwright Workspace" setup section for the
+full walkthrough.
 
 The pipeline provisions the App Service, Static Web App, Azure SQL, Key Vault,
 and a Playwright Workspace (Azure App Testing), writes the SQL connection
