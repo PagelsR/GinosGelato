@@ -1,33 +1,5 @@
 [
   {
-    "runId": "2026-04-10-run-66",
-    "timestamp": "2026-04-10T11:48:52.910Z",
-    "date": "2026-04-10",
-    "runNumber": "66",
-    "total": 25,
-    "passed": 18,
-    "failed": 7,
-    "flaky": 2,
-    "skipped": 0,
-    "duration": 347,
-    "passRate": 72,
-    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-04-10-run-66"
-  },
-  {
-    "runId": "2026-04-17-run-67",
-    "timestamp": "2026-04-17T11:51:04.246Z",
-    "date": "2026-04-17",
-    "runNumber": "67",
-    "total": 25,
-    "passed": 16,
-    "failed": 9,
-    "flaky": 4,
-    "skipped": 0,
-    "duration": 364,
-    "passRate": 64,
-    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-04-17-run-67"
-  },
-  {
     "runId": "2026-04-21-run-62",
     "timestamp": "2026-04-21T21:13:35.516Z",
     "date": "2026-04-21",
@@ -1573,5 +1545,43 @@
     "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-10-08-run-126",
     "runType": "ci-runner",
     "workers": 1
+  },
+  {
+    "runId": "2026-10-08-run-142",
+    "timestamp": "2026-10-08T12:23:12.303Z",
+    "date": "2026-10-08",
+    "runNumber": "142",
+    "total": 37,
+    "passed": 27,
+    "failed": 10,
+    "regressionFailed": 2,
+    "chaosFailed": 8,
+    "flaky": 4,
+    "skipped": 0,
+    "duration": 424,
+    "passRate": 73,
+    "branch": "main",
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-10-08-run-142",
+    "runType": "ci-runner",
+    "workers": 1
+  },
+  {
+    "runId": "2026-10-08-run-142-cloud-scale",
+    "timestamp": "2026-10-08T12:23:12.354Z",
+    "date": "2026-10-08",
+    "runNumber": "142",
+    "total": 23,
+    "passed": 21,
+    "failed": 2,
+    "regressionFailed": 2,
+    "chaosFailed": 0,
+    "flaky": 1,
+    "skipped": 0,
+    "duration": 58,
+    "passRate": 91,
+    "branch": "main",
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-10-08-run-142-cloud-scale",
+    "runType": "cloud-scale",
+    "workers": 20
   }
 ]
