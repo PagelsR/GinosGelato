@@ -64,7 +64,7 @@ jobs:
           echo "**Run Date:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "**Run Number:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Ran single-threaded on the GitHub-hosted runner. Metrics and the combined dashboard are published by the **Publish Test Dashboard** job once both test jobs finish." >> $GITHUB_STEP_SUMMARY
+          echo "Ran single-threaded on the GitHub-hosted runner. Metrics and the combined dashboard are published by the **Publish to Test Dashboard** job once both test jobs finish." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Dashboard:** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
 
@@ -123,13 +123,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Same /e2e/ suite as the CI Runner job, executed in parallel on Azure-managed cloud browsers (20 workers)." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Metrics and the combined dashboard are published by the **Publish Test Dashboard** job once both test jobs finish." >> $GITHUB_STEP_SUMMARY
+          echo "Metrics and the combined dashboard are published by the **Publish toTest Dashboard** job once both test jobs finish." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Dashboard (blended with CI Runner runs):** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
           echo "- **Azure-native scale reporting (Playwright Workspace):** Azure Portal → Azure App Testing → Playwright Workspaces → this workspace's Test runs — parallel workers, per-test traces/screenshots/recordings, and Live View for this exact run." >> $GITHUB_STEP_SUMMARY
 
   publish-dashboard:
-    name: Publish Test Dashboard
+    name: Publish to Test Dashboard
     runs-on: ubuntu-latest
     # Fan-in: waits for both parallel test jobs above, then does the ONE
     # gh-pages checkout/merge/push for both result sets — this is what keeps
