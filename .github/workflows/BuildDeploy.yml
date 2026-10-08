@@ -499,7 +499,10 @@ jobs:
       - name: Run post-deploy smoke journeys on Azure cloud browsers
         run: |
           echo "Validating the freshly deployed Static Web App against the customer journeys, in parallel on managed cloud browsers..."
-          npx playwright test e2e/journey-*.spec.ts --config=playwright.service.config.ts --workers=10
+          # Tee'd so the reporting-upload check below can inspect the
+          # Workspaces reporter's output; pipefail keeps the test exit code.
+          set -o pipefail
+          npx playwright test e2e/journey-*.spec.ts --config=playwright.service.config.ts --workers=10 2>&1 | tee playwright-run.log
         # Non-blocking: this is a reporting/diagnostic signal, not a deploy gate.
         continue-on-error: true
 
@@ -519,6 +522,25 @@ jobs:
           echo "Customer journeys executed against the just-deployed Static Web App, in parallel on Azure-managed cloud browsers. Non-blocking - results are reported here, not used as a deploy gate, and not published to the GitHub Pages dashboard." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "View this run's traces/screenshots/recordings: Azure Portal -> Azure App Testing -> Playwright Workspaces -> this workspace -> Test runs." >> $GITHUB_STEP_SUMMARY
+
+      # Test failures are tolerated above (continue-on-error), but a failed
+      # report upload must not be: the run still shows up in the Portal's
+      # Test runs list, yet opening it returns "HTTP 404: The specified blob
+      # does not exist" because no artifacts were ever uploaded. Usually means
+      # the CI service principal lacks Storage Blob Data Contributor on the
+      # workspace's linked storage account. Fails this job only -
+      # post-deployment-verification still runs (see its if:).
+      - name: Verify Playwright Workspaces reporting upload
+        if: always()
+        run: |
+          if grep -q "Reporting upload status: FAILED" playwright-run.log 2>/dev/null; then
+            REASON=$(grep -A1 "Reporting upload status: FAILED" playwright-run.log | tail -n 1)
+            echo "::error title=Playwright Workspaces reporting upload FAILED::${REASON}"
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> ❌ **Playwright Workspaces reporting upload FAILED** — this run will show HTTP 404 in Azure Portal. ${REASON}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "Playwright Workspaces reporting upload did not report a failure."
 
   # run-load-tests: (disabled - Azure Load Testing resource not provisioned)
   # run-load-tests:
@@ -571,7 +593,16 @@ jobs:
   #         echo "| Target API | ${{ needs.provision-infrastructure.outputs.appServiceUrl }} |" >> $GITHUB_STEP_SUMMARY
 
   post-deployment-verification:
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    # validate-at-scale is non-blocking (it can fail on a Playwright
+    # Workspaces reporting-upload error), so it's left out of the success
+    # checks here - every other dependency must still have succeeded.
+    if: >-
+      !cancelled() &&
+      (github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) &&
+      needs.provision-infrastructure.result == 'success' &&
+      needs.build-and-deploy-backend.result == 'success' &&
+      needs.build-and-deploy-frontend.result == 'success' &&
+      needs.run-playwright-tests.result == 'success'
     name: 6️⃣ Post-Deployment Verification
     runs-on: ubuntu-latest
     needs: [provision-infrastructure, build-and-deploy-backend, build-and-deploy-frontend, run-playwright-tests, validate-at-scale]

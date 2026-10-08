@@ -102,7 +102,10 @@ jobs:
       - name: Run stable suite on Azure cloud browsers (Playwright Workspaces)
         run: |
           echo "Running the stable suite (journeys only, FLAKY specs excluded) in parallel on managed cloud browsers..."
-          npx playwright test --config=playwright.service.config.ts --workers=20 --grep-invert "FLAKY|Flaky Test Examples"
+          # Tee'd so the reporting-upload check below can inspect the
+          # Workspaces reporter's output; pipefail keeps the test exit code.
+          set -o pipefail
+          npx playwright test --config=playwright.service.config.ts --workers=20 --grep-invert "FLAKY|Flaky Test Examples" 2>&1 | tee playwright-run.log
         continue-on-error: true
 
       - name: Upload Playwright Results Artifact
@@ -127,6 +130,24 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Dashboard (blended with CI Runner runs):** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
           echo "- **Azure-native scale reporting (Playwright Workspace):** Azure Portal → Azure App Testing → Playwright Workspaces → this workspace's Test runs — parallel workers, per-test traces/screenshots/recordings, and Live View for this exact run." >> $GITHUB_STEP_SUMMARY
+
+      # Test failures are tolerated above (continue-on-error), but a failed
+      # report upload must not be: the run still shows up in the Portal's
+      # Test runs list, yet opening it returns "HTTP 404: The specified blob
+      # does not exist" because no artifacts were ever uploaded. Usually means
+      # the CI service principal lacks Storage Blob Data Contributor on the
+      # workspace's linked storage account.
+      - name: Verify Playwright Workspaces reporting upload
+        if: always()
+        run: |
+          if grep -q "Reporting upload status: FAILED" playwright-run.log 2>/dev/null; then
+            REASON=$(grep -A1 "Reporting upload status: FAILED" playwright-run.log | tail -n 1)
+            echo "::error title=Playwright Workspaces reporting upload FAILED::${REASON}"
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> ❌ **Playwright Workspaces reporting upload FAILED** — this run will show HTTP 404 in Azure Portal. ${REASON}" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "Playwright Workspaces reporting upload did not report a failure."
 
   publish-dashboard:
     name: Publish to Test Dashboard
