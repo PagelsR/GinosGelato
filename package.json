@@ -9,6 +9,8 @@
     "tailwindcss": "^4.1.16"
   },
   "devDependencies": {
+    "@azure/identity": "^4.13.3",
+    "@azure/playwright": "^1.1.6",
     "@playwright/test": "^1.58.1",
     "@types/node": "^24.9.1"
   },

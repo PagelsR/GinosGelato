@@ -8,6 +8,13 @@ targetScope = 'resourceGroup'
 @description('Azure region for all resources')
 param location string = 'eastus'
 
+// Playwright Workspaces is only available in a short list of regions (for
+// example East US, West US 3, East Asia, West Europe, Australia East, Japan
+// East, Switzerland North). Kept independent of 'location' so the rest of
+// the stack can deploy to a region (e.g. centralus) that doesn't support it.
+@description('Azure region for the Playwright Workspace (Azure App Testing). Must be a region that supports Playwright Workspaces.')
+param playwrightWorkspaceLocation string = 'eastus'
+
 @description('Created by')
 param createdBy string = 'Randy Pagels'
 
@@ -30,6 +37,27 @@ param adminObjectId string = '0aa95253-9e37-4af9-a63a-3b35ed78e98b'
 @description('AAD object ID for the deployment service principal. Optional Key Vault secret access. Empty to skip.')
 param deploymentPrincipalObjectId string = ''
 
+// Role assignment (for the Playwright Workspace) requires
+// Microsoft.Authorization/roleAssignments/write, which needs Owner or User
+// Access Administrator - not the Contributor role most CI principals should
+// have. Defaults to false; grant access manually instead (see
+// iac/playwrightWorkspace.bicep) unless the deploying identity has been
+// granted one of those elevated roles.
+@description('Whether to have this deployment assign Playwright Workspace Contributor roles. Requires the deploying identity to have Owner or User Access Administrator.')
+param assignPlaywrightWorkspaceRoles bool = false
+
+// Playwright Workspaces moved to the Microsoft.LoadTestService resource
+// provider; the older Microsoft.AzurePlaywrightService/accounts type is
+// retired and rejects writes with a "DisallowedResourceOperation" error
+// regardless of RBAC role. Separately, role assignment also needs Owner/User
+// Access Administrator, which most CI principals correctly lack. Defaults to
+// false: the workspace is assumed to already exist (created manually in the
+// Portal, named 'pww${uniqueString(...)}' to match this template's naming)
+// and is only read for its outputs. Set to true once the create path has
+// been verified for a given subscription.
+@description('Whether this deployment creates the Playwright Workspace. If false (default), it is referenced as an already-existing resource instead.')
+param createPlaywrightWorkspace bool = false
+
 // Variables - Centralized resource naming
 // Recommended abbreviations: https://docs.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-abbreviations
 var appServicePlanName = 'plan-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
@@ -41,6 +69,8 @@ var databaseName = 'GinosGelatoDb'
 var appInsightsName = 'appi-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appInsightsWorkspaceName = 'log-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 var appInsightsAlertName = 'alert-responsetime-${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
+// Playwright Workspace resource names must be letters/digits only (no hyphens).
+var playwrightWorkspaceName = 'pww${uniqueString(subscription().subscriptionId, resourceGroup().id)}'
 
 // Tags
 var defaultTags = {
@@ -123,6 +153,21 @@ module appInsights 'appInsights.bicep' = {
   }
 }
 
+// Deploy Playwright Workspace (Azure App Testing) used to run the existing
+// /e2e/ Playwright suite on managed cloud browsers at scale.
+module playwrightWorkspace 'playwrightWorkspace.bicep' = {
+  name: 'playwrightWorkspaceDeployment'
+  params: {
+    location: playwrightWorkspaceLocation
+    playwrightWorkspaceName: playwrightWorkspaceName
+    createPlaywrightWorkspace: createPlaywrightWorkspace
+    adminObjectId: adminObjectId
+    deploymentPrincipalObjectId: deploymentPrincipalObjectId
+    assignWorkspaceRoles: assignPlaywrightWorkspaceRoles
+    defaultTags: defaultTags
+  }
+}
+
 // Write secrets and wire App Service settings/connection strings (reference style)
 module configSettings 'configSettings.bicep' = {
   name: 'configSettingsDeployment'
@@ -150,6 +195,12 @@ output sqlServerFqdn string = sqlDatabase.outputs.sqlServerFqdn
 output databaseName string = sqlDatabase.outputs.databaseName
 output keyVaultName string = keyVault.outputs.keyVaultName
 output appInsightsName string = appInsights.outputs.appInsightsName
+output playwrightWorkspaceName string = playwrightWorkspace.outputs.playwrightWorkspaceName
+output playwrightWorkspaceId string = playwrightWorkspace.outputs.playwrightWorkspaceId
+output playwrightWorkspaceDataplaneUri string = playwrightWorkspace.outputs.playwrightWorkspaceDataplaneUri
+
+@description('Ready-to-use PLAYWRIGHT_SERVICE_URL value for the GitHub Actions secret.')
+output playwrightWorkspaceServiceUrl string = playwrightWorkspace.outputs.playwrightWorkspaceServiceUrl
 
 // Client build consumes this as VITE_APPINSIGHTS_CONNECTION_STRING so browser
 // telemetry lands in the same Application Insights resource as the API.

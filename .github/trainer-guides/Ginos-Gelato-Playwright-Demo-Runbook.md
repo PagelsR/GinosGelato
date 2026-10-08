@@ -37,46 +37,88 @@ The repo already has almost everything this talk needs:
 - `.github/prompts/playwright.prompt.md`, which uses Playwright MCP for AI-assisted test generation.
 - A custom `Journey Author` agent and a Playwright skill with repo-specific testing conventions.
 
-## Required changes for the new conference talk
+## Required changes for the new conference talk — status: implemented
 
-No application code changes are required. Do not change the existing Application Insights workflow.
+No application code changes were required. The existing Application Insights
+workflow is unchanged.
 
-Add only the cloud-test plumbing needed for Playwright Workspaces:
+The cloud-test plumbing is now **in the repo**, not just recommended:
 
-1. Create one **Playwright Workspace** in Azure App Testing.
-2. Add `@azure/playwright` and `@azure/identity` as dev dependencies.
-3. Add `playwright.service.config.ts`.
-4. Add a separate GitHub Actions workflow for the cloud-scale demo.
-5. Store the workspace region endpoint as `PLAYWRIGHT_SERVICE_URL` in GitHub Actions secrets.
-6. Give the identity used by the workflow **Playwright Workspace Contributor** access to the workspace.
+1. ✅ **Playwright Workspace is IaC** — `iac/playwrightWorkspace.bicep`
+   (`Microsoft.LoadTestService/playwrightWorkspaces`), wired into
+   `iac/main.bicep`. It deploys to its own region (`eastus` by default, via
+   the `playwrightWorkspaceLocation` param) because Playwright Workspaces
+   isn't available in every region, and the rest of the stack may deploy
+   elsewhere.
+
+   **Real-world note:** Playwright Workspaces moved to the
+   `Microsoft.LoadTestService` resource provider (alongside Azure Load
+   Testing). The older `Microsoft.AzurePlaywrightService/accounts` type is
+   retired and rejects writes outright — that's a hard failure, not a
+   permissions issue, regardless of RBAC role. If you hit
+   `DisallowedResourceOperation` on `accounts`, that's the tell. Also: the
+   deploying identity typically has Contributor only, which can't do
+   `Microsoft.Authorization/roleAssignments/write` (needs Owner/User Access
+   Administrator) — so this repo's module defaults to referencing an
+   **already-existing** workspace (`createPlaywrightWorkspace = false` in
+   `iac/main.bicep`) rather than creating one, to keep the pipeline
+   deterministic. Create the workspace once, manually, in the Portal (name it
+   to match the Bicep naming convention — see step 3 below), then let Bicep
+   read its outputs.
+2. ✅ `@azure/playwright` and `@azure/identity` are dev dependencies in
+   `package.json`.
+3. ✅ `playwright.service.config.ts` exists at the repo root.
+4. ✅ **No third workflow file.** The cloud-scale run is integrated directly
+   into `.github/workflows/playwright-testing.yml` as a parallel job:
+   `run-playwright-tests-at-scale` runs alongside the daily local job
+   (true fan-out, same workflow run), with a third `publish-dashboard` job
+   fanning back in to do the single GitHub Pages write for both.
+5. ✅ **No manual copy-paste needed for `PLAYWRIGHT_SERVICE_URL`.**
+   `iac/playwrightWorkspace.bicep` outputs `playwrightWorkspaceServiceUrl` -
+   the exact `wss://...` browser endpoint, computed from the workspace's
+   `workspaceId` property and region, matching what the Portal's **Get
+   Started** page shows. Copy that value from the `provision-infrastructure`
+   job's **Infrastructure Deployment Summary** and store it as the GitHub
+   Actions secret `PLAYWRIGHT_SERVICE_URL`.
+6. ⏳ **RBAC is still a manual one-time step** (`assignPlaywrightWorkspaceRoles
+   = false` by default) because role assignment needs Owner/User Access
+   Administrator, not the Contributor role CI principals should have. Grant
+   access with the `az role assignment create` command in step 4 of "One-Time
+   Setup" below.
+7. ✅ **One combined dashboard, not two disconnected ones.** The existing
+   GitHub Pages dashboard (`https://pagelsr.github.io/GinosGelato/`) now shows
+   both the daily local run and the cloud-scale run on the same timeline and
+   table, tagged with a **Mode** badge (`🖥️ CI Runner ×1` vs `☁️ Cloud Scale
+   ×20`) so the parallelism story is visible at a glance, not in two separate
+   places.
 
 That keeps the telemetry talk and the Playwright talk isolated while both use the same application and tests.
 
 ## Optional changes
 
-These are not required for Techorama:
+These are still not required for the talk:
 
-- Add Bicep for the Playwright Workspace later if you want the workspace fully reproducible.
 - Add Firefox and WebKit projects to the cloud-only config if you want a live cross-browser matrix.
 - Generate the official Playwright Test Agents (`planner`, `generator`, `healer`) if you want to show them directly. The repo already has a purpose-built Journey Author agent, so this is optional.
+- Link a customer-managed Azure Storage account to the workspace for custom
+  artifact retention (the default is Microsoft-managed storage, which is
+  sufficient for this demo).
 
 ---
 
-# One-Time Setup Before the Conference
+# One-Time Setup Before the Conference — all steps below are already done in the repo
 
-## 1. Install the service packages
+This section is kept as a reference for how the pieces fit together. You
+don't need to repeat steps 1–2 and 4–5; they're already committed.
 
-From the repo root:
+## 1. Service packages (done)
 
-```text
-npm install --save-dev @azure/playwright @azure/identity
-```
+`package.json` already lists `@azure/playwright` and `@azure/identity` as
+dev dependencies, alongside the unchanged `@playwright/test`.
 
-Do not remove or replace `@playwright/test`.
+## 2. `playwright.service.config.ts` (done)
 
-## 2. Add `playwright.service.config.ts`
-
-Create this beside `playwright.config.ts`:
+Lives at the repo root, beside `playwright.config.ts`:
 
 ```ts
 import { defineConfig } from '@playwright/test';
@@ -89,39 +131,79 @@ export default defineConfig(
   createAzurePlaywrightConfig(config, {
     os: ServiceOS.LINUX,
     credential: new DefaultAzureCredential(),
-    runName: 'Ginos Gelato - Conference Scale Demo',
+    runName: 'Ginos Gelato - Testing at Scale',
   })
 );
 ```
 
 The repo's normal `playwright.config.ts` stays unchanged.
 
-## 3. Create a Playwright Workspace
+## 3. Playwright Workspace (manual one-time creation + IaC reference)
 
-In Azure Portal:
+`iac/playwrightWorkspace.bicep` can create the workspace via Bicep
+(`createPlaywrightWorkspace = true`), but this environment's subscription
+rejects ARM writes to the live resource type for this preview-era service, so
+the default is to create it **once, manually**, and have Bicep reference it
+as `existing` from then on (`createPlaywrightWorkspace = false`, the
+default):
 
-1. Search for **Playwright Workspaces**.
-2. Create a workspace in `rg-GinosGelato-Modernization`.
-3. Choose a supported region close to the conference/demo environment.
-4. Open the workspace **Get Started** page.
-5. Copy the region endpoint.
-6. Store it in GitHub Actions as:
+1. Azure Portal → search **Playwright Workspaces** → **Create**.
+2. **Resource group:** `rg-GinosGelato-Modernization`.
+3. **Name:** match the Bicep naming convention exactly -
+   `pww${uniqueString(subscription().subscriptionId, resourceGroup().id)}`.
+   For this repo's subscription/RG that resolves to `pwwuxryfogy5mzkc` - find
+   the current expected value by checking the name of any other deployed
+   resource in the group (e.g. `app<suffix>`, `sql<suffix>`) and swapping the
+   `pww` prefix in.
+4. **Region:** `East US` (matches `playwrightWorkspaceLocation` default).
+5. Leave **Reporting** enabled; don't enable local auth/access tokens (the
+   repo authenticates via Entra ID / `DefaultAzureCredential` only).
+6. After creation, the `provision-infrastructure` job's **Infrastructure
+   Deployment Summary** will show `playwrightWorkspaceServiceUrl` - the
+   ready-to-use `wss://...` browser endpoint, computed directly from the
+   workspace's `workspaceId` property (no manual Portal copy needed). Store
+   that value as a GitHub Actions secret named:
 
 ```text
 PLAYWRIGHT_SERVICE_URL
 ```
 
-## 4. Grant access
+## 4. Access (role assignment is opt-in — manual step required by default)
 
-The existing GitHub workflow already signs into Azure with `AZURE_CREDENTIALS`.
+`iac/playwrightWorkspace.bicep` can grant the built-in
+**Playwright Workspace Contributor** role to the deployment service principal
+and the `adminObjectId` admin user, but that requires
+`Microsoft.Authorization/roleAssignments/write` — which comes with **Owner**
+or **User Access Administrator**, not **Contributor**. Most CI service
+principals are (correctly, least-privilege) Contributor only, so this is
+**off by default** (`assignPlaywrightWorkspaceRoles = false` in
+`iac/main.bicep`) to avoid failing the whole deployment.
 
-Grant that service principal:
+After the workspace is deployed, grant access manually (one-time, requires an
+account with Owner/User Access Administrator on the resource group):
 
-```text
-Playwright Workspace Contributor
+```powershell
+# Resource ID of the deployed Playwright Workspace (works without knowing the
+# generated name or the deployment name - main.bicep also outputs
+# playwrightWorkspaceId directly if you have the deployment name handy)
+$workspaceId = az resource list --resource-group rg-GinosGelato-Modernization `
+  --resource-type Microsoft.LoadTestService/playwrightWorkspaces --query "[0].id" -o tsv
+
+# Your own object ID (the signed-in az CLI account) - or use the adminObjectId
+# default already in iac/main.bicep (0aa95253-9e37-4af9-a63a-3b35ed78e98b / RPagels)
+$myObjectId = az ad signed-in-user show --query id -o tsv
+
+az role assignment create --assignee $myObjectId `
+  --role "Playwright Workspace Contributor" --scope $workspaceId
 ```
 
-on the Playwright Workspace.
+Repeat for the deployment service principal's object ID (the one behind
+`AZURE_DEPLOY_SP_OBJECT_ID`, if that secret is set - find it with
+`az ad sp show --id <AZURE_CREDENTIALS clientId> --query id -o tsv`) so CI can
+run cloud tests too. If you'd rather have Bicep assign the roles
+automatically, temporarily grant the deploying identity **User Access
+Administrator** on the resource group, redeploy with
+`assignPlaywrightWorkspaceRoles=true`, then revoke the elevated role.
 
 For local testing, sign in with Azure CLI using an account that has the same role:
 
@@ -129,71 +211,39 @@ For local testing, sign in with Azure CLI using an account that has the same rol
 az login
 ```
 
-## 5. Add a dedicated cloud workflow
+## 5. Cloud-scale job (done — integrated into the existing daily/push workflow)
 
-Recommended file:
+No dedicated third workflow file. `.github/workflows/playwright-testing.yml`
+has three jobs forming a fan-out / fan-in, the same shape used in
+`BuildDeploy.yml`:
 
 ```text
-.github/workflows/playwright-azure-scale.yml
+run-playwright-tests (CI Runner, 1 worker)  ─┐
+                                               ├─► publish-dashboard
+run-playwright-tests-at-scale (20 workers)   ─┘
 ```
 
-Recommended starting point:
+The two test jobs run fully in parallel (true fan-out, no `needs:` between
+them) — `run-playwright-tests-at-scale` runs the stable suite
+(`--grep-invert "FLAKY|Flaky Test Examples"`) via
+`playwright.service.config.ts --workers=20`, authenticating with the same
+`AZURE_CREDENTIALS` secret the rest of the pipeline already uses. Each just
+uploads its raw `test-results.json` + `playwright-report/` as a build
+artifact — neither touches GitHub Pages directly.
 
-```yaml
-name: Playwright - Azure Scale Demo
-
-on:
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-env:
-  NODE_VERSION: '20.x'
-  PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
-
-jobs:
-  run-playwright-at-scale:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Run stable Playwright suite in Azure
-        run: >
-          npx playwright test
-          --config=playwright.service.config.ts
-          --workers=20
-          --grep-invert "FLAKY|Flaky Test Examples"
-        continue-on-error: true
-
-      - name: Upload Playwright report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-cloud-report
-          path: playwright-report/
-          retention-days: 10
-```
+`publish-dashboard` (`needs: [run-playwright-tests, run-playwright-tests-at-scale]`)
+is the single fan-in point: it downloads both artifacts, extracts metrics for
+both tagged entries (`ci-runner` / `cloud-scale`) into the **same**
+`test-history.json`, and does the one gh-pages push. This keeps the
+GitHub Actions graph showing a true parallel diamond (like **PART C** in the
+BONUS section) while avoiding a race where two jobs independently push to
+gh-pages at the same time. See **Testing at Scale: Reporting Dashboards**
+below.
 
 ## 6. Pre-run the cloud demo
 
-Before the session, manually dispatch the Azure scale workflow once.
+Before the session, manually dispatch `playwright-testing.yml` once so a
+completed cloud run exists.
 
 Have these open as backup:
 
@@ -224,7 +274,9 @@ Open:
 - `.github/agents/journey-author.agent.md`
 - `playwright.config.ts`
 - `playwright.service.config.ts`
-- `.github/workflows/playwright-azure-scale.yml`
+- `iac/playwrightWorkspace.bicep`
+- `.github/workflows/playwright-testing.yml` (see `run-playwright-tests-at-scale` and the fan-in `publish-dashboard` job)
+- `.github/pages/dashboard.html` (see the Mode badge / blended dashboard logic)
 
 ## Terminal
 
@@ -509,7 +561,9 @@ npx playwright test --config=playwright.service.config.ts --workers=20 --grep-in
 
 Either:
 
-- GitHub -> Actions -> **Playwright - Azure Scale Demo** -> Run workflow, or
+- GitHub -> Actions -> **Playwright Testing - Daily Schedule** -> Run workflow
+  (runs `run-playwright-tests` then `run-playwright-tests-at-scale` right
+  after it), or
 - Run the command locally after `az login` and setting `PLAYWRIGHT_SERVICE_URL`.
 
 Do not wait on stage.
@@ -548,6 +602,144 @@ The current repo keeps the live demo on Chromium for simplicity. Playwright Work
 ## RETURN TO
 
 **The Feedback Loop**
+
+---
+
+# BONUS - Testing at Scale: Reporting Dashboards
+
+**Target (if time permits):** 7 minutes
+**Use this if:** Demo 4 lands early, or during Q&A — not inserted into the
+core 60 minutes (see the updated timing guide below).
+
+## WHY THIS DEMO
+
+Gino's Gelato's GitHub Pages dashboard now blends **both** run types - the
+daily local run and the Azure cloud-scale run - into one timeline and table,
+tagged with a Mode badge. The point isn't "which view is better" - it's that
+the blended dashboard answers "is this trending up or down," the Azure
+Portal answers "why did this exact run fail," and the GitHub Actions pipeline
+graph itself answers "was it actually worth it" - no narration required.
+
+## SAY
+
+> "Running tests at scale is only half the story. The other half is being
+> able to answer two different questions fast: is this getting better or
+> worse over time, and why did this exact run fail."
+
+## PART A - The blended dashboard (GitHub Pages)
+
+Open:
+
+```text
+https://pagelsr.github.io/GinosGelato/
+```
+
+## SHOW
+
+- The **Mode** column in the runs table: `🖥️ CI Runner ×1` next to
+  `☁️ Cloud Scale ×20` - same suite, same timeline, wildly different worker
+  counts, side by side.
+- The trend chart legend: circle markers are CI Runner runs, diamond markers
+  are Cloud Scale runs - point out a cloud-scale run's marker and its much
+  shorter duration for the same (or larger) test count.
+- The recent runs table, each linking to its own archived HTML report.
+
+## SAY
+
+> "This isn't two separate systems bolted together. It's one dashboard, one
+> URL, and now you can see at a glance which runs used twenty cloud browsers
+> instead of one - and how much faster that made the same suite. It's built
+> entirely from our own Playwright JSON reports, tagged by which job produced
+> them - no extra Azure resource required for this view."
+
+## PART B - Azure-native scale reporting (Playwright Workspace)
+
+There's no separate dashboard link to open - test run reports live inside
+Azure Portal navigation. Open:
+
+```text
+Azure Portal -> Azure App Testing -> Playwright Workspaces -> <workspace name,
+from the provision-infrastructure job's Infrastructure Deployment Summary> ->
+Test runs
+```
+
+## SHOW
+
+- This run's parallel workers and overall duration.
+- A single test's trace, screenshot, or recording.
+- Live View or Take Control, only if already staged and reliable.
+
+## SAY
+
+> "The blended dashboard told us there's a cloud-scale run and roughly how
+> fast it was. This tells us exactly what happened, test by test, browser by
+> browser."
+
+## PART C - The Fan-Out / Fan-In Graph (Build and Deploy to Azure)
+
+This one needs zero narration - the GitHub Actions graph proves the point by
+itself. Open:
+
+```text
+GitHub -> Actions -> Build and Deploy to Azure -> a completed run -> graph view
+```
+
+## SHOW
+
+Point at the box between **Build & Deploy Frontend** and
+**Post-Deployment Verification**. It fans out into two parallel jobs and fans
+back in:
+
+- `Run Playwright Tests` (GitHub-hosted runner, 1 worker) - its duration label.
+- `Validate at Scale (Azure Playwright Workspaces)` (cloud browsers,
+  10 workers) - its duration label, printed right next to the first one.
+
+Say nothing yet. Let the audience read both numbers - e.g. `10m 17s` next to
+`1m 10s`. Same deployment, same starting instant, two branches, one answer.
+
+## SAY
+
+> "Both of these boxes started at the exact same moment, in the exact same
+> pipeline run. One number is nine times smaller than the other, and that's
+> not a chart I built - that's the native GitHub Actions graph, doing the
+> explaining for us."
+
+## NOTE
+
+`Validate at Scale` here is deliberately **not** part of the blended
+dashboard - it's a quick, non-blocking post-deploy smoke check
+(`e2e/journey-*` subset only) that exists in this specific pipeline
+(`BuildDeploy.yml`) primarily for this visual and a fast sanity check after
+each deploy.
+
+The daily/scheduled numbers that actually feed the dashboard trend come from
+the separate `playwright-testing.yml` workflow, which has the **same**
+fan-out / fan-in shape, just one box wider:
+
+```text
+Run Playwright Tests  ─┐
+                         ├─► Publish Test Dashboard
+Validate at Scale      ─┘
+```
+
+If there's time, open that workflow's graph too - it's the one worth
+dwelling on, since those two boxes are the exact runs that produced the
+"CI Runner" and "Cloud Scale" rows the audience just saw on the dashboard a
+few minutes ago. `Publish Test Dashboard` is the fan-in: it waits for both,
+then does the single write to GitHub Pages so the two parallel jobs never
+race each other for the same file.
+
+## KEY LINE
+
+> "One dashboard shows the trend, blended across every pipeline job. The
+> other shows the evidence for one exact run. And the pipeline graph itself
+> shows the payoff, in plain daylight, with no explanation required. Together
+> they cover the whole lifecycle of a test failure — from 'something's wrong'
+> to 'here's the fix' to 'here's why it's worth running at scale.'"
+
+## RETURN TO
+
+**Closing - No More Live Demos**
 
 ---
 
@@ -601,6 +793,10 @@ Secure it -> Test it -> Ship with confidence
 
 **Total:** 60 minutes
 
+**Optional, time-permitting:** BONUS - Testing at Scale: Reporting Dashboards
+(~7 min). Not part of the 60-minute core — use only if Demo 4 lands early or
+during Q&A.
+
 ---
 
 # Presenter Safety Net
@@ -611,6 +807,7 @@ If time gets tight:
 2. Keep Demo 2 because AI is in the title.
 3. Shorten Demo 3 to a 60-second UI Mode tour.
 4. Never cut Demo 4. Azure scale is the payoff.
+5. Cut the Testing at Scale Reporting bonus demo first — it's optional.
 
 If cloud access is slow:
 

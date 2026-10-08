@@ -371,3 +371,10 @@ FodyWeavers.xsd
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Environment variables (e.g. @azure/playwright's generated .env with
+# PLAYWRIGHT_SERVICE_URL) - never commit, even though this one isn't a
+# credential by itself (auth is via DefaultAzureCredential, not this URL).
+.env
+.env.*
+!.env.example

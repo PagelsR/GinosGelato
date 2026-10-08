@@ -413,6 +413,7 @@
         </div>
       </div>
       <div class="section-body">
+        <div style="font-size:11px;color:var(--text-3);margin-bottom:6px;">● CI Runner (1 worker) &nbsp;&nbsp; ◆ Cloud Scale (parallel Azure Playwright Workspaces)</div>
         <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
       </div>
     </div>
@@ -559,7 +560,12 @@
       if (vis.passed) ds.push({
         label: 'Passed', data: s.map(r=>r.passed),
         borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,.07)',
-        tension: .3, fill: true, pointRadius: dense ? 1 : 3, pointHoverRadius: 5, borderWidth: 2
+        tension: .3, fill: true,
+        // Distinct marker shape/size for cloud-scale runs (workers > 1) so the
+        // parallelism story is visible on the chart itself, not just the table.
+        pointStyle: s.map(r => modeInfo(r).workers > 1 ? 'rectRot' : 'circle'),
+        pointRadius: s.map(r => (modeInfo(r).workers > 1 ? (dense ? 3 : 5) : (dense ? 1 : 3))),
+        pointHoverRadius: 6, borderWidth: 2
       });
       if (vis.failed) ds.push({
         label: 'Failed', data: s.map(r=>r.failed-(r.flaky||0)),
@@ -593,7 +599,11 @@
               backgroundColor: '#0f172a', titleColor: '#f8fafc', bodyColor: '#cbd5e1',
               padding: 12, cornerRadius: 6,
               callbacks: {
-                title: (items) => `Run #${s[items[0].dataIndex].runNumber}  ·  ${items[0].label}`,
+                title: (items) => {
+                  const r = s[items[0].dataIndex];
+                  const m = modeInfo(r);
+                  return `Run #${r.runNumber}  ·  ${m.icon} ${m.label} ×${m.workers}  ·  ${items[0].label}`;
+                },
                 footer: (items) => {
                   const r = s[items[0].dataIndex];
                   const base = `Pass rate: ${r.passRate}%   Total tests: ${r.total}`;
@@ -664,9 +674,11 @@
         const href = r.reportUrl ? r.reportUrl + '/index.html' : `./reports/${r.runId}/index.html`;
         const aiCell = APP_INSIGHTS_URL
           ? `<td><a href="${APP_INSIGHTS_URL}" class="rpt-link" target="_blank">↗ Insights</a></td>` : '';
+        const m = modeInfo(r);
         return `<tr class="row-${sc}">
           <td>${fmtTs(r.timestamp)}</td>
           <td style="font-weight:600;color:var(--text-2)">#${r.runNumber}</td>
+          <td><span class="bdg ${m.badgeClass}" title="${m.workers} worker${m.workers===1?'':'s'}">${m.icon} ${m.label} ×${m.workers}</span></td>
           <td>${r.total}</td>
           <td><span class="bdg bdg-g">${r.passed}</span></td>
           <td>${regressionFailed>0 ? `<span class="bdg bdg-r">${regressionFailed}</span>` : `<span style="color:var(--text-3)">—</span>`}</td>
@@ -683,7 +695,7 @@
       document.getElementById('runs-container').innerHTML =
         `<table class="runs-tbl">
            <thead><tr>
-             <th>Date / Time</th><th>Run #</th><th>Total</th>
+             <th>Date / Time</th><th>Run #</th><th>Mode</th><th>Total</th>
              <th>Passed</th><th>Regressions</th><th>Chaos</th><th>Flaky</th>
              <th>Pass Rate</th><th>Δ Rate</th><th>Status</th><th>Report</th>${aiCol}
            </tr></thead>
@@ -709,6 +721,19 @@
     function fmtTs(ts) {
       return ts ? new Date(ts).toLocaleString('en-US',
         { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '';
+    }
+    // Every run in this history comes from an automated GitHub Actions
+    // workflow - never a developer's local machine. runType distinguishes
+    // WHERE in the pipeline it executed: a standard GitHub-hosted runner
+    // (ci-runner) vs Azure Playwright Workspaces' managed cloud browsers
+    // (cloud-scale). Missing runType (older history entries) defaults to
+    // ci-runner/1 worker, matching what that job has always run as.
+    function modeInfo(r) {
+      const type = r.runType || 'ci-runner';
+      const workers = r.workers || 1;
+      return type === 'cloud-scale'
+        ? { label: 'Cloud Scale', icon: '☁️', badgeClass: 'bdg-b', workers }
+        : { label: 'CI Runner', icon: '🖥️', badgeClass: 'bdg-sl', workers };
     }
 
     /* ── Toggle + select listeners ───────────────────────── */

@@ -115,6 +115,20 @@ realistic Application Insights telemetry. The fault journey (Journey 4) exercise
 all three fault paths on every run, so slow-dependency, failed-request, and
 exception telemetry appear daily without any manual step.
 
+## Testing at Scale (Azure Playwright Workspaces)
+
+Alongside the local run, `playwright-testing.yml` also runs
+`run-playwright-tests-at-scale` — the same stable suite executed in parallel
+on managed cloud browsers via Azure App Testing → Playwright Workspaces
+(`iac/playwrightWorkspace.bicep`, `playwright.service.config.ts`). Both jobs
+run fully in parallel (fan-out), and a third `publish-dashboard` job fans
+back in once both complete, doing the single GitHub Pages write so the two
+parallel jobs never race updating the same history file. Both runs are
+tagged (`ci-runner` / `cloud-scale`) and blended into the **same**
+dashboard - one timeline, one table, a Mode badge distinguishing them. See
+the Playwright Demo Runbook's "BONUS - Testing at Scale: Reporting
+Dashboards" section for the demo flow.
+
 ## Suggested Demo Flow
 
 1. Show a happy-path pickup order (Journey 1) and correlate it in Application
@@ -123,7 +137,10 @@ exception telemetry appear daily without any manual step.
    telemetry breadth.
 3. Trigger each fault (`/fault?fault=...`) and show the slow dependency, failed
    request, and exception appear in Application Insights.
-4. Open the GitHub Pages trend dashboard to show the daily pass/fail/flaky mix.
+4. Open the GitHub Pages trend dashboard to show the daily pass/fail/flaky mix
+   — note the Mode badge distinguishing the CI Runner run from the Cloud
+   Scale run — then open Azure Portal's Playwright Workspace Test Runs view
+   for that same cloud-scale run's traces, screenshots, and recordings.
 
 ## Exit Criteria (met)
 
