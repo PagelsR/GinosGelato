@@ -120,12 +120,14 @@ exception telemetry appear daily without any manual step.
 Alongside the local run, `playwright-testing.yml` also runs
 `run-playwright-tests-at-scale` — the same stable suite executed in parallel
 on managed cloud browsers via Azure App Testing → Playwright Workspaces
-(`iac/playwrightWorkspace.bicep`, `playwright.service.config.ts`), sequenced
-to run right after the local job so both jobs never race updating the same
-GitHub Pages history. Both runs are tagged (`ci-runner` / `cloud-scale`) and
-blended into the **same** dashboard - one timeline, one table, a Mode badge
-distinguishing them. See the Playwright Demo Runbook's "BONUS - Testing at
-Scale: Reporting Dashboards" section for the demo flow.
+(`iac/playwrightWorkspace.bicep`, `playwright.service.config.ts`). Both jobs
+run fully in parallel (fan-out), and a third `publish-dashboard` job fans
+back in once both complete, doing the single GitHub Pages write so the two
+parallel jobs never race updating the same history file. Both runs are
+tagged (`ci-runner` / `cloud-scale`) and blended into the **same**
+dashboard - one timeline, one table, a Mode badge distinguishing them. See
+the Playwright Demo Runbook's "BONUS - Testing at Scale: Reporting
+Dashboards" section for the demo flow.
 
 ## Suggested Demo Flow
 

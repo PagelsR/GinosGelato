@@ -45,99 +45,35 @@ jobs:
           npx playwright test
         continue-on-error: true
 
-      - name: Checkout gh-pages branch for history
-        if: always()
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: gh-pages-content
-          
-      - name: Extract Test Metrics and Update History
-        if: always()
-        run: |
-          # Create reports directory for this run
-          RUN_ID="${{ github.run_number }}"
-          DATE=$(date +%Y-%m-%d)
-          REPORT_DIR="reports/${DATE}-run-${RUN_ID}"
-          
-          echo "Creating report directory: $REPORT_DIR"
-          mkdir -p deployment-content/$REPORT_DIR
-          
-          # Copy HTML report to dated folder
-          if [ -d "playwright-report" ]; then
-            cp -r playwright-report/* deployment-content/$REPORT_DIR/
-          fi
-          
-          # Extract metrics from JSON
-          if [ -f "test-results.json" ]; then
-            # Copy existing history if it exists
-            if [ -f "gh-pages-content/test-history.json" ]; then
-              cp gh-pages-content/test-history.json ./test-history.json
-            else
-              echo "[]" > test-history.json
-            fi
-            
-            # Extract and append metrics
-            REPORT_URL="https://pagelsr.github.io/GinosGelato/reports/${DATE}-run-${RUN_ID}"
-            node .github/scripts/extract-test-metrics.js test-results.json test-history.json $RUN_ID "$REPORT_URL" "${{ github.ref_name }}" "ci-runner" "1"
-            
-            # Copy updated history to deployment
-            cp test-history.json deployment-content/
-            cp current-run-summary.json deployment-content/
-          fi
-          
-          # Copy dashboard as index.html
-          cp .github/pages/dashboard.html deployment-content/index.html
-          
-          # Copy existing reports if any
-          if [ -d "gh-pages-content/reports" ]; then
-            mkdir -p deployment-content/reports
-            cp -r gh-pages-content/reports/* deployment-content/reports/ || true
-          fi
-          
-          echo "Deployment structure ready"
-          ls -la deployment-content/
-
-      - name: Upload Playwright Report Artifact
+      - name: Upload Playwright Results Artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ github.run_number }}
-          path: playwright-report/
+          name: ci-runner-results-${{ github.run_number }}
+          path: |
+            test-results.json
+            playwright-report/
           retention-days: 30
-
-      - name: Publish Test Dashboard to GitHub Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          personal_token: ${{ secrets.PERSONAL_ACCESSTOKEN_PAGES }}
-          publish_branch: gh-pages
-          publish_dir: deployment-content
-          keep_files: false
-          user_name: 'github-actions[bot]'
-          user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'Deploy scheduled test report for run #${{ github.run_number }}'
+          if-no-files-found: ignore
 
       - name: Test Results Summary
         if: always()
         run: |
-          echo "## 📅 Scheduled Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "## 🖥️ CI Runner Playwright Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Run Date:** $(date)" >> $GITHUB_STEP_SUMMARY
           echo "**Run Number:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 📊 View Results" >> $GITHUB_STEP_SUMMARY
+          echo "Ran single-threaded on the GitHub-hosted runner. Metrics and the combined dashboard are published by the **Publish Test Dashboard** job once both test jobs finish." >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Dashboard:** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
-          echo "- **This Run:** https://pagelsr.github.io/GinosGelato/reports/$(date +%Y-%m-%d)-run-${{ github.run_number }}/" >> $GITHUB_STEP_SUMMARY
 
   run-playwright-tests-at-scale:
-    name: Run Playwright Tests at Scale (Azure Playwright Workspaces)
+    name: Validate at Scale (Azure Playwright Workspaces)
     runs-on: ubuntu-latest
-    # Sequenced after the ci-runner job (not run in parallel) so both jobs
-    # never race to checkout/merge/push the same gh-pages history at once.
-    needs: run-playwright-tests
-    if: always()
+    # Runs in parallel with run-playwright-tests (true fan-out). Neither job
+    # touches gh-pages directly; the publish-dashboard job below fans back in
+    # after both complete and does the one single-writer gh-pages publish.
     env:
       CI: true
       PLAYWRIGHT_SERVICE_URL: ${{ secrets.PLAYWRIGHT_SERVICE_URL }}
@@ -169,6 +105,62 @@ jobs:
           npx playwright test --config=playwright.service.config.ts --workers=20 --grep-invert "FLAKY|Flaky Test Examples"
         continue-on-error: true
 
+      - name: Upload Playwright Results Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloud-scale-results-${{ github.run_number }}
+          path: |
+            test-results.json
+            playwright-report/
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Testing at Scale Summary
+        if: always()
+        run: |
+          echo "## ☁️ Playwright Testing at Scale (Azure Playwright Workspaces)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Same /e2e/ suite as the CI Runner job, executed in parallel on Azure-managed cloud browsers (20 workers)." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Metrics and the combined dashboard are published by the **Publish Test Dashboard** job once both test jobs finish." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dashboard (blended with CI Runner runs):** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Azure-native scale reporting (Playwright Workspace):** Azure Portal → Azure App Testing → Playwright Workspaces → this workspace's Test runs — parallel workers, per-test traces/screenshots/recordings, and Live View for this exact run." >> $GITHUB_STEP_SUMMARY
+
+  publish-dashboard:
+    name: Publish Test Dashboard
+    runs-on: ubuntu-latest
+    # Fan-in: waits for both parallel test jobs above, then does the ONE
+    # gh-pages checkout/merge/push for both result sets — this is what keeps
+    # the fan-out above race-free (single writer to gh-pages).
+    needs: [run-playwright-tests, run-playwright-tests-at-scale]
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Download CI Runner results
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: ci-runner-results-${{ github.run_number }}
+          path: ci-runner-results
+
+      - name: Download Cloud Scale results
+        if: always()
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: cloud-scale-results-${{ github.run_number }}
+          path: cloud-scale-results
+
       - name: Checkout gh-pages branch for history
         if: always()
         uses: actions/checkout@v4
@@ -176,44 +168,55 @@ jobs:
           ref: gh-pages
           path: gh-pages-content
 
-      - name: Extract Test Metrics and Update History
+      - name: Extract Test Metrics and Update History (both run types)
         if: always()
         run: |
-          # Distinct report folder/run ID from the ci-runner job above, even
-          # though both share the same github.run_number within this workflow run.
           RUN_ID="${{ github.run_number }}"
           DATE=$(date +%Y-%m-%d)
-          REPORT_DIR="reports/${DATE}-run-${RUN_ID}-cloud-scale"
 
-          echo "Creating report directory: $REPORT_DIR"
-          mkdir -p deployment-content/$REPORT_DIR
+          mkdir -p deployment-content
 
-          # Copy HTML report to dated folder
-          if [ -d "playwright-report" ]; then
-            cp -r playwright-report/* deployment-content/$REPORT_DIR/
+          # Seed test-history.json from whatever is already published
+          if [ -f "gh-pages-content/test-history.json" ]; then
+            cp gh-pages-content/test-history.json ./test-history.json
+          else
+            echo "[]" > test-history.json
           fi
 
-          # Extract metrics from JSON, merging into the SAME combined history
-          # file/dashboard as the ci-runner job (blended single timeline).
-          if [ -f "test-results.json" ]; then
-            if [ -f "gh-pages-content/test-history.json" ]; then
-              cp gh-pages-content/test-history.json ./test-history.json
-            else
-              echo "[]" > test-history.json
+          # --- CI Runner (single worker, GitHub-hosted runner) ---
+          if [ -f "ci-runner-results/test-results.json" ]; then
+            REPORT_DIR="reports/${DATE}-run-${RUN_ID}"
+            mkdir -p deployment-content/$REPORT_DIR
+            if [ -d "ci-runner-results/playwright-report" ]; then
+              cp -r ci-runner-results/playwright-report/* deployment-content/$REPORT_DIR/
             fi
-
             REPORT_URL="https://pagelsr.github.io/GinosGelato/${REPORT_DIR}"
-            node .github/scripts/extract-test-metrics.js test-results.json test-history.json $RUN_ID "$REPORT_URL" "${{ github.ref_name }}" "cloud-scale" "20"
-
-            cp test-history.json deployment-content/
+            node .github/scripts/extract-test-metrics.js ci-runner-results/test-results.json test-history.json $RUN_ID "$REPORT_URL" "${{ github.ref_name }}" "ci-runner" "1"
             cp current-run-summary.json deployment-content/
+          else
+            echo "No CI Runner test-results.json found (job may have failed before producing results) — skipping that entry"
           fi
+
+          # --- Cloud Scale (Azure Playwright Workspaces, 20 workers) ---
+          if [ -f "cloud-scale-results/test-results.json" ]; then
+            REPORT_DIR="reports/${DATE}-run-${RUN_ID}-cloud-scale"
+            mkdir -p deployment-content/$REPORT_DIR
+            if [ -d "cloud-scale-results/playwright-report" ]; then
+              cp -r cloud-scale-results/playwright-report/* deployment-content/$REPORT_DIR/
+            fi
+            REPORT_URL="https://pagelsr.github.io/GinosGelato/${REPORT_DIR}"
+            node .github/scripts/extract-test-metrics.js cloud-scale-results/test-results.json test-history.json $RUN_ID "$REPORT_URL" "${{ github.ref_name }}" "cloud-scale" "20"
+            cp current-run-summary.json deployment-content/
+          else
+            echo "No Cloud Scale test-results.json found (job may have failed before producing results) — skipping that entry"
+          fi
+
+          cp test-history.json deployment-content/
 
           # Copy dashboard as index.html
           cp .github/pages/dashboard.html deployment-content/index.html
 
-          # Copy existing reports (including the ci-runner job's report that
-          # already landed on gh-pages, since this job runs after it)
+          # Copy existing reports (preserve history of all prior runs)
           if [ -d "gh-pages-content/reports" ]; then
             mkdir -p deployment-content/reports
             cp -r gh-pages-content/reports/* deployment-content/reports/ || true
@@ -221,14 +224,6 @@ jobs:
 
           echo "Deployment structure ready"
           ls -la deployment-content/
-
-      - name: Upload Cloud Playwright Report Artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-cloud-report-${{ github.run_number }}
-          path: playwright-report/
-          retention-days: 30
 
       - name: Publish Test Dashboard to GitHub Pages
         if: always()
@@ -240,17 +235,18 @@ jobs:
           keep_files: false
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
-          commit_message: 'Deploy cloud-scale test report for run #${{ github.run_number }}'
+          commit_message: 'Deploy test report for run #${{ github.run_number }} (CI Runner + Cloud Scale)'
 
-      - name: Testing at Scale Summary
+      - name: Dashboard Summary
         if: always()
         run: |
-          echo "## ☁️ Playwright Testing at Scale (Azure Playwright Workspaces)" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Combined Playwright Test Dashboard" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Same /e2e/ suite as the scheduled run above, executed in parallel on Azure-managed cloud browsers." >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Number:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📊 View Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Dashboard (blended with ci-runner runs):** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
-          echo "- **This Run:** https://pagelsr.github.io/GinosGelato/reports/$(date +%Y-%m-%d)-run-${{ github.run_number }}-cloud-scale/" >> $GITHUB_STEP_SUMMARY
-          echo "- **Azure-native scale reporting (Playwright Workspace):** Azure Portal → Azure App Testing → Playwright Workspaces → this workspace's Test runs — parallel workers, per-test traces/screenshots/recordings, and Live View for this exact run." >> $GITHUB_STEP_SUMMARY
+          echo "- **Dashboard:** https://pagelsr.github.io/GinosGelato/" >> $GITHUB_STEP_SUMMARY
+          echo "- **CI Runner Report:** https://pagelsr.github.io/GinosGelato/reports/$(date +%Y-%m-%d)-run-${{ github.run_number }}/" >> $GITHUB_STEP_SUMMARY
+          echo "- **Cloud Scale Report:** https://pagelsr.github.io/GinosGelato/reports/$(date +%Y-%m-%d)-run-${{ github.run_number }}-cloud-scale/" >> $GITHUB_STEP_SUMMARY

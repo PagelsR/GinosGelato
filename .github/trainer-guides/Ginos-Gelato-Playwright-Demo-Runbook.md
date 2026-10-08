@@ -69,9 +69,10 @@ The cloud-test plumbing is now **in the repo**, not just recommended:
    `package.json`.
 3. ✅ `playwright.service.config.ts` exists at the repo root.
 4. ✅ **No third workflow file.** The cloud-scale run is integrated directly
-   into `.github/workflows/playwright-testing.yml` as a new, independent job:
-   `run-playwright-tests-at-scale` (runs after the daily local job, same
-   workflow run).
+   into `.github/workflows/playwright-testing.yml` as a parallel job:
+   `run-playwright-tests-at-scale` runs alongside the daily local job
+   (true fan-out, same workflow run), with a third `publish-dashboard` job
+   fanning back in to do the single GitHub Pages write for both.
 5. ✅ **No manual copy-paste needed for `PLAYWRIGHT_SERVICE_URL`.**
    `iac/playwrightWorkspace.bicep` outputs `playwrightWorkspaceServiceUrl` -
    the exact `wss://...` browser endpoint, computed from the workspace's
@@ -212,22 +213,32 @@ az login
 
 ## 5. Cloud-scale job (done — integrated into the existing daily/push workflow)
 
-No dedicated third workflow file. `.github/workflows/playwright-testing.yml`'s
-daily/push job (`run-playwright-tests`, local Chromium, 1 worker) is joined by
-a second, independent job that runs right after it:
+No dedicated third workflow file. `.github/workflows/playwright-testing.yml`
+has three jobs forming a fan-out / fan-in, the same shape used in
+`BuildDeploy.yml`:
 
 ```text
-run-playwright-tests-at-scale
+run-playwright-tests (CI Runner, 1 worker)  ─┐
+                                               ├─► publish-dashboard
+run-playwright-tests-at-scale (20 workers)   ─┘
 ```
 
-It runs the stable suite (`--grep-invert "FLAKY|Flaky Test Examples"`) via
+The two test jobs run fully in parallel (true fan-out, no `needs:` between
+them) — `run-playwright-tests-at-scale` runs the stable suite
+(`--grep-invert "FLAKY|Flaky Test Examples"`) via
 `playwright.service.config.ts --workers=20`, authenticating with the same
-`AZURE_CREDENTIALS` secret the rest of the pipeline already uses. It's
-sequenced to run *after* the local job completes (not in parallel), so both
-jobs never race to update the same GitHub Pages history at once - each writes
-its own tagged entry (`ci-runner` / `cloud-scale`) into the **same**
-`test-history.json`, blended into one dashboard. See **Testing at Scale:
-Reporting Dashboards** below.
+`AZURE_CREDENTIALS` secret the rest of the pipeline already uses. Each just
+uploads its raw `test-results.json` + `playwright-report/` as a build
+artifact — neither touches GitHub Pages directly.
+
+`publish-dashboard` (`needs: [run-playwright-tests, run-playwright-tests-at-scale]`)
+is the single fan-in point: it downloads both artifacts, extracts metrics for
+both tagged entries (`ci-runner` / `cloud-scale`) into the **same**
+`test-history.json`, and does the one gh-pages push. This keeps the
+GitHub Actions graph showing a true parallel diamond (like **PART C** in the
+BONUS section) while avoiding a race where two jobs independently push to
+gh-pages at the same time. See **Testing at Scale: Reporting Dashboards**
+below.
 
 ## 6. Pre-run the cloud demo
 
@@ -264,7 +275,7 @@ Open:
 - `playwright.config.ts`
 - `playwright.service.config.ts`
 - `iac/playwrightWorkspace.bicep`
-- `.github/workflows/playwright-testing.yml` (see `run-playwright-tests-at-scale`)
+- `.github/workflows/playwright-testing.yml` (see `run-playwright-tests-at-scale` and the fan-in `publish-dashboard` job)
 - `.github/pages/dashboard.html` (see the Mode badge / blended dashboard logic)
 
 ## Terminal
@@ -695,12 +706,28 @@ Say nothing yet. Let the audience read both numbers - e.g. `10m 17s` next to
 
 ## NOTE
 
-`Validate at Scale` is deliberately **not** part of the blended dashboard
-above - it's a quick, non-blocking post-deploy smoke check (`e2e/journey-*`
-subset only) that exists in this specific pipeline (`BuildDeploy.yml`)
-primarily for this visual and a fast sanity check after each deploy. The
-daily/scheduled cloud-scale numbers that feed the dashboard trend come from
-the separate `playwright-testing.yml` workflow.
+`Validate at Scale` here is deliberately **not** part of the blended
+dashboard - it's a quick, non-blocking post-deploy smoke check
+(`e2e/journey-*` subset only) that exists in this specific pipeline
+(`BuildDeploy.yml`) primarily for this visual and a fast sanity check after
+each deploy.
+
+The daily/scheduled numbers that actually feed the dashboard trend come from
+the separate `playwright-testing.yml` workflow, which has the **same**
+fan-out / fan-in shape, just one box wider:
+
+```text
+Run Playwright Tests  ─┐
+                         ├─► Publish Test Dashboard
+Validate at Scale      ─┘
+```
+
+If there's time, open that workflow's graph too - it's the one worth
+dwelling on, since those two boxes are the exact runs that produced the
+"CI Runner" and "Cloud Scale" rows the audience just saw on the dashboard a
+few minutes ago. `Publish Test Dashboard` is the fan-in: it waits for both,
+then does the single write to GitHub Pages so the two parallel jobs never
+race each other for the same file.
 
 ## KEY LINE
 
