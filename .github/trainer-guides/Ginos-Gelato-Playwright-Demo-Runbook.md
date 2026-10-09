@@ -132,11 +132,25 @@ export default defineConfig(
     os: ServiceOS.LINUX,
     credential: new DefaultAzureCredential(),
     runName: 'Ginos Gelato - Testing at Scale',
-  })
+  }),
+  {
+    reporter: [
+      ['list'],
+      ['json', { outputFile: 'test-results.json' }],
+      ['html', { open: 'never' }],
+      ['@azure/playwright/reporter'],
+    ],
+  }
 );
 ```
 
 The repo's normal `playwright.config.ts` stays unchanged.
+
+The `reporter` block is what makes the Azure Portal's Test runs reports work:
+`@azure/playwright/reporter` uploads the HTML report, traces, screenshots and
+recordings to the workspace's linked storage account, and `html` must come
+before it. `runName` is the title you'll see on each run's report in the
+Portal (**Ginos Gelato - Testing at Scale**).
 
 ## 3. Playwright Workspace (manual one-time creation + IaC reference)
 
@@ -157,7 +171,10 @@ default):
    `pww` prefix in.
 4. **Region:** `East US` (matches `playwrightWorkspaceLocation` default).
 5. Leave **Reporting** enabled; don't enable local auth/access tokens (the
-   repo authenticates via Entra ID / `DefaultAzureCredential` only).
+   repo authenticates via Entra ID / `DefaultAzureCredential` only). Enabling
+   Reporting creates and links a storage account in the same resource group
+   (currently `pwstrg20bf`) - every run's report is uploaded there, into a
+   container named after the workspace ID.
 6. After creation, the `provision-infrastructure` job's **Infrastructure
    Deployment Summary** will show `playwrightWorkspaceServiceUrl` - the
    ready-to-use `wss://...` browser endpoint, computed directly from the
@@ -211,6 +228,40 @@ For local testing, sign in with Azure CLI using an account that has the same rol
 az login
 ```
 
+### Reporting storage access (required for Portal reports)
+
+Starting runs on the workspace is not enough - the Portal's Test runs reports
+only work if the reporter can **upload** to the linked storage account
+(`pwstrg20bf`). Shared-key access is disabled on that account, so uploads use
+Entra ID and need the data-plane role **Storage Blob Data Contributor**.
+Owner or Contributor on the storage account does **not** include it.
+
+Grant it to the identity behind `AZURE_CREDENTIALS` (currently
+`82f103_ServicePrincipal_FullAccess`, app ID
+`a23b6a0a-5e39-4b32-ba8e-9ad656ba20e4`) and to yourself for local runs:
+
+```powershell
+$storageId = az storage account show -n pwstrg20bf -g rg-GinosGelato-Modernization --query id -o tsv
+$spObjectId = az ad sp show --id a23b6a0a-5e39-4b32-ba8e-9ad656ba20e4 --query id -o tsv
+
+az role assignment create --assignee-object-id $spObjectId `
+  --assignee-principal-type ServicePrincipal `
+  --role "Storage Blob Data Contributor" --scope $storageId
+az role assignment create --assignee $myObjectId `
+  --role "Storage Blob Data Contributor" --scope $storageId
+```
+
+Allow 5-10 minutes for the role to take effect. If it's missing, the test
+runs still appear in the Portal's Test runs list, but opening one shows
+**HTTP 404: The specified blob does not exist**, and the cloud-scale job's
+log shows `Reporting upload status: FAILED`. Both workflows now fail the
+cloud-scale job on that line (step **Verify Playwright Workspaces reporting
+upload**), so it can't go unnoticed.
+
+To confirm which identity CI actually runs as, check the **Triggered by** ID
+on any run in the Portal's Test runs list - it's that service principal's
+object ID.
+
 ## 5. Cloud-scale job (done — integrated into the existing daily/push workflow)
 
 No dedicated third workflow file. `.github/workflows/playwright-testing.yml`
@@ -243,12 +294,31 @@ below.
 ## 6. Pre-run the cloud demo
 
 Before the session, manually dispatch `playwright-testing.yml` once so a
-completed cloud run exists.
+completed cloud run exists:
+
+1. GitHub -> Actions -> **Playwright Testing - Daily Schedule** -> **Run
+   workflow** (branch `main`).
+2. When it finishes, open the **Validate at Scale (Azure Playwright
+   Workspaces)** job and confirm the **Verify Playwright Workspaces reporting
+   upload** step is green. If it's red, see **Reporting storage access**
+   above - the Portal report for that run will be a 404.
+3. Azure Portal -> `pwwuxryfogy5mzkc` -> **Test runs** -> click the newest
+   run. Confirm the **Ginos Gelato - Testing at Scale** report loads and a
+   test's trace opens. Note the run's time so you can find it on stage.
+4. Open https://pagelsr.github.io/GinosGelato/ and confirm the newest rows in
+   **Recent Test Runs** are a `🖥️ CI Runner ×1` and a `☁️ Cloud Scale ×20`
+   pair from that run (the dashboard updates a few minutes after the
+   workflow, once GitHub Pages redeploys).
+
+Runs from before the reporting-storage fix (2026-10-08) still appear in the
+Test runs list but always show a 404 - never pick those on stage.
 
 Have these open as backup:
 
 - The completed GitHub Actions run.
-- The Playwright Workspace test run in Azure Portal.
+- The Playwright Workspace test run in Azure Portal (the report verified in
+  step 3, already open).
+- The Reliability Dashboard.
 - A failed or retried test with artifacts if available.
 
 Never depend on a cloud run completing while the audience waits.
@@ -263,13 +333,19 @@ Open:
 
 1. Deployed Gino's Gelato storefront.
 2. GitHub repo - Actions.
-3. Azure Portal - Playwright Workspace - Test runs.
+3. Azure Portal - Playwright Workspace `pwwuxryfogy5mzkc` - **Test runs**.
+4. Azure Portal - the pre-verified **Ginos Gelato - Testing at Scale** run
+   report (see **Pre-run the cloud demo**), so Demo 4 never depends on
+   navigation.
+5. Reliability Dashboard - https://pagelsr.github.io/GinosGelato/
 
 ## VS Code tabs
 
 Open:
 
 - `e2e/journey-1-happy-path-pickup.spec.ts`
+- `e2e/journey-5-shipping-order.spec.ts` (Demo 3 - the PO Box failure)
+- Copilot Chat in **Agent** mode, Playwright MCP server running (Demo 2)
 - `.github/prompts/playwright.prompt.md`
 - `.github/agents/journey-author.agent.md`
 - `playwright.config.ts`
@@ -364,32 +440,105 @@ npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --headed --workers=1
 
 # DEMO 2 - Create a New Journey with AI
 
-**Target:** 7 minutes  
+**Target:** 9 minutes (Part A 3-4 min, Part B 5 min)  
 **Demo slide:** Create a New Journey with AI
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 2.** In VS Code use the existing Playwright prompt/MCP workflow to create a stronger empty-cart test. Require the agent to explore the live app first, generate the test, run it, and iterate until it passes. Save the result as `e2e/demo-empty-cart.spec.ts`. Delete or revert the demo file after the session. Return to **When a Test Fails, Don't Guess**.
+> **RUNBOOK: Demo 2.** **A)** Playwright MCP: Copilot drives the storefront as a secret shopper and audits the Special Offers - no code. **B)** `/playwright` prompt → `e2e/demo-empty-cart.spec.ts` → run until green. Delete the file after. Return to **When a Test Fails, Don't Guess**.
 
 ## WHY THIS DEMO
 
-This makes the **AI** part of the title real. The repo already contains:
+This makes the **AI** part of the title real, in two steps:
+
+- **Part A** - Copilot drives a real browser through the storefront from a
+  plain-English request, using the Playwright MCP server. No test code at all.
+- **Part B** - the same MCP tools explore the live app *before* writing a
+  test, so the generated test is based on the real UI, not guesses.
+
+Use the repo's `/playwright` prompt for Part B:
 
 ```text
 .github/prompts/playwright.prompt.md
 ```
 
-That prompt explicitly tells Copilot to use Playwright MCP to interact with the application before writing code.
+It lists the Playwright MCP tools (`playwright/*`) and tells Copilot to explore
+the app before writing code. The custom `.github/agents/journey-author.agent.md`
+does **not** list the Playwright MCP tools, so it can't explore the live app -
+use the prompt file, not the agent, for this demo.
 
-The repo also contains a custom:
+## PART A - Playwright MCP: Copilot Drives the Storefront
+
+**Before the session:**
+
+1. Copilot Chat in **Agent** mode, with the Playwright MCP server running (the
+   tools picker lists the `playwright` tools).
+2. Warm the app: open https://wonderful-coast-040cb1a10.7.azurestaticapps.net/
+   once - the API can take 30-60 seconds on a cold start.
+3. Dry-run the prompt below once on the day and note how long it takes.
+
+## SAY
+
+> "Before we write a single line of test code, let's give Copilot a browser
+> and a job."
+
+## THE PROMPT
+
+Paste into Copilot Chat (Agent mode):
 
 ```text
-.github/agents/journey-author.agent.md
+You're a secret shopper for Gino's Gelato, and Gino suspects his website is
+making promises it doesn't keep. Use the Playwright browser tools to do this
+for real - don't write any code.
+
+1. Open https://wonderful-coast-040cb1a10.7.azurestaticapps.net/
+2. Order three sundaes - one for Gino, one for Nico, and one for the Techorama
+   audience. Each one: Bowl Cup, three flavors of your choice (make them
+   interesting), with Hot Fudge and Whipped Cream. Add all three to the cart.
+3. On the Cart page, read me the "Special Offers" box.
+4. Check out as Gino Gelato (gino@ginosgelato.test, 555-0100) with Local
+   Delivery to 123 Gelato Street, Sweet City, SC 12345. Stop at the payment
+   step. Do NOT place the order.
+5. Report back like Gino's accountant: an itemized bill, then for each Special
+   Offer - did this order qualify, and was it actually applied? Show the math
+   and end with a one-line verdict.
 ```
 
-Use either path depending on what is most reliable in the current VS Code build.
+## WHAT SHOULD HAPPEN
 
-## RECOMMENDED PROMPT
+Each sundae is $10.25 (Bowl Cup $3.00 + 3 flavors × $2.00 + Hot Fudge $0.75 +
+Whipped Cream $0.50), so three make a **$30.75 subtotal** - enough to qualify
+for every offer on the Cart page:
+
+| Special Offer | Qualifies? | Applied? |
+|---|---|---|
+| Free topping with 3+ items | Yes - 3 items | **No** |
+| 10% off orders over $25 | Yes - $30.75 | **No** |
+| Free delivery on $30+ orders | Yes - $30.75 | **No** - $4.99 delivery fee charged |
+
+Order Summary at the payment step: Subtotal **$30.75**, Tax (8.5%) **$2.61**,
+Delivery **$4.99**, Total **$38.35**.
+
+This is a real bug, not a staged one: the offers are display-only text in
+`ginos-gelato/client/src/pages/Cart.tsx`, and neither the client checkout nor
+the API (`ginos-gelato/server/Services/PricingService.cs`) applies any of them.
+
+## SHOW
+
+- The browser moving by itself while the tool calls (`browser_navigate`,
+  `browser_click`, `browser_snapshot`, ...) stream into the chat.
+- The accountant's verdict.
+
+## SAY
+
+> "No selectors. No code. Copilot read the page the way a screen reader does,
+> drove a real browser, and caught Gino's website breaking three promises.
+> Now let's have it write a test we can keep."
+
+**If it runs long:** stop it once the $4.99 delivery fee appears in the Order
+Summary, and give the verdict yourself from the table above.
+
+## PART B - Turn Exploration into a Test
 
 Use the existing `/playwright` prompt file, then provide:
 
@@ -432,7 +581,25 @@ Playwright now also ships **Playwright Test Agents** that formalize the same kin
 Planner -> Generator -> Healer
 ```
 
-You do not need to generate those agents live. The Gino repo already has its own purpose-built agent and MCP prompt, which keeps the demo specific to the application.
+You do not need to generate those agents live. The Gino repo already has its own purpose-built MCP prompt, which keeps the demo specific to the application.
+
+## OPTIONAL SWAP - Healer agent (replaces Part B, never added to it)
+
+Only if rehearsed - Part B is the reliable path.
+
+1. Before the session, on a scratch branch, generate the agents once
+   (Playwright 1.56+; the repo uses 1.58):
+
+   ```text
+   npx playwright init-agents --loop=vscode
+   ```
+
+2. Live: copy Journey 1 to a scratch spec and break one locator (for example
+   `'Waffle Cone'` → `'Waffle Cones'`). Run it red.
+3. Ask the **healer** agent to fix it. Show the diff, run it green.
+
+> "The healer didn't guess - it re-read the real page and repaired the
+> locator. I still review the change."
 
 ## CLEANUP
 
@@ -449,6 +616,7 @@ e2e/demo-empty-cart.spec.ts
 ```
 
 Do not leave a demo-only test in the branch unless you decide it has real value.
+Part A creates nothing - it stops before placing the order.
 
 ## RETURN TO
 
@@ -456,64 +624,86 @@ Do not leave a demo-only test in the branch unless you decide it has real value.
 
 ---
 
-# DEMO 3 - Debug with UI Mode and Trace Viewer
+# DEMO 3 - Debug with UI Mode, Trace Viewer, and AI
 
 **Target:** 5 minutes  
 **Demo slide:** Break It, Diagnose It, Fix It
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 3.** Run Journey 1 in Playwright UI Mode, then open the trace/timeline and show actions, locator details, DOM snapshots, console, and network information. If a recent scheduled run has a flaky retry/failure, use that as the failure example. Do not manufacture a random failure on stage. Return to **Local Testing Has a Ceiling**.
+> **RUNBOOK: Demo 3.** Run `journey-5-shipping-order.spec.ts` in UI Mode. Tour the timeline on a passing test, then open the **PO Box** failure: error, steps, DOM snapshot. Click **Copy prompt** and let Copilot say whether the bug is in the test or the app. Return to **Local Testing Has a Ceiling**.
 
 ## SAY
 
 > "When a browser test fails, the worst debugging strategy is rerun it and stare harder. Playwright gives us evidence."
 
-## OPTION A - Reliable live path
+## WHY THE PO BOX TEST
 
-Run UI Mode:
+`e2e/journey-5-shipping-order.spec.ts` contains **"rejects shipping to a PO Box
+address"** - a test that fails on every run, by design. It asserts a business
+rule the app doesn't implement yet (no shipping to PO Boxes). It's a real
+failure, not a staged or flaky one, so there's nothing to manufacture on stage.
+The same test also shows up red in Demo 4's cloud report and on the
+Reliability Dashboard.
+
+## PART A - UI Mode tour (1.5 min)
 
 ```text
-npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --ui
+npx playwright test e2e/journey-5-shipping-order.spec.ts --ui
 ```
 
-Run the test once and select it.
-
-## SHOW
-
-Keep this to four things:
+Run the whole file. Select **Shipping order completes end-to-end** (green) and
+keep it to four things:
 
 1. Timeline / time-travel view.
 2. The locator used for an action.
 3. DOM snapshot at that moment.
 4. Network or console information.
 
-Then say:
+## PART B - Break It, Diagnose It (2 min)
 
-> "This is why a browser test failure can be a debugging artifact, not just a red X."
+Select **rejects shipping to a PO Box address** (red).
 
-## OPTION B - If a recent scheduled run has a failure
+1. **Errors** tab: *"App should reject shipping to a PO Box, but no such
+   validation exists yet."*
+2. Step through the actions: the address typed as `PO Box 1234`, then
+   **Continue to Payment** clicked.
+3. DOM snapshot after the click: the app went straight to the payment step,
+   with no error message.
 
-The daily workflow intentionally includes flaky examples. If the latest run contains a retry/failure:
+> "The test isn't broken. The app is missing a rule - and Playwright handed us
+> the evidence."
 
-1. Open the HTML report or artifact.
-2. Select one failed/retried test.
-3. Open its trace.
-4. Show the exact action and page state where it failed.
+## PART C - Fix It, with AI (1.5 min)
 
-Do not spend time trying to force a random test to fail live.
+1. On the error, click **Copy prompt** (Playwright 1.51+, in UI Mode and in the
+   HTML report). It copies the error, the test source and a page snapshot as a
+   ready-made prompt.
+2. Paste it into Copilot Chat and add:
 
-## OPTIONAL TRACE COMMAND
+   ```text
+   Is this a bug in the test or in the app? Where would the fix go?
+   ```
 
-If you want a guaranteed trace from a successful run:
+3. Expected answer: the test is right; the checkout's shipping step has no PO
+   Box validation.
+
+Don't implement the fix live. "Fix It" here means knowing exactly where and why,
+in seconds.
+
+If **Copy prompt** isn't there in your build, select the error text, paste it
+into Copilot Chat yourself, and ask the same question. Check this in rehearsal.
+
+## BACKUP
+
+The PO Box test also fails in every cloud-scale run, so its trace is in the
+latest Portal report (Demo 4 Part C) and in the GitHub Actions
+`cloud-scale-results-*` artifact.
+
+For an HTML-report version of the same flow (it also has **Copy prompt**):
 
 ```text
-npx playwright test e2e/journey-1-happy-path-pickup.spec.ts --trace on
-```
-
-Then:
-
-```text
+npx playwright test e2e/journey-5-shipping-order.spec.ts --trace on
 npx playwright show-report
 ```
 
@@ -525,12 +715,12 @@ npx playwright show-report
 
 # DEMO 4 - Run the Same Suite at Scale in Azure
 
-**Target:** 8 minutes  
+**Target:** 10 minutes  
 **Demo slide:** Run the Same Suite at Scale in Azure
 
 ## Speaker note for the Demo slide
 
-> **RUNBOOK: Demo 4.** Show `playwright.service.config.ts`, then trigger the dedicated GitHub Actions cloud workflow or run the stable suite with `--workers=20`. Immediately switch to a pre-completed run in Azure App Testing -> Playwright Workspaces. Show parallel cloud browsers, results, and one diagnostic artifact. If useful, briefly show Live View or Take Control. Return to **The Feedback Loop**.
+> **RUNBOOK: Demo 4.** Show `playwright.service.config.ts`, then trigger the **Playwright Testing - Daily Schedule** GitHub Actions workflow or run the stable suite with `--workers=20`. Immediately switch to a pre-completed run in Azure App Testing -> Playwright Workspaces -> Test runs and open its **Ginos Gelato - Testing at Scale** report. Show parallel cloud browsers, results, and one diagnostic artifact. Then open the **Reliability Dashboard** (https://pagelsr.github.io/GinosGelato/) and show the same run as a ☁️ Cloud Scale row next to the 🖥️ CI Runner row. Return to **Gino's Testing Recipe**.
 
 ## SAY
 
@@ -562,77 +752,85 @@ npx playwright test --config=playwright.service.config.ts --workers=20 --grep-in
 Either:
 
 - GitHub -> Actions -> **Playwright Testing - Daily Schedule** -> Run workflow
-  (runs `run-playwright-tests` then `run-playwright-tests-at-scale` right
-  after it), or
+  (runs `run-playwright-tests` and `run-playwright-tests-at-scale` in
+  parallel, then `publish-dashboard`), or
 - Run the command locally after `az login` and setting `PLAYWRIGHT_SERVICE_URL`.
 
 Do not wait on stage.
 
 Immediately switch to the pre-completed run.
 
-## PART C - Azure Portal
+## PART C - Azure Portal: Playwright Workspace Test runs
 
 Open:
 
 ```text
-Azure App Testing -> Playwright Workspaces -> <workspace> -> Test runs
+Azure App Testing -> Playwright Workspaces -> pwwuxryfogy5mzkc -> Test runs
 ```
 
-Select the pre-run conference run.
+(Or type `pwwuxryfogy5mzkc` in the Portal search bar, then select **Test
+runs** in the left menu.)
+
+1. **The Test runs list.** Point at the columns: **Time**, **Triggered by**
+   (the GitHub Actions icon - CI started these, not a laptop), **Duration**,
+   **Max Concurrent Sessions** (how many cloud browsers ran at once) and
+   **Branch**. One sentence: "Every CI run lands here automatically."
+2. **Open the pre-run conference run.** Click the run you verified in **Pre-run
+   the cloud demo** (or switch to the tab you already have open). It opens as
+   **Ginos Gelato - Testing at Scale** - the `runName` from
+   `playwright.service.config.ts`.
+3. **The run summary.** Total, passed, failed and flaky counts, and the
+   overall duration.
+4. **One test.** Click a test - ideally **rejects shipping to a PO Box
+   address**, the same failure from Demo 3 - and open its trace,
+   screenshot or recording.
+
+If a run shows **HTTP 404: The specified blob does not exist**, don't
+troubleshoot on stage - switch to the pre-verified report tab. (Cause: that
+run's report was never uploaded; see **Reporting storage access**.)
 
 ## SHOW
 
 Keep it focused:
 
 - Same Playwright suite.
-- Multiple workers executing on managed cloud browsers.
+- Multiple workers executing on managed cloud browsers (**Max Concurrent
+  Sessions**).
 - Overall duration and result summary.
 - A test result.
 - Trace/screenshot/recording if present.
 - Live View or Take Control only if it is already staged and reliable.
 
-## KEY LINE
-
-> "Playwright gave us the test. Azure gives us the browser fleet."
-
-## OPTIONAL CROSS-BROWSER POINT
-
-The current repo keeps the live demo on Chromium for simplicity. Playwright Workspaces supports the browser and operating system matrix Playwright supports. If you want a future version of the demo to show multiple browsers, add Firefox and WebKit as **cloud-only** projects rather than changing the existing telemetry workflow.
-
-## RETURN TO
-
-**The Feedback Loop**
-
----
-
-# BONUS - Testing at Scale: Reporting Dashboards
-
-**Target (if time permits):** 7 minutes
-**Use this if:** Demo 4 lands early, or during Q&A — not inserted into the
-core 60 minutes (see the updated timing guide below).
-
-## WHY THIS DEMO
-
-Gino's Gelato's GitHub Pages dashboard now blends **both** run types - the
-daily local run and the Azure cloud-scale run - into one timeline and table,
-tagged with a Mode badge. The point isn't "which view is better" - it's that
-the blended dashboard answers "is this trending up or down," the Azure
-Portal answers "why did this exact run fail," and the GitHub Actions pipeline
-graph itself answers "was it actually worth it" - no narration required.
-
 ## SAY
 
-> "Running tests at scale is only half the story. The other half is being
-> able to answer two different questions fast: is this getting better or
-> worse over time, and why did this exact run fail."
+> "This is the evidence for one exact run - test by test, browser by
+> browser. Now let's zoom out from one run to every run."
 
-## PART A - The blended dashboard (GitHub Pages)
+## PART D - The Reliability Dashboard
 
-Open:
+Switch to the dashboard tab from **Stage Setup**:
 
 ```text
 https://pagelsr.github.io/GinosGelato/
 ```
+
+The page is titled **Gino's Gelato — Customer Journey & Reliability
+Dashboard**. It blends **both** run types - the CI runner (1 worker) and the
+Azure cloud-scale run (20 workers) - into one timeline and table. Walk it top
+to bottom:
+
+1. **KPI strip** (top row) - the latest run's headline numbers.
+2. **Test Outcome Trend** - leave **All runs** selected. The legend line
+   above the chart reads `● CI Runner (1 worker)  ◆ Cloud Scale (parallel
+   Azure Playwright Workspaces)`. Hover a ◆ diamond, then a ● circle next to
+   it, and compare durations. Optionally toggle **Passed** off so only
+   **Failed** and **Flaky** remain.
+3. **Flaky Test Distribution** - the tests that passed only on retry over
+   the last 50 runs. This is the "which tests do we stop trusting" view.
+4. **Recent Test Runs** - point at the **Mode** column: `🖥️ CI Runner ×1`
+   next to `☁️ Cloud Scale ×20` from the same workflow run - the ☁️ row is
+   the run you just opened in the Portal (match it by time). Click one row's
+   report link to show it opens that run's archived HTML report.
 
 ## SHOW
 
@@ -652,30 +850,37 @@ https://pagelsr.github.io/GinosGelato/
 > entirely from our own Playwright JSON reports, tagged by which job produced
 > them - no extra Azure resource required for this view."
 
-## PART B - Azure-native scale reporting (Playwright Workspace)
+## KEY LINE
 
-There's no separate dashboard link to open - test run reports live inside
-Azure Portal navigation. Open:
+> "Playwright gave us the test. Azure gives us the browser fleet. The
+> Portal shows the evidence for one exact run; the Reliability Dashboard
+> shows whether we're getting better or worse over time."
 
-```text
-Azure Portal -> Azure App Testing -> Playwright Workspaces -> <workspace name,
-from the provision-infrastructure job's Infrastructure Deployment Summary> ->
-Test runs
-```
+## OPTIONAL CROSS-BROWSER POINT
 
-## SHOW
+The current repo keeps the live demo on Chromium for simplicity. Playwright Workspaces supports the browser and operating system matrix Playwright supports. If you want a future version of the demo to show multiple browsers, add Firefox and WebKit as **cloud-only** projects rather than changing the existing telemetry workflow.
 
-- This run's parallel workers and overall duration.
-- A single test's trace, screenshot, or recording.
-- Live View or Take Control, only if already staged and reliable.
+## RETURN TO
 
-## SAY
+**Gino's Testing Recipe**
 
-> "The blended dashboard told us there's a cloud-scale run and roughly how
-> fast it was. This tells us exactly what happened, test by test, browser by
-> browser."
+---
 
-## PART C - The Fan-Out / Fan-In Graph (Build and Deploy to Azure)
+# BONUS - The Fan-Out / Fan-In Graph
+
+**Target (if time permits):** 3 minutes
+**Use this if:** Demo 4 lands early, or during Q&A — not inserted into the
+core 60 minutes (see the timing guide below). The Reliability Dashboard and
+the Portal Test runs are **not** part of this bonus - they're core, in
+Demo 4.
+
+## WHY THIS DEMO
+
+The dashboard answers "is this trending up or down," the Portal answers "why
+did this exact run fail," and the GitHub Actions pipeline graph itself
+answers "was it actually worth it" - no narration required.
+
+## PART A - Build and Deploy to Azure graph
 
 This one needs zero narration - the GitHub Actions graph proves the point by
 itself. Open:
@@ -718,24 +923,22 @@ fan-out / fan-in shape, just one box wider:
 
 ```text
 Run Playwright Tests  ─┐
-                         ├─► Publish Test Dashboard
+                         ├─► Publish to Test Dashboard
 Validate at Scale      ─┘
 ```
 
 If there's time, open that workflow's graph too - it's the one worth
 dwelling on, since those two boxes are the exact runs that produced the
-"CI Runner" and "Cloud Scale" rows the audience just saw on the dashboard a
-few minutes ago. `Publish Test Dashboard` is the fan-in: it waits for both,
+"CI Runner" and "Cloud Scale" rows the audience saw on the dashboard in
+Demo 4. `Publish to Test Dashboard` is the fan-in: it waits for both,
 then does the single write to GitHub Pages so the two parallel jobs never
 race each other for the same file.
 
 ## KEY LINE
 
-> "One dashboard shows the trend, blended across every pipeline job. The
-> other shows the evidence for one exact run. And the pipeline graph itself
-> shows the payoff, in plain daylight, with no explanation required. Together
-> they cover the whole lifecycle of a test failure — from 'something's wrong'
-> to 'here's the fix' to 'here's why it's worth running at scale.'"
+> "The dashboard shows the trend, the Portal shows the evidence for one
+> exact run, and the pipeline graph itself shows the payoff, in plain
+> daylight, with no explanation required."
 
 ## RETURN TO
 
@@ -747,9 +950,18 @@ race each other for the same file.
 
 After Demo 4, stay in PowerPoint.
 
-## The Feedback Loop
+## Gino's Testing Recipe
 
-Land this flow:
+The whole talk in six steps, under the line *"The goal is not more tests. The
+goal is more confidence per change."* Read the headings quickly, don't
+re-explain them, and leave the links on screen:
+
+```text
+playwright.dev | learn.microsoft.com/azure/app-testing | github.com/PagelsR/GinosGelato
+```
+
+The **Feedback Loop** slide is hidden in the deck. If you have spare time, unhide
+it and land this flow before the Recipe:
 
 ```text
 Requirement
@@ -781,21 +993,25 @@ Secure it -> Test it -> Ship with confidence
 | Section | Target |
 |---|---:|
 | Gino/Nico story + why testing | 7 min |
-| Playwright fundamentals | 8 min |
+| Playwright fundamentals | 7 min |
 | Demo 1 - customer journey | 6 min |
-| AI-assisted authoring | 6 min |
-| Demo 2 - AI journey creation | 7 min |
+| AI-assisted authoring | 5 min |
+| Demo 2 - Playwright MCP + AI journey creation | 9 min |
 | Debugging + reliability | 5 min |
-| Demo 3 - UI Mode / trace | 5 min |
-| CI + Azure App Testing | 6 min |
-| Demo 4 - Azure scale | 8 min |
+| Demo 3 - UI Mode / trace / Copy prompt | 5 min |
+| CI + Azure App Testing | 4 min |
+| Demo 4 - Azure scale + Reliability Dashboard | 10 min |
 | Closing | 2 min |
 
 **Total:** 60 minutes
 
-**Optional, time-permitting:** BONUS - Testing at Scale: Reporting Dashboards
-(~7 min). Not part of the 60-minute core — use only if Demo 4 lands early or
-during Q&A.
+Demo 4 grew by 2 minutes for the Reliability Dashboard (Part D); the
+CI + Azure App Testing slides give up those 2 minutes, since the dashboard
+now shows what those slides used to explain.
+
+**Optional, time-permitting:** BONUS - The Fan-Out / Fan-In Graph (~3 min).
+Not part of the 60-minute core — use only if Demo 4 lands early or during
+Q&A.
 
 ---
 
@@ -804,15 +1020,24 @@ during Q&A.
 If time gets tight:
 
 1. Never cut Demo 1. It establishes the customer journey.
-2. Keep Demo 2 because AI is in the title.
-3. Shorten Demo 3 to a 60-second UI Mode tour.
-4. Never cut Demo 4. Azure scale is the payoff.
-5. Cut the Testing at Scale Reporting bonus demo first — it's optional.
+2. Keep Demo 2 because AI is in the title. If short, stop Part A once the
+   $4.99 delivery fee appears and give the verdict yourself.
+3. Shorten Demo 3 to Parts B and C (the PO Box failure and Copy prompt) -
+   skip the tour, keep the AI.
+4. Never cut Demo 4, including Part D (Reliability Dashboard). Azure scale
+   is the payoff. If short on time, trim Part C to the Test runs list plus
+   one trace, and Part D to the trend chart plus the Mode column.
+5. Cut the Fan-Out / Fan-In Graph bonus first — it's optional.
 
 If cloud access is slow:
 
 - Trigger the run, then immediately use the pre-completed Azure run.
 - The audience still sees the command and the cloud results without waiting.
+
+If Playwright MCP is slow or stalls:
+
+- The app is probably cold - it should have been warmed before the session.
+- Stop the agent and narrate the verdict from the Demo 2 Part A table.
 
 If AI generation drifts:
 
