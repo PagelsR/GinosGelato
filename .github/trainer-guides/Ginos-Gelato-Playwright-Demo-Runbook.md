@@ -59,7 +59,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
 # DEMO 1 - The Customer Journey Becomes Code
 
-**8 min · slide 10**
+**8 min · slide 9**
 
 **Part A - Getting started (3 min), starter-folder terminal**
 
@@ -119,7 +119,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
 # DEMO 2 - Create a New Journey with AI
 
-**11 min · slide 14** · explore → audit → test
+**11 min · slide 13** · explore → audit → test
 
 **Before:** Copilot Chat in **Agent** mode · Playwright MCP running · storefront warmed up.
 
@@ -176,7 +176,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
 # DEMO 3 - Break It, Diagnose It, Fix It
 
-**5 min · slide 16**
+**5 min · slide 15**
 
 1. Run:
 
@@ -204,9 +204,20 @@ Everything after **Timing** is reference material, not needed on stage.
 
 # DEMO 4 - Run the Same Suite at Scale in Azure
 
-**10 min · slide 21**
+**10 min · slide 20**
 
 **Before:** the verified report tab and the dashboard tab are already open.
+
+**Setup at a glance (1 min - talk through it, don't do it live; already done, see Appendix C)**
+
+- **Create a workspace:** Azure Portal → **Playwright Workspaces** → **Create** → pick a region, leave **Reporting** on.
+- **Grant access:** **Playwright Workspace Contributor** on the workspace for whoever runs tests (you and the CI identity), plus **Storage Blob Data Contributor** on the reporting storage so reports can upload.
+- **Add two packages:** `npm install -D @azure/playwright @azure/identity`.
+- **Point at the workspace:** copy the workspace's service URL into `PLAYWRIGHT_SERVICE_URL` (an env var locally, a GitHub secret in CI).
+- **Add one config file:** `playwright.service.config.ts` wraps the existing config - no test changes.
+- **Sign in and run:** `az login` locally, or an `azure/login` step in GitHub Actions, then run with `--config=playwright.service.config.ts`.
+
+**Say:** "Same tests, same config, one extra file. The browsers just live in Azure now."
 
 **Part A - The config (1.5 min)**
 
@@ -221,7 +232,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
 3. GitHub → Actions → **Playwright Testing - Daily Schedule** → **Run workflow**. Move on.
 
-**Part C - Portal Test runs (4 min)**
+**Part C - Portal Test runs (3.5 min)**
 
 4. Portal → `pwwuxryfogy5mzkc` → **Test runs**. Point at **Triggered by** (GitHub), **Duration**, **Max Concurrent Sessions**.
 5. Open the verified run → **Ginos Gelato - Testing at Scale** report → the summary counts.
@@ -229,7 +240,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
    **Say:** "Playwright gave us the test. Azure gives us the browser fleet."
 
-**Part D - Reliability Dashboard (4 min)**
+**Part D - Reliability Dashboard (3.5 min)**
 
 7. Switch to https://pagelsr.github.io/GinosGelato/
 8. **Test Outcome Trend:** hover a ◆ (Cloud Scale), then a ● (CI Runner) → compare durations.
