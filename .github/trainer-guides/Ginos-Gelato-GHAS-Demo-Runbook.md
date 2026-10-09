@@ -50,7 +50,13 @@ Everything after **Timing** is reference, not needed on stage.
 
 1. On the live storefront, start a normal order so the room sees it working.
 2. When a field asks for a **Username**, paste the SQL-injection string from
-   `Ginos Vulnerable Gelato Demo Notes.md` → **Demo 0**, exactly. Submit.
+   `Ginos Vulnerable Gelato Demo Notes.md` → **Demo 0**, exactly.
+
+``` sql
+'; DELETE FROM "Toppings"; DELETE FROM "Flavors"; INSERT INTO "Flavors" ("Name", "Description", "Color", "Emoji") VALUES (N'Earwax', N'A disturbingly authentic waxy, musky flavor that lingers far too long', N'#C8A96E', N'👂'), (N'Bogey', N'Salty, viscous, and unmistakably nasal — you were warned', N'#6B8E23', N'🤧'), (N'Vomit', N'Acidic, chunky, and deeply regrettable from the first lick', N'#9ACD32', N'🤮'), (N'Dirty Sock', N'Damp wool and foot sweat aged to a funky, toe-curling perfection', N'#8B7355', N'🧦'), (N'Rotten Egg', N'The sulfurous bouquet of an egg left far past its welcome', N'#D4C85A', N'🥚'), (N'Tripe', N'A honeycomb-textured horror with the full-bodied funk of offal', N'#D2B48C', N'🫀'), (N'Sprouts', N'Overboiled Brussels sprouts with that unique bitter, sulfurous finish', N'#556B2F', N'🥦'), (N'Sardine', N'Briny, oily, and fishy in the most unwelcome frozen dessert way', N'#708090', N'🐟'); INSERT INTO "Toppings" ("Name", "Price", "Emoji") VALUES (N'Earthworm Gummies', 0.75, N'🪱'), (N'Booger Sprinkles', 0.50, N'💚'), (N'Dirt Dust', 0.25, N'🌱'), (N'Pickled Cabbage Shreds', 0.75, N'🥬'), (N'Anchovy Crumbles', 1.00, N'🐟'), (N'Liver Bits', 1.25, N'🩸'), (N'Soggy Newspaper Flakes', 0.50, N'📰'), (N'Moldy Cheese Crumbles', 1.00, N'🧀'); --
+```
+3. Submit form
+
 3. Return to the homepage - every flavor is now revolting.
 
    **Say:** "Someone typed into the order form and the database did what it was told. The damage isn't a severity score - it's the brand on the sign above his door."
@@ -63,7 +69,7 @@ Everything after **Timing** is reference, not needed on stage.
 
 # DEMO 1 - Secret Protection & Push Protection
 
-**10 min · slide 11**
+**10 min · slide 10**
 
 **1.1 Existing secret alerts (1 min)**
 
@@ -78,6 +84,10 @@ Everything after **Timing** is reference, not needed on stage.
 2. In VS Code, create a branch. Open any file and paste the **test PAT** from
    `Ginos Vulnerable Gelato Demo Notes.md` → **Demo 1 / Push Protection**.
 3. Commit → **blocked**.
+
+```
+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
+```
 
    **Say:** "This one never makes it in. Prevention beats detection."
 4. Demonstrate the bypass: mark the reason **false positive** and commit. Mention that **Delegated Alert Dismissal** can require a reviewer to approve bypasses (off in this lab).
@@ -120,7 +130,7 @@ Everything after **Timing** is reference, not needed on stage.
 
 # DEMO 2 - Dependency Management
 
-**8 min · slide 16**
+**8 min · slide 13**
 
 **2.1 Dependabot + Copilot (start, then leave it)**
 
@@ -157,7 +167,7 @@ Everything after **Timing** is reference, not needed on stage.
 
 # DEMO 3 - Code Scanning, Autofix & Campaigns
 
-**12 min · slide 21**
+**12 min · slide 17**
 
 > **Order of operations:** start 3.1, then start 3.2; while both run, do 3.3; return to 3.1/3.2 results; finish with 3.4 (optional). Demo 3.3 often ends with no results - that's the point.
 
