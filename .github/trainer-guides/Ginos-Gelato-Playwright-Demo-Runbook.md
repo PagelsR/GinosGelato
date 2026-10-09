@@ -14,7 +14,7 @@
 | Demo | Slide | Min | The audience sees |
 |---|---:|---:|---|
 | 1 - The Customer Journey Becomes Code | 10 | 8 | Install, CLI favorites, codegen records an order, Journey 1 runs |
-| 2 - Create a New Journey with AI | 14 | 9 | Copilot drives the storefront, finds 3 broken promises, writes a test |
+| 2 - Create a New Journey with AI | 14 | 11 | Copilot explores the site, audits the offers, then writes a test |
 | 3 - Break It, Diagnose It, Fix It | 16 | 5 | A real failure, diagnosed in UI Mode, explained by Copilot |
 | 4 - Run the Same Suite at Scale in Azure | 21 | 10 | 20 cloud browsers, the Portal report, the Reliability Dashboard |
 
@@ -31,7 +31,7 @@ Everything after **Timing** is reference material, not needed on stage.
 - [ ] Portal → `pwwuxryfogy5mzkc` → **Test runs** → newest run opens the **Ginos Gelato - Testing at Scale** report (no 404) and a trace opens. Note the run's time.
 - [ ] Dashboard shows a new `🖥️ CI Runner ×1` + `☁️ Cloud Scale ×20` pair.
 - [ ] Demo 1 starter folder: in an empty folder (e.g. `C:\demo\playwright-start`) run `npm init playwright@latest` and accept the defaults - so nothing downloads on stage.
-- [ ] Rehearse `/demo-secret-shopper` and `/demo-empty-cart` once. Note how long the secret shopper takes.
+- [ ] Rehearse `/demo-explore-site`, `/demo-secret-shopper` and `/demo-empty-cart` once. Note how long each takes.
 - [ ] Save a known-good `demo-empty-cart.spec.ts` outside the repo as a backup.
 - [ ] Confirm **Copy prompt** shows on a failed test in UI Mode.
 
@@ -119,20 +119,32 @@ Everything after **Timing** is reference material, not needed on stage.
 
 # DEMO 2 - Create a New Journey with AI
 
-**9 min · slide 14**
+**11 min · slide 14** · explore → audit → test
 
 **Before:** Copilot Chat in **Agent** mode · Playwright MCP running · storefront warmed up.
 
-**Part A - Secret shopper: Copilot drives the storefront (3-4 min)**
+**Part A - Explore: Copilot tours the site (2 min)**
 
 1. In Copilot Chat, type:
+
+   ```text
+   /demo-explore-site
+   ```
+
+2. Let it run. Point at the browser moving by itself and the `browser_*` tool calls in the chat.
+3. → Expect a page-by-page summary, the main journeys, top 3 tests to write, and **3 dead footer links**: Privacy Policy, Terms of Service and Nutrition Info go to `/privacy`, `/terms` and `/nutrition`, which the app doesn't have.
+
+   **Say:** "It read the site like a screen reader would - and found broken links on its first day."
+
+**Part B - Secret shopper: Copilot audits the offers (3-4 min)**
+
+4. In Copilot Chat, type:
 
    ```text
    /demo-secret-shopper
    ```
 
-2. Let it run. Point at the browser moving by itself and the `browser_*` tool calls in the chat.
-3. → Expect this verdict ($30.75 subtotal + $2.61 tax + $4.99 delivery = **$38.35**):
+5. → Expect this verdict ($30.75 subtotal + $2.61 tax + $4.99 delivery = **$38.35**):
 
    | Special Offer | Qualifies? | Applied? |
    |---|---|---|
@@ -144,9 +156,9 @@ Everything after **Timing** is reference material, not needed on stage.
 
    **Say:** "No selectors, no code - and it caught Gino's site breaking three promises."
 
-**Part B - Turn exploration into a test (5 min)**
+**Part C - Turn exploration into a test (5 min)**
 
-4. In Copilot Chat, type:
+6. In Copilot Chat, type:
 
    ```text
    /demo-empty-cart
@@ -156,7 +168,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
    **Say:** "Explore, generate, run, fix, green. And I still review the assertion."
 
-**If it breaks:** Part A is slow → stop once $4.99 shows in the Order Summary and give the verdict from the table. Part B drifts → stop after it explores; open your backup `demo-empty-cart.spec.ts`.
+**If it breaks:** Part A is slow → stop it and read out whatever it has found. Part B is slow → stop once $4.99 shows in the Order Summary and give the verdict from the table. Part C drifts → stop after it explores; open your backup `demo-empty-cart.spec.ts`. Short on time → skip Part B.
 
 **After:** delete `e2e/demo-empty-cart.spec.ts`.
 
@@ -247,7 +259,7 @@ The **Feedback Loop** slide (22) is hidden. Unhide it only if you have spare tim
 | Cloud run is slow | Never wait. Use the verified run. |
 | Report shows HTTP 404 | Switch to the verified report tab. |
 | AI drifts | Stop after it explores; open the backup `demo-empty-cart.spec.ts`. |
-| Running long | Cut in this order: Demo 3 step 2 → Demo 4 short path → Demo 2 Part A early stop. Never cut Demo 1 or Demo 4. |
+| Running long | Cut in this order: Demo 2 Part B → Demo 3 step 2 → Demo 4 short path. Never cut Demo 1 or Demo 4. |
 
 ---
 
@@ -259,15 +271,15 @@ The **Feedback Loop** slide (22) is hidden. Unhide it only if you have spare tim
 | Playwright basics | 8-9 | 3 |
 | **Demo 1** | 10 | 8 |
 | Anatomy + AI + MCP | 11-13 | 5 |
-| **Demo 2** | 14 | 9 |
+| **Demo 2** | 14 | 11 |
 | When a test fails | 15 | 2 |
 | **Demo 3** | 16 | 5 |
 | Ceiling → Azure → repo changes | 17-20 | 6 |
 | **Demo 4** | 21 | 10 |
 | Recipe + thank you | 23-24 | 2 |
-| **Total** | | **56** |
+| **Total** | | **58** |
 
-That leaves 4 minutes of buffer for transitions and questions.
+That leaves 2 minutes of buffer. If you need more, skip Demo 2 Part B (the secret shopper) - it frees 3-4 minutes.
 
 ---
 ---
@@ -292,7 +304,7 @@ No application code changes were needed. The talk adds:
 | Post-deploy smoke | `validate-at-scale` in `.github/workflows/BuildDeploy.yml` (journeys only, 10 workers) |
 | Workspace IaC | `iac/playwrightWorkspace.bicep`, referenced as existing by default (`createPlaywrightWorkspace = false`) |
 | Dashboard | `.github/pages/dashboard.html`, published to GitHub Pages by the `publish-dashboard` job |
-| AI prompts | `.github/prompts/playwright.prompt.md`, `demo-secret-shopper.prompt.md`, `demo-empty-cart.prompt.md` |
+| AI prompts | `.github/prompts/playwright.prompt.md`, `demo-explore-site.prompt.md`, `demo-secret-shopper.prompt.md`, `demo-empty-cart.prompt.md` |
 | AI conventions | `.github/skills/ginos-gelato-playwright/SKILL.md`, `.github/agents/journey-author.agent.md` (no MCP tools - use the prompt files for Demo 2) |
 
 `playwright-testing.yml` fans out and back in, so only one job writes to GitHub Pages:
@@ -360,9 +372,9 @@ az role assignment create --assignee $myObjectId --role "Storage Blob Data Contr
 - To see which identity CI really uses: the **Triggered by** ID on a run in **Test runs** is that service principal's object ID.
 - Runs from before the storage fix (2026-10-08) always show a 404 - never pick those on stage.
 
-## D. Optional: Healer agent swap (replaces Demo 2 Part B)
+## D. Optional: Healer agent swap (replaces Demo 2 Part C)
 
-Only if rehearsed.
+Only if rehearsed. Replaces Part C.
 
 1. Before the session, on a scratch branch: `npx playwright init-agents --loop=vscode` (Playwright 1.56+; the repo uses 1.58).
 2. Live: copy Journey 1 to a scratch spec, break one locator (`'Waffle Cone'` → `'Waffle Cones'`), run it red.
