@@ -85,6 +85,10 @@ Everything after **Timing** is reference, not needed on stage.
    `Ginos Vulnerable Gelato Demo Notes.md` → **Demo 1 / Push Protection**.
 3. Commit → **blocked**.
 
+```
+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
+```
+
    **Say:** "This one never makes it in. Prevention beats detection."
 4. Demonstrate the bypass: mark the reason **false positive** and commit. Mention that **Delegated Alert Dismissal** can require a reviewer to approve bypasses (off in this lab).
 5. Repo → **Security** → show the new alert as **closed** with its audit trail.
