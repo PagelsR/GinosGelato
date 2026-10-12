@@ -126,11 +126,6 @@ if (fs.existsSync(historyPath)) {
 // Add new summary to history
 history.push(summary);
 
-// Keep only last 100 runs
-if (history.length > 100) {
-  history = history.slice(-100);
-}
-
 // Write updated history
 fs.writeFileSync(historyPath, JSON.stringify(history, null, 2));
 console.log(`Updated history with ${history.length} total runs`);

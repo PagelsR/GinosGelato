@@ -32,11 +32,12 @@ This directory contains the Test Results Dashboard that gets deployed to GitHub 
 
 ## Features
 
-- ✅ Pass/Fail trend chart (last 20 runs)
+- ✅ Selectable pass/fail trend chart (last 20, 50, 100, or all recorded runs)
 - ✅ Duration trend chart
 - ✅ Summary statistics (total runs, avg pass rate)
-- ✅ Recent test runs table with direct links
-- ✅ Keeps last 50 runs in history
+- ✅ Complete test runs table with direct links
+- ✅ Retains all recorded runs in history
+- ✅ Flaky test distribution chart (last 50 runs)
 - ✅ Mobile responsive design
 
 ## Viewing Reports
