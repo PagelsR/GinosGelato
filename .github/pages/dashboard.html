@@ -432,8 +432,8 @@
     <!-- Runs table -->
     <div class="section">
       <div class="section-hdr">
-        <span class="section-title">Recent Test Runs</span>
-        <span style="font-size:12px;color:var(--text-3)">Most recent first · up to 100 rows</span>
+        <span class="section-title">Test Runs</span>
+        <span id="runs-count-label" style="font-size:12px;color:var(--text-3)"></span>
       </div>
       <div class="tbl-wrap" id="runs-container">
         <div class="loading-state"><div class="spinner"></div>&nbsp;Loading…</div>
@@ -656,7 +656,9 @@
 
     /* ── Runs table ──────────────────────────────────────── */
     function renderTable(h) {
-      const ordered = [...h].reverse().slice(0, 100);
+      const ordered = [...h].reverse();
+      document.getElementById('runs-count-label').textContent =
+        `${ordered.length} recorded run${ordered.length === 1 ? '' : 's'} · most recent first`;
       const anomalies = findAnomalies(ordered.slice().reverse());
       const aiCol = APP_INSIGHTS_URL ? '<th>App Insights</th>' : '';
       const rows = ordered.map((r, i, arr) => {
