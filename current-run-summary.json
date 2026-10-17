@@ -1,8 +1,8 @@
 {
-  "runId": "2026-10-17-run-157-cloud-scale",
-  "timestamp": "2026-10-17T14:18:01.932Z",
+  "runId": "2026-10-17-run-158-cloud-scale",
+  "timestamp": "2026-10-17T18:08:34.514Z",
   "date": "2026-10-17",
-  "runNumber": "157",
+  "runNumber": "158",
   "total": 23,
   "passed": 21,
   "failed": 2,
@@ -10,10 +10,10 @@
   "chaosFailed": 0,
   "flaky": 1,
   "skipped": 0,
-  "duration": 56,
+  "duration": 51,
   "passRate": 91,
   "branch": "main",
-  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-10-17-run-157-cloud-scale",
+  "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-10-17-run-158-cloud-scale",
   "runType": "cloud-scale",
   "workers": 20
 }
