@@ -116,6 +116,16 @@ github_pat_11ABFFZUI0qoyKYTZsnbnC_WP4zIcGrtQvzaCmNYO9zw8KGgT4oRQzxIuRPDQVVEGUZI3
    → Expect: it points to the **database connection string (full string)** pattern and gives step-by-step add instructions, without printing the connection string.
 8. Add the pattern in **Settings → Advanced Security → Secret scanning → Custom patterns**. Scanning now flags the DB connection string as a secret.
 
+   ```
+   (?i)\b(?:Server|Data Source)\s*=\s*[^;]+;(?:[^;\r\n]*;\s*)*\s*(?:Initial Catalog|Database)\s*=\s*[^;\r\n;]+
+   ```
+
+9. Test it out
+
+   ```
+   Server=tcp:example.database.windows.net,1433;Initial Catalog=ExampleDb;User Id=test_user;Password=NOT_A_REAL_PASSWORD;Encrypt=True;
+   ```
+
 **1.4 Optional - AI credential audit (if time)**
 
 9. In Copilot Chat:
@@ -155,7 +165,7 @@ github_pat_11ABFFZUI0qoyKYTZsnbnC_WP4zIcGrtQvzaCmNYO9zw8KGgT4oRQzxIuRPDQVVEGUZI3
 
 **2.2 Dependency review blocks a bad PR (5 min)**
 
-3. Add these to the solution's package references:
+3. Add these to the solution's package references `GinosGelato.csproj`:
 
    ```xml
    <PackageReference Include="System.Formats.Nrbf" Version="9.0.0-rc.2.24473.5" />
