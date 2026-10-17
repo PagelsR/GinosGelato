@@ -10,4 +10,8 @@ pre-defined pattern (it can be multiple if you believe that is better) in the
 a database connection string, and tell me step by step how to add this custom
 pattern. Include a link to the pattern so I can verify it myself.
 
+show me the regex pattern I can add to my customer pattens.
+
+show me an example connection string I can test with.
+
 DO NOT EXPOSE THE FOUND CONNECTION STRING IN THIS CHAT. Keep your response brief.
