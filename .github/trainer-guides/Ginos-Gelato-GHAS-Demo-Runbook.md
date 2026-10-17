@@ -6,7 +6,7 @@
 |---|---|
 | Storefront | https://proud-desert-0f16d6910.7.azurestaticapps.net/ |
 | Template repo | https://github.com/mdo-test-org/Ginos-Gelato → click **Use this template** to create a new demo repo |
-| Your demo repo | `https://github.com/mdo-test-org/GinoAtTechorama2026` (fill in after you create it) |
+| Your demo repo | https://github.com/mdo-test-org/GinoAtTechorama2026 (fill in after you create it) |
 | Verbatim payloads | `Ginos Vulnerable Gelato Demo Notes.md` (SQL-injection string + test PAT live here - single source of truth) |
 | Custom patterns | https://github.com/advanced-security/awesome-secret-scanning |
 
