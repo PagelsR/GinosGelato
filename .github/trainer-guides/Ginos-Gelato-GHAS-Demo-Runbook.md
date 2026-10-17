@@ -4,8 +4,9 @@
 
 | | |
 |---|---|
+| Storefront | https://proud-desert-0f16d6910.7.azurestaticapps.net/ |
 | Template repo | https://github.com/mdo-test-org/Ginos-Gelato → click **Use this template** to create a new demo repo |
-| Your demo repo | `https://github.com/<you>/Ginos-Gelato` (fill in after you create it) |
+| Your demo repo | `https://github.com/mdo-test-org/GinoAtTechorama2026` (fill in after you create it) |
 | Verbatim payloads | `Ginos Vulnerable Gelato Demo Notes.md` (SQL-injection string + test PAT live here - single source of truth) |
 | Custom patterns | https://github.com/advanced-security/awesome-secret-scanning |
 
@@ -42,6 +43,14 @@ Everything after **Timing** is reference, not needed on stage.
 - **Browser:** demo repo **Security** tab · the live demo storefront · `advanced-security/awesome-secret-scanning`
 - **VS Code:** the cloned repo · Copilot Chat (Agent mode)
 
+## Manually Reset Database (use injection string)
+
+1. Reset the database using the SQL-injection string below.
+2. During check out in the **Username** field, paste the SQL-injection string from
+
+``` sql
+'; DELETE FROM "Toppings"; DELETE FROM "Flavors"; INSERT INTO "Flavors" ("Name", "Description", "Color", "Emoji") VALUES (N'Vanilla', N'Classic creamy vanilla with Madagascar vanilla bean', N'#F3E5AB', N'🤍'), (N'Chocolate', N'Rich dark chocolate gelato', N'#3D1C02', N'🤎'), (N'Strawberry', N'Fresh strawberry with real fruit pieces', N'#FC5A8D', N'🍓'), (N'Pistachio', N'Traditional Italian pistachio gelato', N'#93C572', N'🥜'), (N'Lemon Sorbet', N'Refreshing tart lemon sorbet', N'#FFF44F', N'🍋'), (N'Hazelnut', N'Creamy hazelnut with a nutty finish', N'#7B3F00', N'🌰'), (N'Mango Sorbet', N'Tropical mango sorbet made with real Alphonso mangoes', N'#FF8C00', N'🥭'), (N'Tiramisu', N'Italian coffee-mascarpone gelato with a hint of espresso', N'#C4A882', N'☕'); INSERT INTO "Toppings" ("Name", "Price", "Emoji") VALUES (N'Rainbow Sprinkles', 0.50, N'🌈'), (N'Chocolate Sauce', 0.75, N'🍫'), (N'Crushed Nuts', 0.75, N'🥜'), (N'Whipped Cream', 0.50, N'🥛'), (N'Cherries', 0.50, N'🍒'), (N'Caramel Drizzle', 0.75, N'🧈'), (N'Crushed Oreos', 1.00, N'🍪'), (N'Fresh Strawberries', 1.25, N'🍓'); --
+```
 ---
 
 # DEMO 0 - Break the Menu
@@ -49,7 +58,7 @@ Everything after **Timing** is reference, not needed on stage.
 **3 min · inline on slide 7 ("Scene Three: The Morning It Broke")**
 
 1. On the live storefront, start a normal order so the room sees it working.
-2. When a field asks for a **Username**, paste the SQL-injection string from
+2. During check out in the **Username** field, paste the SQL-injection string from
    `Ginos Vulnerable Gelato Demo Notes.md` → **Demo 0**, exactly.
 
 ``` sql
