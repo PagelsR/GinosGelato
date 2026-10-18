@@ -32,6 +32,7 @@ Everything after **Timing** is reference, not needed on stage.
 - [ ] In repo **Settings → Advanced Security**, enable: Secret scanning, **Push protection**, Code scanning (CodeQL default setup), Dependabot alerts, Dependency review, Code quality.
 - [ ] Let the first CodeQL scan finish so **Security → Code scanning** already shows ~20 findings.
 - [ ] Confirm **Secret scanning** already shows a couple of alerts (the seeded ones).
+- [ ] If you rehearsed in this repo, confirm `main` doesn't already have the Demo 2.2 packages (`System.Formats.Nrbf`, `Csla`) or the Demo 3.2 `SearchFlavors` endpoint. If it does, dependency review and CodeQL have nothing new to flag on the PR.
 - [ ] Confirm Copilot coding agent is available (you can assign issues/alerts to Copilot) in this repo.
 - [ ] Clone the repo locally and open it in VS Code with Copilot Chat in **Agent** mode.
 - [ ] Copy the three prompt files from `.github/prompts/` into your demo repo if they aren't already there: `ghas-find-sql-connection-pattern`, `ghas-credential-audit`, `ghas-dependabot-lodash`.
@@ -45,33 +46,36 @@ Everything after **Timing** is reference, not needed on stage.
 
 ## Manually Reset Database (use injection string)
 
-1. Reset the database using the SQL-injection string below.
-2. During check out in the **Username** field, paste the SQL-injection string from
+Use this after Demo 0 to put the real menu back.
+
+1. **Storefront (browser):** Start an order.
+2. At checkout, paste this restore string into the **Username** field exactly, then submit:
 
 ``` sql
 '; DELETE FROM "Toppings"; DELETE FROM "Flavors"; INSERT INTO "Flavors" ("Name", "Description", "Color", "Emoji") VALUES (N'Vanilla', N'Classic creamy vanilla with Madagascar vanilla bean', N'#F3E5AB', N'🤍'), (N'Chocolate', N'Rich dark chocolate gelato', N'#3D1C02', N'🤎'), (N'Strawberry', N'Fresh strawberry with real fruit pieces', N'#FC5A8D', N'🍓'), (N'Pistachio', N'Traditional Italian pistachio gelato', N'#93C572', N'🥜'), (N'Lemon Sorbet', N'Refreshing tart lemon sorbet', N'#FFF44F', N'🍋'), (N'Hazelnut', N'Creamy hazelnut with a nutty finish', N'#7B3F00', N'🌰'), (N'Mango Sorbet', N'Tropical mango sorbet made with real Alphonso mangoes', N'#FF8C00', N'🥭'), (N'Tiramisu', N'Italian coffee-mascarpone gelato with a hint of espresso', N'#C4A882', N'☕'); INSERT INTO "Toppings" ("Name", "Price", "Emoji") VALUES (N'Rainbow Sprinkles', 0.50, N'🌈'), (N'Chocolate Sauce', 0.75, N'🍫'), (N'Crushed Nuts', 0.75, N'🥜'), (N'Whipped Cream', 0.50, N'🥛'), (N'Cherries', 0.50, N'🍒'), (N'Caramel Drizzle', 0.75, N'🧈'), (N'Crushed Oreos', 1.00, N'🍪'), (N'Fresh Strawberries', 1.25, N'🍓'); --
 ```
+
+3. Refresh the homepage - the original menu is back.
+
 ---
 
 # DEMO 0 - Break the Menu
 
-**3 min · inline on slide 7 ("Scene Three: The Morning It Broke")**
+**3 min · inline on slide 7 ("Scene Three: The Morning It Broke") · Storefront (browser)**
 
-1. On the live storefront, start a normal order so the room sees it working.
-2. During check out in the **Username** field, paste the SQL-injection string from
-   `Ginos Vulnerable Gelato Demo Notes.md` → **Demo 0**, exactly.
+1. Open the live storefront and start a normal order so the room sees it working.
+2. At checkout, paste this string into the **Username** field exactly:
 
 ``` sql
 '; DELETE FROM "Toppings"; DELETE FROM "Flavors"; INSERT INTO "Flavors" ("Name", "Description", "Color", "Emoji") VALUES (N'Earwax', N'A disturbingly authentic waxy, musky flavor that lingers far too long', N'#C8A96E', N'👂'), (N'Bogey', N'Salty, viscous, and unmistakably nasal — you were warned', N'#6B8E23', N'🤧'), (N'Vomit', N'Acidic, chunky, and deeply regrettable from the first lick', N'#9ACD32', N'🤮'), (N'Dirty Sock', N'Damp wool and foot sweat aged to a funky, toe-curling perfection', N'#8B7355', N'🧦'), (N'Rotten Egg', N'The sulfurous bouquet of an egg left far past its welcome', N'#D4C85A', N'🥚'), (N'Tripe', N'A honeycomb-textured horror with the full-bodied funk of offal', N'#D2B48C', N'🫀'), (N'Sprouts', N'Overboiled Brussels sprouts with that unique bitter, sulfurous finish', N'#556B2F', N'🥦'), (N'Sardine', N'Briny, oily, and fishy in the most unwelcome frozen dessert way', N'#708090', N'🐟'); INSERT INTO "Toppings" ("Name", "Price", "Emoji") VALUES (N'Earthworm Gummies', 0.75, N'🪱'), (N'Booger Sprinkles', 0.50, N'💚'), (N'Dirt Dust', 0.25, N'🌱'), (N'Pickled Cabbage Shreds', 0.75, N'🥬'), (N'Anchovy Crumbles', 1.00, N'🐟'), (N'Liver Bits', 1.25, N'🩸'), (N'Soggy Newspaper Flakes', 0.50, N'📰'), (N'Moldy Cheese Crumbles', 1.00, N'🧀'); --
 ```
 
-3. Submit form
-
-3. Return to the homepage - every flavor is now revolting.
+3. Submit the order.
+4. Return to the homepage - every flavor is now revolting.
 
    **Say:** "Someone typed into the order form and the database did what it was told. The damage isn't a severity score - it's the brand on the sign above his door."
 
-**After:** reset the menu (re-seed / redeploy the demo DB) before you move on, or the broken menu stays up for the rest of the talk.
+**After:** reset the menu with [Manually Reset Database](#manually-reset-database-use-injection-string) (or re-seed / redeploy the demo DB) before you move on, or the broken menu stays up for the rest of the talk.
 
 **If it breaks:** input is sanitized / nothing changes → skip to the transition ("so what was sitting in that codebase the whole time?") and move to slide 8. Don't debug live.
 
@@ -79,11 +83,11 @@ Everything after **Timing** is reference, not needed on stage.
 
 # DEMO 1 - Secret Protection & Push Protection
 
-**10 min · slide 10**
+**10 min · slide 10 · GitHub.com + VS Code**
 
 **1.1 Existing secret alerts (1 min)**
 
-1. Repo → **Security → Secret scanning**. Point at the alerts already there.
+1. **GitHub.com:** In your demo repo, open **Security → Secret scanning**. Point at the alerts already there.
 
    **Say:** "These were committed long ago. Secret scanning found them after the fact - that's detection, not prevention."
 
@@ -91,36 +95,37 @@ Everything after **Timing** is reference, not needed on stage.
 
 > ⚠️ Push protection must be **on** (pre-show checklist).
 
-2. In VS Code, create a branch. Open any file and paste the **test PAT** from
-   `Ginos Vulnerable Gelato Demo Notes.md` → **Demo 1 / Push Protection**.
-3. Commit → **blocked**.
+2. **VS Code:** Switch to `main` and create a new branch. Open any file and paste this test PAT:
 
 ```
 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
 ```
 
+3. Save, commit, then click **Publish Branch**. GitHub **blocks the push**. Open **Output → Git** to show the message: secret type, file, and unblock link.
+
    **Say:** "This one never makes it in. Prevention beats detection."
-4. Demonstrate the bypass: mark the reason **false positive** and commit. Mention that **Delegated Alert Dismissal** can require a reviewer to approve bypasses (off in this lab).
-5. Repo → **Security** → show the new alert as **closed** with its audit trail.
+4. **GitHub.com:** Open the unblock link from that message. Choose **It's a false positive**, then click **Allow me to push this secret**. Mention that **Delegated Alert Dismissal** can require a reviewer to approve bypasses (off in this lab).
+5. **VS Code:** Click **Publish Branch** again. This time the push succeeds.
+6. **GitHub.com:** Open **Security → Secret scanning** and click **Closed**. Show the new alert and its audit trail.
 
 **1.3 Custom pattern for the DB connection string (3 min)**
 
-6. Browser: show `advanced-security/awesome-secret-scanning`, then its
+7. **GitHub.com:** Show `advanced-security/awesome-secret-scanning`, then its
    `secret-scanning-custom-patterns` repo. One line: "GHAS-recommended patterns for secrets too format-specific for the default set - like SQL connection strings."
-7. In Copilot Chat:
+8. **VS Code:** In Copilot Chat (Agent mode), run:
 
    ```text
    /ghas-find-sql-connection-pattern
    ```
 
    → Expect: it points to the **database connection string (full string)** pattern and gives step-by-step add instructions, without printing the connection string.
-8. Add the pattern in **Settings → Advanced Security → Secret scanning → Custom patterns**. Scanning now flags the DB connection string as a secret.
+9. **GitHub.com:** In your demo repo, open **Settings → Advanced Security**. Next to **Custom patterns**, click **New pattern**. Name it, then paste this regex into **Secret format**:
 
    ```
    (?i)\b(?:Server|Data Source)\s*=\s*[^;]+;(?:[^;\r\n]*;\s*)*\s*(?:Initial Catalog|Database)\s*=\s*[^;\r\n;]+
    ```
 
-9. Test it out
+10. Paste the sample below into the test string box to show the match. Click **Save and dry run** to show matches in the repo, then click **Publish pattern**.
 
    ```
    Server=tcp:example.database.windows.net,1433;Initial Catalog=ExampleDb;User Id=test_user;Password=NOT_A_REAL_PASSWORD;Encrypt=True;
@@ -128,7 +133,7 @@ github_pat_11ABFFZUI0qoyKYTZsnbnC_WP4zIcGrtQvzaCmNYO9zw8KGgT4oRQzxIuRPDQVVEGUZI3
 
 **1.4 Optional - AI credential audit (if time)**
 
-9. In Copilot Chat:
+11. **VS Code:** In Copilot Chat (Agent mode), run:
 
    ```text
    /ghas-credential-audit
@@ -136,13 +141,13 @@ github_pat_11ABFFZUI0qoyKYTZsnbnC_WP4zIcGrtQvzaCmNYO9zw8KGgT4oRQzxIuRPDQVVEGUZI3
 
    Results vary - best run beforehand and glance at it. It reports *where/what*, never the value.
 
-   **Bonus - HydraFusion CLI.** Same prompt, run in the Copilot CLI sandbox for stronger results. Launch:
+   **Bonus - HydraFusion CLI.** Same prompt, run in the Copilot CLI sandbox for stronger results. In the VS Code terminal at the repo root, launch:
 
    ```text
    copilot --experimental --allow-all --sandbox --model hydrafusion
    ```
 
-   Then paste the `ghas-credential-audit` prompt text. Say one line on *why*: the CLI agent sweeps the whole workspace in a sandbox, and HydraFusion is the stronger model for this reasoning. Start it before Demo 1.3 and glance at it on the side.
+   Then paste the prompt text from `.github/prompts/ghas-credential-audit.prompt.md` (below the `---` header). Say one line on *why*: the CLI agent sweeps the whole workspace in a sandbox, and HydraFusion is the stronger model for this reasoning. Start it before Demo 1.3 and glance at it on the side.
 
 **If it breaks:** the custom-pattern finder wanders → add the pattern by hand from the linked repo. The credential audit is low-confidence → skip it; it's optional.
 
@@ -150,55 +155,65 @@ github_pat_11ABFFZUI0qoyKYTZsnbnC_WP4zIcGrtQvzaCmNYO9zw8KGgT4oRQzxIuRPDQVVEGUZI3
 
 # DEMO 2 - Dependency Management
 
-**8 min · slide 13**
+**8 min · slide 13 · all on GitHub.com**
 
-**2.1 Dependabot + Copilot (start, then leave it)**
+**2.1 Assign the lodash alerts to Copilot**
 
-1. **Security → Dependabot** → open a **lodash** alert.
-2. Assign it to Copilot with:
+1. Open **Security → Dependabot** and filter: `is:open package:lodash`. Open one lodash alert.
+2. In the right panel, click **Assign to Agent** → **Copilot**. Paste this prompt, assign it, and leave it running:
 
    ```text
-   /ghas-dependabot-lodash
+   Your solution should resolve ALL Dependabot alerts for lodash in this repository. Ensure the version of lodash you select is valid, does not contain any vulnerabilities, and is not marked as a "bad" or deprecated build in npm.
    ```
 
-   Leave the agent running and go to 2.2.
+**2.2 Dependency review catches a bad PR**
 
-**2.2 Dependency review blocks a bad PR (5 min)**
+> ⚠️ `main` must **not** already have these two packages (for example, from a rehearsal). Dependency review only checks what the PR adds.
 
-3. Add these to the solution's package references `GinosGelato.csproj`:
+3. Open `ginos-gelato/server/GinosGelato.csproj` and click **Edit** (pencil icon). Add these lines with the other `PackageReference` lines:
 
    ```xml
    <PackageReference Include="System.Formats.Nrbf" Version="9.0.0-rc.2.24473.5" />
    <PackageReference Include="Csla" Version="7.0.5" />
    ```
 
-4. Commit → open a PR. **Dependency review** runs and flags both as vulnerable.
+4. Click **Commit changes...** and select **Create a new branch for this commit and start a pull request**. The default commits straight to `main` and skips the PR. Click **Propose changes** → **Create pull request**.
+5. Wait for the **Dependency review** check to fail. Show the failed check and the summary comment listing the vulnerable packages (both have **critical** advisories).
 
    **Say:** "Caught at the door, on the pull request - before it ever merges."
-5. Comment on the PR asking Copilot to address the Dependency Review findings. Let it finish, let review re-run on the new commit → resolved.
+6. Comment on the PR, then leave Copilot working:
 
-**2.3 Back to 2.1**
+   ```text
+   @copilot Fix the vulnerable packages that Dependency Review flagged in this PR.
+   ```
 
-6. The lodash agent should be done. Show the PR (small change), merge it, and note the alert clears from Dependabot a few minutes later.
+**2.3 Merge the lodash fix**
 
-**If it breaks:** the lodash agent stalls → just show its PR draft and narrate. Dependency review doesn't flag → confirm the versions match the block above.
+7. In **Pull requests**, open Copilot's lodash PR and show **Files changed** (a small version bump). Click **Ready for review**, then merge it.
+
+**Wrap up**
+
+8. Back on the bad PR, once Copilot's commit appears, click **Approve and run workflows** if GitHub asks. Show that **Dependency review** passes.
+9. Refresh **Security → Dependabot** and show the lodash alerts are closed.
+
+**If it breaks:** an agent is still running → show its session or draft PR and move on. Dependency review doesn't run → confirm the PR targets `main`. Dependency review passes with "No vulnerabilities" → the packages are already on `main`, so the PR adds nothing new. Pivot to **Security → Dependabot**, where those packages already have alerts.
 
 ---
 
 # DEMO 3 - Code Scanning, Autofix & Campaigns
 
-**12 min · slide 17**
+**12 min · slide 17 · all on GitHub.com**
 
-> **Order of operations:** start 3.1, then start 3.2; while both run, do 3.3; return to 3.1/3.2 results; finish with 3.4 (optional). Demo 3.3 often ends with no results - that's the point.
+> **Order:** Start 3.1, then 3.2, and leave both running. Start 3.3; while it works, show the results for 3.1 and 3.2. Finish by showing the PR from 3.3. Campaigns are optional and can run while Copilot works.
 
-**3.1 Fix one finding with Copilot (start, then leave it)**
+**3.1 Fix one finding**
 
-1. **Security → Code scanning** (~20 findings). Open **Clear-text storage of sensitive information**.
-2. Assign it to Copilot. Narrate the agent session, then move on.
+1. Open **Security → Code scanning** (about 20 findings). Open the **Clear-text storage of sensitive information** alert and click **Assign to Copilot**.
+2. Show the agent session in the repo's **Agents** tab, then leave it running.
 
-**3.2 A PR introduces a new vuln (start, then leave it)**
+**3.2 Scan a PR for a new vulnerability**
 
-3. Add this intentionally vulnerable endpoint to `FlavorsController.cs`:
+3. Open `ginos-gelato/server/Controllers/FlavorsController.cs` and click **Edit** (pencil icon). Paste this intentionally vulnerable endpoint right after the `GetFlavors()` method:
 
    ```csharp
    // GET: api/flavors/search?name=...
@@ -211,44 +226,45 @@ github_pat_11ABFFZUI0qoyKYTZsnbnC_WP4zIcGrtQvzaCmNYO9zw8KGgT4oRQzxIuRPDQVVEGUZI3
    }
    ```
 
-4. Commit → open a PR. If CodeQL flags it, great. If not, comment:
+4. Click **Commit changes...** and select **Create a new branch for this commit and start a pull request**. The default commits straight to `main` and skips the PR. Click **Propose changes** → **Create pull request**.
+5. Right away, comment on the PR (don't wait for CodeQL):
 
    ```text
    @Copilot Does this PR contain any security vulnerabilities? If so - fix it.
    ```
 
-   → It finds the SQL injection and edits the PR to parameterize the query.
+   Copilot should find the SQL injection and push a fix to the PR. Leave it working. When you come back, show whether CodeQL flagged it, then show Copilot's fix.
 
-**3.3 Fix many at once (while 3.1/3.2 run)**
+**3.3 Submit multiple alerts to Copilot**
 
-5. In Code scanning, filter: `is:open branch:main rule:cs/log-forging`.
+6. Back in **Security → Code scanning**, filter: `is:open branch:main rule:cs/log-forging`.
 
-   **Say:** "Log entries built from user input."
-6. Select **all** of them → assign to Copilot at once. Show the single PR it opens.
+   **Say:** "These are log entries that depend on user-provided values."
+7. Select all matching alerts, then click **Assign to Copilot** above the list. Copilot fixes them together in one PR. While it works, return to 3.1 and 3.2. When it finishes, show the PR and its changes.
 
 **3.4 Optional - Campaigns**
 
-7. Org level → **new campaign** → target your repo → filter **high severity**. One line on how campaigns organize and track remediation (not another scanner).
+8. Open your organization's **Security** tab → **Campaigns** → **Create campaign** → **From code scanning filters**. Filter: `is:open repo:<your-repo> severity:high`. Click **Save as** → **Publish campaign**, fill in the details, and click **Publish campaign**. Explain that campaigns organize and track remediation; they aren't another scanner.
 
-**Wrap 3.1 / 3.2:** return to both, show the finished PRs and what changed.
+**If either Copilot task is still running:** show its draft PR and keep moving.
 
-**If it breaks:** an agent is slow → show the draft PR and keep moving. CodeQL silent on 3.2 → use the `@Copilot` comment, that's the scripted path.
+**If CodeQL doesn't flag the SQL injection:** no problem - the `@Copilot` comment still finds and fixes it.
 
 ---
 
 # DEMO 4 - Code Quality & Copilot Code Review
 
-**6 min · slide 25**
+**6 min · slide 25 · all on GitHub.com**
 
 **4.1 Code quality (3 min)**
 
-1. **Security → Code quality** → the 2 **unused variable** alerts.
-2. Select both → assign to Copilot → show the resulting PR.
+1. Open **Security → Code quality → Standard findings** and find the 2 **unused variable** findings.
+2. Select both, then click **Assign to Copilot**. Show the draft PR Copilot opens.
 
 **4.2 Copilot Code Review (3 min)**
 
-3. Open the **Code Quality** PR → request **Copilot Code Review**. Then do the same on the **FlavorsController** PR.
-4. Contrast them: the quality PR likely says "merge it"; the controller PR likely recommends changes. Mention effort levels (light vs balanced).
+3. Open Copilot's Code Quality PR. In the right sidebar under **Reviewers**, pick an effort level (**Lite** or **Balanced**), then click **Request** next to **Copilot**. Do the same on the **FlavorsController** PR from 3.2.
+4. Contrast them: the quality PR likely says "merge it"; the controller PR likely recommends changes. Explain the effort levels: **Lite** for quick checks, **Balanced** for deeper analysis.
 
    **Say:** "No changes recommended doesn't mean perfect - it means it passed an automated review and is ready for a human's final pass."
 
