@@ -387,7 +387,7 @@ az role assignment create --assignee $myObjectId --role "Storage Blob Data Contr
 
 Only if rehearsed. Replaces Part C.
 
-1. Before the session, on a scratch branch: `npx playwright init-agents --loop=vscode` (Playwright 1.56+; the repo uses 1.58).
+1. Before the session, on a scratch branch: `npx playwright init-agents --loop=vscode` (Playwright 1.56+; the repo uses 1.64).
 2. Live: copy Journey 1 to a scratch spec, break one locator (`'Waffle Cone'` → `'Waffle Cones'`), run it red.
 3. Ask the **healer** agent to fix it. Show the diff, run it green.
 
