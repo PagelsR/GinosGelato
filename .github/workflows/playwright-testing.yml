@@ -13,12 +13,7 @@ env:
 jobs:
   run-playwright-tests:
     name: Run Playwright Tests
-    # Pinned: ubuntu-latest moved to Ubuntu 26.04 in Oct 2026, and Playwright
-    # 1.58.x can't install browsers there (support starts in 1.61). Switch back
-    # to ubuntu-latest after upgrading @playwright/test to 1.61 or later.
-    #
-    # Longer-term fix: upgrade @playwright/test to 1.61 or later (latest is 1.64.1), then switch the job back to ubuntu-latest. @azure/playwright's required range (^1.47.0) allows that.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     env:
       CI: true
 
