@@ -26,7 +26,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
 ## The day before
 
-- [ ] GitHub → Actions → **Playwright Testing - Daily Schedule** → **Run workflow** (`main`).
+- [ ] GitHub → Actions → **Playwright Testing - Weekly Schedule** → **Run workflow** (`main`).
 - [ ] When it finishes: in the **Validate at Scale** job, the **Verify Playwright Workspaces reporting upload** step is green.
 - [ ] Portal → `pwwuxryfogy5mzkc` → **Test runs** → newest run opens the **Ginos Gelato - Testing at Scale** report (no 404) and a trace opens. Note the run's time.
 - [ ] Dashboard shows a new `🖥️ CI Runner ×1` + `☁️ Cloud Scale ×20` pair.
@@ -230,7 +230,7 @@ Everything after **Timing** is reference material, not needed on stage.
 
 **Part B - Trigger, don't wait (30 s)**
 
-3. GitHub → Actions → **Playwright Testing - Daily Schedule** → **Run workflow**. Move on.
+3. GitHub → Actions → **Playwright Testing - Weekly Schedule** → **Run workflow**. Move on.
 
 **Part C - Portal Test runs (3.5 min)**
 

@@ -10,10 +10,10 @@ Application Insights telemetry on demand.
 
 - **Feature-flagged demo faults** — deterministic, disabled by default, and
   independently selectable.
-- **Daily customer journeys** (Playwright specs in `/e2e/`) that generate clean
+- **Weekly customer journeys** (Playwright specs in `/e2e/`) that generate clean
   success telemetry and, on demand, fault telemetry.
 - **Scheduled workflow** that runs the full Playwright suite (journeys, fault,
-  and flaky specs) against the deployed Static Web App every day, producing a
+  and flaky specs) against the deployed Static Web App every week, producing a
   realistic mix of passing, failing, and flaky results plus telemetry.
 
 ## Customer Journeys
@@ -41,7 +41,7 @@ Run all journeys:
 npx playwright test e2e/journey-*.spec.ts
 ```
 
-Run the full suite (what the daily workflow does — journeys, fault, and flaky
+Run the full suite (what the weekly workflow does — journeys, fault, and flaky
 specs, giving a mix of pass/fail/flaky results plus telemetry):
 
 ```powershell
@@ -101,19 +101,20 @@ DemoFaults__Enabled = false
 When disabled, the fault endpoints return `404` and no fault telemetry is
 produced.
 
-## Daily Scheduled Workflow
+## Weekly Scheduled Workflow
 
-`.github/workflows/playwright-testing.yml` runs the full Playwright suite daily
-(06:00 EST / 11:00 UTC) and can be triggered manually via **workflow_dispatch**.
+`.github/workflows/playwright-testing.yml` runs the full Playwright suite weekly
+(Mondays at 03:00 Eastern, DST-aware) and can be triggered manually via
+**workflow_dispatch**.
 The run intentionally includes a mix of statuses — reliable journeys, the fault
 journey, and the flaky/failing specs — so the trend dashboard stays realistic.
 The step uses `continue-on-error`, so failing and flaky tests never block the
 HTML report and trend dashboard that are published to GitHub Pages.
 
-Because the suite runs against the live deployment, it continuously generates
+Because the suite runs against the live deployment, it regularly generates
 realistic Application Insights telemetry. The fault journey (Journey 4) exercises
 all three fault paths on every run, so slow-dependency, failed-request, and
-exception telemetry appear daily without any manual step.
+exception telemetry appear every week without any manual step.
 
 ## Testing at Scale (Azure Playwright Workspaces)
 
@@ -137,15 +138,15 @@ Dashboards" section for the demo flow.
    telemetry breadth.
 3. Trigger each fault (`/fault?fault=...`) and show the slow dependency, failed
    request, and exception appear in Application Insights.
-4. Open the GitHub Pages trend dashboard to show the daily pass/fail/flaky mix
+4. Open the GitHub Pages trend dashboard to show the weekly pass/fail/flaky mix
    — note the Mode badge distinguishing the CI Runner run from the Cloud
    Scale run — then open Azure Portal's Playwright Workspace Test Runs view
    for that same cloud-scale run's traces, screenshots, and recordings.
 
 ## Exit Criteria (met)
 
-- One daily workflow runs the Playwright suite and generates realistic telemetry
+- One weekly workflow runs the Playwright suite and generates realistic telemetry
   against the deployed Static Web App.
 - Every demo scenario (each journey and each fault) is independently selectable.
 - Faults are deterministic, repeatable, and disabled by default.
-- The daily run produces a realistic mix of passing, failing, and flaky results.
+- The weekly run produces a realistic mix of passing, failing, and flaky results.

@@ -111,7 +111,7 @@ npx playwright test --config=playwright.service.config.ts --workers=20 --grep-in
 ```
 
 ### Part B – Trigger It
-GitHub → Actions → **Playwright Testing - Daily Schedule** → **Run workflow**. Don't wait for it.
+GitHub → Actions → **Playwright Testing - Weekly Schedule** → **Run workflow**. Don't wait for it.
 
 Open a previous workflow run. Show job **Run Playwright Tests**. Show step **Run Playwright Tests**, scroll through the logs.
 

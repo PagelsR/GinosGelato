@@ -21,13 +21,15 @@ npm ci
 npx playwright install chromium
 ```
 
-## Telemetry is already fresh
+## Make sure telemetry is fresh
 
 The branch's scheduled workflow (`.github/workflows/playwright-testing.yml`)
 runs the full suite — journeys, faults, and flaky specs — automatically every
-day at 11:00 UTC against the deployed Static Web App. No manual pre-session
-run is required: by the time you present, healthy and fault telemetry from
-the last run is already in Application Insights.
+Monday at 3:00 AM Eastern against the deployed Static Web App. If you're
+presenting later in the week, run it manually before your session (GitHub →
+Actions → **Playwright Testing - Weekly Schedule** → **Run workflow**) so
+healthy and fault telemetry from a recent run is already in Application
+Insights.
 
 ## Open Azure once
 

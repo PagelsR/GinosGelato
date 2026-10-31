@@ -464,7 +464,7 @@ jobs:
     # Deliberately parallel with run-playwright-tests (same needs:, no
     # dependency on each other) - fans out from build-and-deploy-frontend and
     # fans back in at post-deployment-verification. This job is a quick
-    # post-deploy smoke check on cloud browsers, kept separate from the daily
+    # post-deploy smoke check on cloud browsers, kept separate from the weekly
     # cloud-scale job in playwright-testing.yml: its results are NOT published
     # to the GitHub Pages dashboard (which intentionally only blends
     # ci-runner + cloud-scale entries) - view this job's results via its own
@@ -643,7 +643,7 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Reliability Dashboard" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Trend history dashboard**: https://pagelsr.github.io/GinosGelato/ (includes cloud-scale runs from the daily Playwright workflow)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Trend history dashboard**: https://pagelsr.github.io/GinosGelato/ (includes cloud-scale runs from the weekly Playwright workflow)" >> $GITHUB_STEP_SUMMARY
           echo "- **Playwright Workspace** (${{ needs.provision-infrastructure.outputs.playwrightWorkspaceName }}): view runs via Azure Portal -> Azure App Testing -> Playwright Workspaces" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Security" >> $GITHUB_STEP_SUMMARY
