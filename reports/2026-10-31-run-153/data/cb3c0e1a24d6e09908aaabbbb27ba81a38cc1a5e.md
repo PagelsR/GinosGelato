@@ -1,0 +1,305 @@
+# Instructions
+
+- Following Playwright test failed.
+- Explain why, be concise, respect Playwright best practices.
+- Provide a snippet of code with the fix, if possible.
+
+# Test info
+
+- Name: flaky-tests.spec.ts >> Flaky Test Examples >> Database Connection Pool Exhaustion - 15% Failure Rate
+- Location: e2e/flaky-tests.spec.ts:116:7
+
+# Error details
+
+```
+Test timeout of 30000ms exceeded.
+```
+
+```
+Error: page.click: Test timeout of 30000ms exceeded.
+Call log:
+  - waiting for locator('text=Build Your Gelato')
+
+```
+
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]: 🍦
+    - generic [ref=e7]: 🍨
+    - generic [ref=e8]: 🧁
+    - generic [ref=e10]:
+      - heading [level=1] [ref=e11]:
+        - link "🍦 Gino's Gelato" [ref=e12] [cursor=pointer]:
+          - /url: /
+      - navigation [ref=e13]:
+        - list [ref=e14]:
+          - listitem [ref=e15]:
+            - link "Home" [ref=e16] [cursor=pointer]:
+              - /url: /
+          - listitem [ref=e17]:
+            - link "🎨 Build Ice Cream" [ref=e18] [cursor=pointer]:
+              - /url: /builder
+          - listitem [ref=e19]:
+            - link "🛒 Cart" [ref=e20] [cursor=pointer]:
+              - /url: /cart
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]: 🍦
+      - generic [ref=e24]: 🍨
+      - generic [ref=e25]: 🧁
+      - generic [ref=e26]: 🍓
+      - generic [ref=e27]: 🫐
+      - generic [ref=e29]:
+        - generic [ref=e30]:
+          - heading "🍦 Gino's Gelato! 🍨" [level=1] [ref=e31]
+          - paragraph [ref=e32]: Create your perfect ice cream masterpiece with our premium flavors, delicious toppings, and artisanal containers. Every scoop is a celebration!
+          - button "🎨 Start Creating Your Ice Cream" [ref=e33] [cursor=pointer]
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - generic [ref=e36]: 🏆
+            - heading "Premium Quality" [level=3] [ref=e37]
+            - paragraph [ref=e38]: Made with the finest ingredients and traditional Italian recipes
+          - generic [ref=e39]:
+            - generic [ref=e40]: 🎨
+            - heading "Custom Creations" [level=3] [ref=e41]
+            - paragraph [ref=e42]: Mix and match flavors, toppings, and containers to create your perfect treat
+          - generic [ref=e43]:
+            - generic [ref=e44]: 🚀
+            - heading "Fresh Daily" [level=3] [ref=e45]
+            - paragraph [ref=e46]: Made fresh every day with love and passion for authentic gelato
+        - generic [ref=e47]:
+          - heading "🌟 Today's Featured Flavors" [level=2] [ref=e48]
+          - generic [ref=e49]:
+            - generic [ref=e50]: 🍓 Strawberry Bliss
+            - generic [ref=e51]: 🍋 Lemon Zest
+            - generic [ref=e52]: 🫐 Berry Burst
+            - generic [ref=e53]: 🥝 Mint Chocolate
+  - contentinfo [ref=e54]:
+    - generic [ref=e55]:
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - heading "🍦 Gino's Gelato" [level=3] [ref=e58]
+          - paragraph [ref=e59]: Crafting authentic Italian gelato with the finest ingredients since 1952. Every scoop is a journey to Italy!
+          - generic [ref=e60]:
+            - generic [ref=e61] [cursor=pointer]: 📧
+            - generic [ref=e62] [cursor=pointer]: 📞
+            - generic [ref=e63] [cursor=pointer]: 🌍
+        - generic [ref=e64]:
+          - heading "Quick Links" [level=4] [ref=e65]
+          - list [ref=e66]:
+            - listitem [ref=e67]:
+              - link "About Us" [ref=e68] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e69]:
+              - link "Our Flavors" [ref=e70] [cursor=pointer]:
+                - /url: /flavors
+            - listitem [ref=e71]:
+              - link "Locations" [ref=e72] [cursor=pointer]:
+                - /url: /locations
+            - listitem [ref=e73]:
+              - link "Catering" [ref=e74] [cursor=pointer]:
+                - /url: /catering
+        - generic [ref=e75]:
+          - heading "Contact" [level=4] [ref=e76]
+          - generic [ref=e77]:
+            - paragraph [ref=e78]: 👤 Randy Pagels
+            - paragraph [ref=e79]: ✉️ randy.pagels@xebia.com
+            - paragraph [ref=e80]: 📍 123 Gelato Street
+            - paragraph [ref=e81]: 🌟 Sweet City, SC 12345
+            - paragraph [ref=e82]: 📞 (555) 123-GELATO
+            - paragraph [ref=e83]: "🕒 Daily: 10AM - 10PM"
+      - generic [ref=e84]:
+        - paragraph [ref=e85]: © 2026 Gino's Gelato. All rights reserved. Made with ❤️ and lots of ice cream!
+        - generic [ref=e86]:
+          - link "Privacy Policy" [ref=e87] [cursor=pointer]:
+            - /url: /privacy
+          - link "Terms of Service" [ref=e88] [cursor=pointer]:
+            - /url: /terms
+          - link "Nutrition Info" [ref=e89] [cursor=pointer]:
+            - /url: /nutrition
+```
+
+# Test source
+
+```ts
+  26  |     const shouldPass = Math.random() > 0.15;
+  27  |     
+  28  |     console.log(`Current second: ${currentSecond}, Test will ${shouldPass ? 'PASS' : 'FAIL'}`);
+  29  |     
+  30  |     await page.goto('/');
+  31  |     
+  32  |     if (!shouldPass) {
+  33  |       expect(shouldPass, `Simulated time-based failure (second: ${currentSecond})`).toBeTruthy();
+  34  |     }
+  35  |     
+  36  |     await expect(page).toHaveTitle(/Gino's Gelato/);
+  37  |   });
+  38  | 
+  39  |   test('Race Condition Simulation', async ({ page }) => {
+  40  |     // Simulates a race condition with random timing
+  41  |     const delay = Math.floor(Math.random() * 100);
+  42  |     const shouldFail = delay > 75;
+  43  |     
+  44  |     console.log(`Delay: ${delay}ms, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
+  45  |     
+  46  |     await page.goto('/');
+  47  |     
+  48  |     // Simulate waiting for an element with inconsistent timing
+  49  |     await page.waitForTimeout(delay);
+  50  |     
+  51  |     if (shouldFail) {
+  52  |       throw new Error(`Race condition detected! Delay was ${delay}ms (threshold: 50ms)`);
+  53  |     }
+  54  |     
+  55  |     await expect(page).toHaveTitle(/Gino's Gelato/);
+  56  |   });
+  57  | 
+  58  |   test('API Timeout Simulation - 20% Failure Rate', async ({ page }) => {
+  59  |     // Simulates intermittent API timeouts (fails 20% of the time)
+  60  |     const shouldFail = Math.random() > 0.8;
+  61  |     
+  62  |     console.log(`API timeout test will ${shouldFail ? 'FAIL' : 'PASS'} this time`);
+  63  |     
+  64  |     await page.goto('/');
+  65  |     
+  66  |     // Navigate to builder page where API calls happen
+  67  |     await page.click('text=Build Your Gelato');
+  68  |     
+  69  |     if (shouldFail) {
+  70  |       throw new Error('Simulated API timeout - Request took too long to respond');
+  71  |     }
+  72  |     
+  73  |     // If we get here, verify the page loaded correctly
+  74  |     await expect(page.locator('h1')).toContainText('Build Your');
+  75  |   });
+  76  | 
+  77  |   test('Memory Leak Simulation - 25% Failure Rate', async ({ page }) => {
+  78  |     // Simulates memory pressure causing test failures (fails 25% of the time)
+  79  |     const memoryPressure = Math.random();
+  80  |     const shouldFail = memoryPressure > 0.75;
+  81  |     
+  82  |     console.log(`Memory pressure: ${(memoryPressure * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
+  83  |     
+  84  |     await page.goto('/');
+  85  |     
+  86  |     // Simulate some memory-intensive operation
+  87  |     await page.click('text=Our Flavors');
+  88  |     await page.waitForTimeout(100);
+  89  |     
+  90  |     if (shouldFail) {
+  91  |       expect(shouldFail, `Memory leak detected! Pressure at ${(memoryPressure * 100).toFixed(1)}%`).toBeFalsy();
+  92  |     }
+  93  |     
+  94  |     await expect(page.locator('h1')).toBeVisible();
+  95  |   });
+  96  | 
+  97  |   test('Browser Cache Inconsistency - 20% Failure Rate', async ({ page }) => {
+  98  |     // Simulates stale cache causing inconsistent behavior (fails 20% of the time)
+  99  |     const cacheState = Math.floor(Math.random() * 5); // 0, 1, 2, 3, or 4
+  100 |     const shouldFail = cacheState === 0; // 20% chance
+  101 |     
+  102 |     console.log(`Cache state: ${cacheState}, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
+  103 |     
+  104 |     await page.goto('/');
+  105 |     
+  106 |     // Navigate to a page that might have caching issues
+  107 |     await page.click('text=About Us');
+  108 |     
+  109 |     if (shouldFail) {
+  110 |       throw new Error(`Stale cache detected (state: ${cacheState}) - Expected fresh content`);
+  111 |     }
+  112 |     
+  113 |     await expect(page.locator('body')).toContainText('About');
+  114 |   });
+  115 | 
+  116 |   test('Database Connection Pool Exhaustion - 15% Failure Rate', async ({ page }) => {
+  117 |     // Simulates database connection issues (fails 15% of the time)
+  118 |     const connectionPoolLoad = Math.random() * 100;
+  119 |     const shouldFail = connectionPoolLoad > 85;
+  120 |     
+  121 |     console.log(`Connection pool load: ${connectionPoolLoad.toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
+  122 |     
+  123 |     await page.goto('/');
+  124 |     
+  125 |     // Simulate action that requires database access
+> 126 |     await page.click('text=Build Your Gelato');
+      |                ^ Error: page.click: Test timeout of 30000ms exceeded.
+  127 |     await page.waitForTimeout(50);
+  128 |     
+  129 |     if (shouldFail) {
+  130 |       expect(false, `Database connection pool exhausted at ${connectionPoolLoad.toFixed(1)}% load`).toBeTruthy();
+  131 |     }
+  132 |     
+  133 |     await expect(page).toHaveURL(/.*build/);
+  134 |   });
+  135 | 
+  136 |   test('Payment Gateway Timeout - 20% Failure Rate', async ({ page }) => {
+  137 |     // Occasionally fails (20% failure)
+  138 |     const shouldFail = Math.random() > 0.8;
+  139 |     
+  140 |     console.log(`Payment gateway test will ${shouldFail ? 'FAIL' : 'PASS'} this time`);
+  141 |     
+  142 |     await page.goto('/');
+  143 |     await page.click('text=Build Your Gelato');
+  144 |     
+  145 |     if (shouldFail) {
+  146 |       throw new Error('Payment gateway connection timeout - Service unavailable');
+  147 |     }
+  148 |     
+  149 |     await expect(page).toHaveURL(/.*build/);
+  150 |   });
+  151 | 
+  152 |   test('Image CDN Loading Failure - 15% Failure Rate', async ({ page }) => {
+  153 |     // Fails 15% of the time - simulates CDN issues
+  154 |     const cdnHealth = Math.random() * 100;
+  155 |     const shouldFail = cdnHealth > 85;
+  156 |     
+  157 |     console.log(`CDN health: ${cdnHealth.toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
+  158 |     
+  159 |     await page.goto('/');
+  160 |     
+  161 |     if (shouldFail) {
+  162 |       expect(false, `CDN failed to load images - Health at ${cdnHealth.toFixed(1)}%`).toBeTruthy();
+  163 |     }
+  164 |     
+  165 |     await expect(page).toHaveTitle(/Gino's Gelato/);
+  166 |   });
+  167 | 
+  168 |   test('Session Storage Corruption - 15% Failure Rate', async ({ page }) => {
+  169 |     // Fails 15% of the time - simulates persistent storage issues
+  170 |     const storageIntegrity = Math.random();
+  171 |     const shouldFail = storageIntegrity > 0.85;
+  172 |     
+  173 |     console.log(`Storage integrity: ${(storageIntegrity * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
+  174 |     
+  175 |     await page.goto('/');
+  176 |     await page.click('text=Our Flavors');
+  177 |     
+  178 |     if (shouldFail) {
+  179 |       throw new Error(`Session storage corrupted - Integrity check failed at ${(storageIntegrity * 100).toFixed(1)}%`);
+  180 |     }
+  181 |     
+  182 |     await expect(page.locator('h1')).toBeVisible();
+  183 |   });
+  184 | 
+  185 |   test('Third-Party Script Blocker - 15% Failure Rate', async ({ page }) => {
+  186 |     // Fails 15% of the time - simulates ad blockers or script failures
+  187 |     const scriptLoaded = Math.random();
+  188 |     const shouldFail = scriptLoaded > 0.85;
+  189 |     
+  190 |     console.log(`Script load probability: ${(scriptLoaded * 100).toFixed(1)}%, Test will ${shouldFail ? 'FAIL' : 'PASS'}`);
+  191 |     
+  192 |     await page.goto('/');
+  193 |     
+  194 |     if (shouldFail) {
+  195 |       expect(false, `Third-party script blocked or failed to load (${(scriptLoaded * 100).toFixed(1)}%)`).toBeTruthy();
+  196 |     }
+  197 |     
+  198 |     await expect(page).toHaveTitle(/Gino's Gelato/);
+  199 |   });
+  200 | });
+  201 | 
+```
