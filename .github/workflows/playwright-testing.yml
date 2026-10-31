@@ -1,12 +1,10 @@
-name: Playwright Testing - Daily Schedule
+name: Playwright Testing - Weekly Schedule
 
 on:
-  push:
-    branches:
-      - main
   schedule:
-    # Runs daily at 6:00 AM EST (11:00 AM UTC) to generate Application Insights telemetry
-    - cron: '0 11 * * *'
+    # Runs weekly on Mondays at 3:00 AM Eastern (DST-aware) to generate Application Insights telemetry
+    - cron: '0 3 * * 1'
+      timezone: 'America/New_York'
   workflow_dispatch: # Allows manual trigger from GitHub Actions UI
 
 env:

@@ -38,7 +38,7 @@ namespace GinosGelato.Controllers
         }
 
         // Faults are disabled unless explicitly enabled for the environment.
-        // Defaults to true so the deployed demo environment and the daily fault
+        // Defaults to true so the deployed demo environment and the weekly fault
         // journey work out of the box; presenters can set DemoFaults:Enabled to
         // false to lock the endpoints down.
         private bool FaultsEnabled => _configuration.GetValue("DemoFaults:Enabled", true);

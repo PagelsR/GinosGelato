@@ -159,7 +159,7 @@ idea that the customer journey *is* code you can run on demand.
 **Talking point:**
 
 > "Our customer journeys are Playwright specs in `/e2e/`. A scheduled workflow
-> runs them daily against production, so we always have realistic telemetry —
+> runs them weekly against production, so we always have realistic telemetry —
 > and I can replay any journey on demand. Application Insights tells us whether a
 > problem is isolated, widespread, new, or getting worse."
 
@@ -233,7 +233,7 @@ context — and correlated across the browser and API.
    dependency** is recorded (no order data touched). Return to **Application
    map** and show the **SQL node/edge now flagged red** with a small error
    percentage — the same map from Demo 2, now showing a database-layer problem.
-   Because the daily fault journey runs this once a day, that red slice stays an
+   Because the fault journey runs this only once a week, that red slice stays an
    occasional `<1%`, not a constant alarm.
 
 ### Reading the Application Map (narrate left → right)
@@ -272,7 +272,7 @@ Click the red edge, then drill in:
 **Honesty beat (recommended):**
 
 > "Full transparency — I planted this one. It's a deterministic demo fault that
-> runs a harmless `RAISERROR`, fired once a day by our Playwright journey so the
+> runs a harmless `RAISERROR`, fired once a week by our Playwright journey so the
 > map always has a realistic sub-1% database error to investigate. The tooling
 > and workflow are exactly what you'd use on a real failure; only the cause is
 > simulated."
@@ -494,8 +494,8 @@ Prioritize these if time is short; everything else supports them:
 
 **If portal telemetry lags:** lead with **Live Metrics** (near real-time) and
 narrate over it, or trigger each scenario a couple of minutes before you present
-it. The daily scheduled workflow means there is always recent history to fall
-back on.
+it. The weekly scheduled workflow (plus a manual run before your session) means
+there is always recent history to fall back on.
 
 **If a fault does not fire:** confirm `GET /api/demo/status` reports
 `faultsEnabled: true`, and that you used the exact `?fault=` value. The faults

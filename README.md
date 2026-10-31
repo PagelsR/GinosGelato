@@ -1,7 +1,7 @@
 # 🍨 Gino's Gelato
 
 [![Build and Deploy to Azure (main)](https://github.com/PagelsR/GinosGelato/actions/workflows/BuildDeploy.yml/badge.svg?branch=main)](https://github.com/PagelsR/GinosGelato/actions/workflows/BuildDeploy.yml)
-[![Playwright Testing - Daily Schedule](https://github.com/PagelsR/GinosGelato/actions/workflows/playwright-testing.yml/badge.svg)](https://github.com/PagelsR/GinosGelato/actions/workflows/playwright-testing.yml)
+[![Playwright Testing - Weekly Schedule](https://github.com/PagelsR/GinosGelato/actions/workflows/playwright-testing.yml/badge.svg)](https://github.com/PagelsR/GinosGelato/actions/workflows/playwright-testing.yml)
 
 A full-stack ice cream shop application for building custom gelato creations, managing a cart, and placing orders.
 
@@ -156,9 +156,10 @@ Key implementation points:
 - Client trigger logic lives in [`ginos-gelato/client/src/pages/FaultDemo.tsx`](ginos-gelato/client/src/pages/FaultDemo.tsx)
   and [`ginos-gelato/client/src/utils/demoFaults.ts`](ginos-gelato/client/src/utils/demoFaults.ts).
 - [`e2e/journey-4-fault-demo.spec.ts`](e2e/journey-4-fault-demo.spec.ts) drives
-  all four faults through Playwright and runs automatically via the daily
-  scheduled `.github/workflows/playwright-testing.yml` workflow, so
-  Application Insights always has recent fault telemetry to investigate.
+  all four faults through Playwright and runs automatically via the weekly
+  scheduled `.github/workflows/playwright-testing.yml` workflow (Mondays at
+  3:00 AM Eastern), so Application Insights always has fault telemetry from
+  the past week to investigate.
 - The full presenter walkthrough - what to click, what to say, and how to
   read the resulting telemetry - is in
   [`.github/trainer-guides/Ginos-Gelato-AppInsights-Demo-Runbook-75min.md`](.github/trainer-guides/Ginos-Gelato-AppInsights-Demo-Runbook-75min.md).
