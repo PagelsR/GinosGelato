@@ -2851,5 +2851,43 @@
     "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-11-09-run-180-cloud-scale",
     "runType": "cloud-scale",
     "workers": 20
+  },
+  {
+    "runId": "2026-11-16-run-181",
+    "timestamp": "2026-11-16T18:19:13.938Z",
+    "date": "2026-11-16",
+    "runNumber": "181",
+    "total": 38,
+    "passed": 28,
+    "failed": 10,
+    "regressionFailed": 1,
+    "chaosFailed": 9,
+    "flaky": 4,
+    "skipped": 0,
+    "duration": 390,
+    "passRate": 74,
+    "branch": "main",
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-11-16-run-181",
+    "runType": "ci-runner",
+    "workers": 1
+  },
+  {
+    "runId": "2026-11-16-run-181-cloud-scale",
+    "timestamp": "2026-11-16T18:19:14.292Z",
+    "date": "2026-11-16",
+    "runNumber": "181",
+    "total": 24,
+    "passed": 16,
+    "failed": 8,
+    "regressionFailed": 8,
+    "chaosFailed": 0,
+    "flaky": 7,
+    "skipped": 0,
+    "duration": 54,
+    "passRate": 67,
+    "branch": "main",
+    "reportUrl": "https://pagelsr.github.io/GinosGelato/reports/2026-11-16-run-181-cloud-scale",
+    "runType": "cloud-scale",
+    "workers": 20
   }
 ]
